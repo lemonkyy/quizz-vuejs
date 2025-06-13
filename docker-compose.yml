@@ -1,0 +1,77 @@
+networks:
+  database-backend-bridge:
+    driver: bridge
+  backend-frontend-bridge:
+    driver: bridge
+
+services:
+  #postgres database
+  database:
+    image: postgres:17.4-alpine
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER_DEV}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
+      POSTGRES_DB: ${POSTGRES_DB_DEV}
+    volumes:
+      - postgres-data-dev:/var/lib/postgresql/data:rw
+    networks:
+      - database-backend-bridge  
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-database}", "-U", "${POSTGRES_USER:-user}"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    
+  #backend - symfony
+  backend: 
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+      args:
+        DATABASE_URL: ${DATABASE_URL_DEV}
+    ports:
+      - "8000:80"
+    container_name: backend
+    environment:
+      APP_ENV: dev
+      APP_DEBUG: 1
+      SHELL_VERBOSITY: 3
+      APP_SECRET: ${APP_SECRET_DEV}
+      DATABASE_URL: ${DATABASE_URL_DEV}
+      CORS_ALLOW_ORIGIN: '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
+    volumes:
+      - ./backend:/app:delegated
+      - uploads-data-dev:/app/public/uploads/images
+    depends_on:
+      - database
+    networks:
+      - database-backend-bridge
+      - backend-frontend-bridge
+
+  #frontend - vuejs
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "81:80"
+    volumes:
+      - ./frontend:/app:delegated
+      - /app/node_modules
+      - /app/.next
+    container_name: frontend
+    depends_on:
+      - backend
+    environment:
+      NODE_ENV: development
+      NEXT_PUBLIC_API_URL: ${VUE_PUBLIC_API_URL}
+      NEXT_SERVER_API_URL: ${VUE_SERVER_API_URL}
+      NEXT_PUBLIC_IMAGES_URL: ${VUE_PUBLIC_IMAGES_URL}
+      WATCHPACK_POLLING: true
+    networks:
+      - backend-frontend-bridge
+
+volumes:
+  postgres-data-dev:
+  uploads-data-dev:
