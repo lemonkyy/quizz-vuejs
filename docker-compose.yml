@@ -8,7 +8,7 @@ services:
   #postgres database
   database:
     image: postgres:17.4-alpine
-    container_name: postgres
+    container_name: postgres_quizz
     environment:
       POSTGRES_USER: ${POSTGRES_USER_DEV}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
@@ -32,7 +32,7 @@ services:
         DATABASE_URL: ${DATABASE_URL_DEV}
     ports:
       - "8000:80"
-    container_name: backend
+    container_name: backend_quizz
     environment:
       APP_ENV: dev
       APP_DEBUG: 1
@@ -60,7 +60,7 @@ services:
       - ./frontend:/app:delegated
       - /app/node_modules
       - /app/.next
-    container_name: frontend
+    container_name: frontend_quizz
     depends_on:
       - backend
     environment:
