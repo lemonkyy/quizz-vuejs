@@ -72,6 +72,25 @@ services:
     networks:
       - backend-frontend-bridge
 
+  #ollama
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-quizz
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data-dev:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: ["gpu"]
+
+
 volumes:
   postgres-data-dev:
   uploads-data-dev:
+  ollama-data-dev:
