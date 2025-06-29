@@ -3,3 +3,8 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
+lexik_jwt_login:
+    path: /api/login
+    methods: [POST]
+    controller: lexik_jwt_authentication.controller.authentication::getTokenAction

@@ -12,13 +12,16 @@ RUN apk update && apk add --no-cache \
     icu-dev \
     nginx \
     postgresql-dev \
+    postgresql \
+    libsodium-dev \
     && docker-php-ext-configure intl \
     && docker-php-ext-install \
-    zip \
-    intl \
-    pgsql \
-    pdo \
-    pdo_pgsql
+        zip \
+        intl \
+        pgsql \
+        pdo \
+        pdo_pgsql \
+        sodium
 
 RUN sed -i 's|listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|' /usr/local/etc/php-fpm.d/www.conf
 
@@ -30,10 +33,10 @@ COPY ./build/php.ini /usr/local/etc/php/php.ini
 
 COPY . .
 
-RUN composer install --optimize-autoloader
+RUN composer install --optimize-autoloader --no-scripts
 
 RUN chown -R www-data:www-data /app
 
-CMD ["sh", "-c", "nginx && php-fpm"]
+CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
 
 EXPOSE 80
