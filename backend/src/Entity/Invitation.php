@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\UuidV7;
 
 #[ApiResource]
 #[ORM\Entity]
@@ -12,9 +13,8 @@ class Invitation
 {
     #[Groups(['invitation:read'])]
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private UuidV7 $id;
 
     #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: Group::class)]
@@ -52,7 +52,7 @@ class Invitation
         $this->invitedAt = new \DateTimeImmutable();
     }
 
-    public function getId(): ?int
+    public function getId(): ?UuidV7
     {
         return $this->id;
     }
