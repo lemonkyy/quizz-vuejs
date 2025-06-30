@@ -2,25 +2,20 @@
 
 namespace App\Controller\Api\Invitation;
 
-use App\Entity\Invitation;
-use App\Entity\Group;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\InvitationRepository;
-use App\Repository\GroupRepository;
+use App\Repository\RoomRepository;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 //accept an invite
-class AcceptController extends AbstractController
+class MeAcceptController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(int $id, InvitationRepository $invitationRepository, GroupRepository $groupRepository, EntityManagerInterface $entityManager, ParameterBagInterface $params): Response {
-        
-        $user = $this->getUser();
+    public function __invoke(#[CurrentUser] $user, string $id, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager, ParameterBagInterface $params): Response {
 
         $invitation = $invitationRepository->find($id);
 
@@ -29,9 +24,9 @@ class AcceptController extends AbstractController
         }
 
         $expirationThreshold = $params->get('app.invite_expiration_threshold');
-        $expirationDate = (clone $invitation->getInvitedAt())->modify($expirationThreshold);
+        $expirationDate = (clone $invitation->getInvitedAt())->modify('+' . $expirationThreshold);
         $now = new \DateTimeImmutable();
-        
+
         if ($now > $expirationDate) {
             return $this->json(['error' => 'Invitation has expired'], 400);
         }
@@ -41,15 +36,15 @@ class AcceptController extends AbstractController
         }
 
         $invitation->setAcceptedAt($now);
-        $group = $invitation->getGroup();
+        $room = $invitation->getRoom();
 
-        if ($group->getDeletedAt() !== null) {
-            return $this->json(['error' => 'Group has been deleted'], 400);
+        if ($room->getDeletedAt() !== null) {
+            return $this->json(['error' => 'Room has been deleted'], 400);
         }
 
-        $group->addUser($user);
+        $room->addUser($user);
 
-        $entityManager->persist($group);
+        $entityManager->persist($room);
         $entityManager->persist($invitation);
         $entityManager->flush();
 

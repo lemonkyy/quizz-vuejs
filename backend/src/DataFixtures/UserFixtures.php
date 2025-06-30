@@ -39,6 +39,34 @@ class UserFixtures extends AbstractFixtures
             'password' => 'user2',
             'roles' => ['ROLE_USER'],
         ];
+
+        yield [
+            'email' => 'user3@example.com',
+            'username' => 'user3',
+            'password' => 'user3',
+            'roles' => ['ROLE_USER'],
+        ];
+
+        yield [
+            'email' => 'user4@example.com',
+            'username' => 'user4',
+            'password' => 'user4',
+            'roles' => ['ROLE_USER'],
+        ];
+
+        yield [
+            'email' => 'user5@example.com',
+            'username' => 'user5',
+            'password' => 'user5',
+            'roles' => ['ROLE_USER'],
+        ];
+
+        yield [
+            'email' => 'user6@example.com',
+            'username' => 'user6',
+            'password' => 'user6',
+            'roles' => ['ROLE_USER'],
+        ];
     }
 
     protected function postInstantiate($entity): void

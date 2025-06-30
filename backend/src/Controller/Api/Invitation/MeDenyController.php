@@ -2,22 +2,19 @@
 
 namespace App\Controller\Api\Invitation;
 
-use App\Entity\Invitation;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Component\Routing\Annotation\Route;
 use App\Repository\InvitationRepository;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 //deny an invite
 class MeDenyController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(int $id, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager): Response
+    public function __invoke(#[CurrentUser] $user, string $id, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager): Response
     {
-        $user = $this->getUser();
-        
         $invitation = $invitationRepository->find($id);
 
         if (!$invitation || $invitation->getInvitedUser() !== $user) {

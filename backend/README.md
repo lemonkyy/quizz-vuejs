@@ -20,34 +20,45 @@
   - Body: `{ "username": "string" }`
   - Response: `{ "status": "Username updated", "username": "string" }` or error message.
 
-### Group
+### Room
 
-- **GET /api/user/group**
-  - Gets the current group of the user.
+- **GET /api/user/room**
+  - Gets the current room of the user.
   - Requires: `Authorization: Bearer <JWT_TOKEN>` header.
-  - Response: `{ "id": "group_id", ... }` or 401 if not authenticated.
+  - Response: `{ "id": "room_id", ... }` or 401 if not authenticated.
 
-- **POST /api/group/create**
-  - Creates a new group (user becomes owner).
+- **POST /api/room/create**
+  - Creates a new room (user becomes owner).
   - Requires: `Authorization: Bearer <JWT_TOKEN>` header.
   - Body: `{ "isPublic": true|false }` (optional)
-  - Response: `{ "status": "Group created", "group_id": "string" }` or error message.
+  - Response: `{ "status": "Room created", "room_id": "string" }` or error message.
 
-- **DELETE /api/group/delete**
-  - Soft-deletes the group where the user is the owner.
+- **POST /api/room/join**
+  - Join a room by id.
   - Requires: `Authorization: Bearer <JWT_TOKEN>` header.
-  - Response: `{ "status": "Group deleted", "group_id": "string" }` or error message.
+  - Path parameter: `id` (room id)
+  - Response: Room object or error message.
 
-- **POST /api/group/kick**
-  - Kicks a user from the group (owner only).
+- **POST /api/room/leave**
+  - Leave the current room.
+  - Requires: `Authorization: Bearer <JWT_TOKEN>` header.
+  - Response: `{ "message": "Left room successfully" }` or error message.
+
+- **DELETE /api/room/delete**
+  - Soft-deletes the room where the user is the owner.
+  - Requires: `Authorization: Bearer <JWT_TOKEN>` header.
+  - Response: `{ "status": "Room deleted", "room_id": "string" }` or error message.
+
+- **POST /api/room/kick**
+  - Kicks a user from the room (owner only).
   - Requires: `Authorization: Bearer <JWT_TOKEN>` header.
   - Body: `{ "user_id": "string" }`
-  - Response: `{ "status": "User kicked from group", "user_id": "string" }` or error message.
+  - Response: `{ "status": "User kicked from room", "user_id": "string" }` or error message.
 
 ### Invitation
 
 - **POST /api/invitation/send**
-  - Send an invitation to another user to join your group.
+  - Send an invitation to another user to join your room.
   - Requires: `Authorization: Bearer <JWT_TOKEN>` header.
   - Body: `{ "user_id": "string" }`
   - Response: `{ "status": "Invitation sent", "invitation_id": "string" }` or error message.
@@ -81,7 +92,7 @@
 
 Defined in `config/services.yaml`:
 
-- `app.max_group_users`: **4** — Maximum number of users allowed per group
+- `app.max_room_users`: **4** — Maximum number of users allowed per room
 - `app.invite_expiration_threshold`: **-10 minutes** — Invitations older than this are considered expired
 
 ## Notes

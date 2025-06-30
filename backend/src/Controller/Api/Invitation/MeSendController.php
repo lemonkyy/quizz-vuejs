@@ -3,31 +3,29 @@
 namespace App\Controller\Api\Invitation;
 
 use App\Entity\Invitation;
-use App\Entity\User;
-use App\Entity\Group;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use App\Repository\UserRepository;
-use App\Repository\GroupRepository;
+use App\Repository\RoomRepository;
 use App\Repository\InvitationRepository;
 
-//send an invitation to another user to join the current user's group
+//send an invitation to another user to join the current user's room
 class MeSendController extends AbstractController
 {
-    private int $maxGroupUsers;
+    private int $maxRoomUsers;
     public function __construct(ParameterBagInterface $params)
     {
-        $this->maxGroupUsers = $params->get('app.max_group_users');
+        $this->maxRoomUsers = $params->get('app.max_room_users');
     }
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(Request $request, UserRepository $userRepository, GroupRepository $groupRepository, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager): Response
+    public function __invoke(#[CurrentUser] $user, Request $request, UserRepository $userRepository, RoomRepository $roomRepository, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager): Response
     {
-        $user = $this->getUser();
         $data = json_decode($request->getContent(), true);
 
         $targetUserId = $data['user_id'] ?? null;
@@ -45,21 +43,21 @@ class MeSendController extends AbstractController
             return $this->json(['error' => 'User not found'], 404);
         }
 
-        $group = $groupRepository->findActiveGroupForUser($user);
-        if (!$group) {
-            return $this->json(['error' => 'You are not in a group'], 400);
+        $room = $roomRepository->findActiveRoomForUser($user);
+        if (!$room) {
+            return $this->json(['error' => 'You are not in a room'], 400);
         }
 
-        if ($group->getUsers()->contains($targetUser)) {
-            return $this->json(['error' => 'User is already in the group'], 400);
+        if ($room->getUsers()->contains($targetUser)) {
+            return $this->json(['error' => 'User is already in the room'], 400);
         }
 
-        if (count($group->getUsers()) >= $this->maxGroupUsers) {
-            return $this->json(['error' => 'Group is at max capacity'], 400);
+        if (count($room->getUsers()) >= $this->maxRoomUsers) {
+            return $this->json(['error' => 'Room is at max capacity'], 400);
         }
 
         $existing = $invitationRepository->findOneBy([
-            'group' => $group,
+            'room' => $room,
             'invitedBy' => $user,
             'invitedUser' => $targetUser,
             'acceptedAt' => null,
@@ -72,13 +70,13 @@ class MeSendController extends AbstractController
         }
 
         $invitation = new Invitation();
-        $invitation->setGroup($group);
+        $invitation->setRoom($room);
         $invitation->setInvitedBy($user);
         $invitation->setInvitedUser($targetUser);
 
         $entityManager->persist($invitation);
         $entityManager->flush();
-        
+
         return $this->json(['message' => 'Invitation sent'], 201);
     }
 }

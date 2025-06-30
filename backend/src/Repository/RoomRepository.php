@@ -2,36 +2,38 @@
 
 namespace App\Repository;
 
-use App\Entity\Group;
+use App\Entity\Room;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
-class GroupRepository extends ServiceEntityRepository
+class RoomRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct(Group::class, $registry);
+        parent::__construct($registry, Room::class);
     }
 
     /**
-     * @return Group|null
+     * @return Room|null
      */
-    public function findActiveGroupForUser(User $user): ?Group
+    public function findActiveRoomForUser(User $user): ?Room
     {
-        return $this->createQueryBuilder('g')
-            ->join('g.users', 'u')
-            ->where('u = :user')
-            ->andWhere('g.deletedAt IS NULL')
-            ->setParameter('user', $user)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $result = $this->createQueryBuilder('g')
+        ->join('g.users', 'u')
+        ->where('u = :user')
+        ->andWhere('g.deletedAt IS NULL')
+        ->setParameter('user', $user)
+        ->getQuery()
+        ->getResult();
+
+        return $result[0] ?? null;
     }
 
     /**
-     * @return Group[]
+     * @return Room[]
      */
-    public function findAllGroupsForUser(User $user): array
+    public function findAllRoomsForUser(User $user): array
     {
         return $this->createQueryBuilder('g')
             ->join('g.users', 'u')
@@ -42,7 +44,7 @@ class GroupRepository extends ServiceEntityRepository
     }
 
     /**
-     * @return Group[]
+     * @return Room[]
      */
     public function findPublicWithAvailableSlots(int $maxUsers): array
     {

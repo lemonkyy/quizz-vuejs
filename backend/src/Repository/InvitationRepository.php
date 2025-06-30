@@ -14,7 +14,7 @@ class InvitationRepository extends ServiceEntityRepository
 
     public function __construct(ManagerRegistry $registry, ParameterBagInterface $params)
     {
-        parent::__construct(Invitation::class, $registry);
+        parent::__construct($registry, Invitation::class);
         $this->inviteExpirationThreshold = $params->get('app.invite_expiration_threshold');
     }
 
@@ -22,16 +22,16 @@ class InvitationRepository extends ServiceEntityRepository
      * @return Invitation[]
      * find pending invites for user, may also be filtered by sender user
      */
-    public function findActiveForUser(User $invitedUser, User $SenderUser = null): array
+    public function findActiveForUser(User $invitedUser, ?User $SenderUser = null): array
     {
-        $expiredThreshold = new \DateTimeImmutable($this->inviteExpirationThreshold);
+        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold);
 
         $qb = $this->createQueryBuilder('i')
             ->where('i.invitedUser = :user')
-            ->andWhere('i.revoked IS NULL')
+            ->andWhere('i.revokedAt IS NULL')
             ->andWhere('i.deniedAt IS NULL')
             ->andWhere('i.acceptedAt IS NULL')
-            ->andWhere('i.createdAt >= :minDate')
+            ->andWhere('i.invitedAt >= :minDate')
             ->setParameter('user', $invitedUser)
             ->setParameter('minDate', $expiredThreshold);
 

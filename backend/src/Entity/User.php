@@ -11,23 +11,122 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
+use App\Controller\Api\User\MeReadController;
+use App\Controller\Api\User\MeUpdateUsernameController;
+use App\Controller\Api\User\RegisterController;
 
 #[ApiResource(
-    operations: require __DIR__ . '/../../config/api_resources/User.operations.php'
+    operations: [
+        new Get(
+            uriTemplate: '/user/info',
+            controller: MeReadController::class,
+            read: false,
+            name: 'api_user_info',
+            openapiContext: [
+                'summary' => 'Get current user info',
+                'description' => 'Returns the username and email of the current authenticated user.',
+                'responses' => [
+                    '200' => [
+                        'description' => 'User info',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'username' => ['type' => 'string'],
+                                        'email' => ['type' => 'string'],
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '401' => [
+                        'description' => 'Unauthorized'
+                    ]
+                ]
+            ]
+        ),
+        new Post(
+            uriTemplate: '/register',
+            controller: RegisterController::class,
+            read: false,
+            name: 'api_register',
+            openapiContext: [
+                'summary' => 'Register a new user',
+                'description' => 'Registers a new user with email and password.',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'email' => ['type' => 'string'],
+                                    'password' => ['type' => 'string'],
+                                ],
+                                'required' => ['email', 'password']
+                            ]
+                        ]
+                    ]
+                ],
+                'responses' => [
+                    '201' => [
+                        'description' => 'User created.'
+                    ],
+                    '400' => [
+                        'description' => 'Invalid input or email already in use.'
+                    ]
+                ]
+            ]
+        ),
+        new Put(
+            uriTemplate: '/user/username',
+            controller: MeUpdateUsernameController::class,
+            read: false,
+            name: 'api_update_username',
+            openapiContext: [
+                'summary' => 'Update current user username',
+                'description' => 'Updates the username of the current authenticated user.',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'username' => ['type' => 'string'],
+                                ],
+                                'required' => ['username']
+                            ]
+                        ]
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'Username updated.'
+                    ],
+                    '400' => [
+                        'description' => 'Invalid username or already in use.'
+                    ],
+                    '401' => [
+                        'description' => 'Unauthorized.'
+                    ]
+                ]
+            ]
+        ),
+    ]
 )]
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    #[Groups(["room:read", "invitation:read"])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private UuidV7 $id;
 
-    #[Groups(["user:read"])]
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private $email;
 
-    #[Groups(["user:read"])]
+    #[Groups(["user:read", "room:read", "invitation:read"])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private $username;
 
@@ -42,6 +141,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
+
+    public function __construct()
+    {
+        $this->id = UuidV7::v7();
+    }
 
     public function getId(): ?UuidV7
     {
