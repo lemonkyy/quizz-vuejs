@@ -1,19 +1,18 @@
 <?php
 
-namespace App\Controller;
+namespace App\Api\Controller\User;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Repository\UserRepository;
 
 class RegisterController extends AbstractController
 {
-    #[Route('/api/register', name: 'api_register', methods: ['POST'])]
-    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher)
+    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UserRepository $userRepository)
     {
         $data = json_decode($request->getContent(), true);
 
@@ -27,7 +26,7 @@ class RegisterController extends AbstractController
 
         $user = new User();
 
-        if ($entityManager->getRepository(User::class)->findOneBy(['email' => $data['email']])) {
+        if ($userRepository->findOneBy(['email' => $data['email']])) {
             return new JsonResponse(['error' => 'Email already in use'], 400);
         }
 
@@ -40,7 +39,7 @@ class RegisterController extends AbstractController
             if ($attempts > $maxAttempts) {
                 return new JsonResponse(['error' => 'Could not generate unique username.'], 500);
             }
-        } while ($entityManager->getRepository(User::class)->findOneBy(['username' => $randomUsername]));
+        } while ($userRepository->findOneBy(['username' => $randomUsername]));
 
         $user->setUsername($randomUsername);
         $user->setEmail($data['email']);
