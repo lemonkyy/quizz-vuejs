@@ -10,7 +10,7 @@ services:
   #postgres database
   database:
     image: postgres:17.4-alpine
-    container_name: postgres_quizz
+    container_name: postgres_quiz
     environment:
       POSTGRES_USER: ${POSTGRES_USER_DEV}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
@@ -34,7 +34,7 @@ services:
         DATABASE_URL: ${DATABASE_URL_DEV}
     ports:
       - "8000:80"
-    container_name: backend_quizz
+    container_name: backend_quiz
     environment:
       APP_ENV: dev
       APP_DEBUG: 1
@@ -64,7 +64,7 @@ services:
       - ./frontend:/app:delegated
       - /app/node_modules
       - /app/.next
-    container_name: frontend_quizz
+    container_name: frontend_quiz
     depends_on:
       - backend
     environment:
@@ -79,7 +79,7 @@ services:
   #ollama - ai 
   ollama:
     image: ollama/ollama:latest
-    container_name: ollama_quizz
+    container_name: ollama_quiz
     restart: unless-stopped
     ports:
       - "11434:11434"
