@@ -14,11 +14,13 @@ use Symfony\Component\Uid\UuidV7;
 use App\Controller\Api\User\MeReadController;
 use App\Controller\Api\User\MeUpdateUsernameController;
 use App\Controller\Api\User\RegisterController;
+use App\Repository\UserRepository;
 
 #[ApiResource(
     operations: [
         new Get(
             uriTemplate: '/user/info',
+            input: false,
             controller: MeReadController::class,
             read: false,
             name: 'api_user_info',
@@ -80,6 +82,7 @@ use App\Controller\Api\User\RegisterController;
         ),
         new Put(
             uriTemplate: '/user/username',
+            input: false,
             controller: MeUpdateUsernameController::class,
             read: false,
             name: 'api_update_username',
@@ -114,8 +117,9 @@ use App\Controller\Api\User\RegisterController;
         ),
     ]
 )]
-#[ORM\Entity]
-#[ORM\Table(name: 'users')]
+
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: "`user`")]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[Groups(["room:read", "invitation:read"])]

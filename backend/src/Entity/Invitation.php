@@ -11,6 +11,7 @@ use App\Controller\Api\Invitation\MeListPendingController;
 use App\Controller\Api\Invitation\MeAcceptController;
 use App\Controller\Api\Invitation\MeDenyController;
 use App\Controller\Api\Invitation\MeCancelController;
+use App\Repository\InvitationRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
@@ -87,6 +88,7 @@ use Symfony\Component\Uid\UuidV7;
         ),
         new Get(
             uriTemplate: '/invitation/sent',
+            input: false,
             controller: MeListSentController::class,
             read: false,
             name: 'api_invitation_sent',
@@ -119,6 +121,7 @@ use Symfony\Component\Uid\UuidV7;
         ),
         new Get(
             uriTemplate: '/invitation/pending',
+            input: false,
             controller: MeListPendingController::class,
             read: false,
             name: 'api_invitation_pending',
@@ -298,7 +301,9 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
     ]
-)]#[ORM\Entity]
+)]
+
+#[ORM\Entity(repositoryClass: InvitationRepository::class)]
 class Invitation
 {
     #[Groups(['invitation:read'])]

@@ -10,6 +10,9 @@ use App\Controller\Api\Room\MeKickUserController;
 use App\Controller\Api\Room\MeCreateController;
 use App\Controller\Api\Room\MeDeleteController;
 use App\Controller\Api\Room\MeShowCurrentController;
+use App\Controller\Api\Room\MeJoinController;
+use App\Controller\Api\Room\MeLeaveController;
+use App\Repository\RoomRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,6 +23,7 @@ use Symfony\Component\Uid\UuidV7;
     operations: [
         new Get(
             uriTemplate: '/room/current',
+            input: false,
             controller: MeShowCurrentController::class,
             read: false,
             name: 'api_user_room',
@@ -157,6 +161,7 @@ use Symfony\Component\Uid\UuidV7;
         ),
         new Delete(
             uriTemplate: '/room/delete',
+            input: false,
             controller: MeDeleteController::class,
             read: false,
             name: 'api_room_delete',
@@ -195,7 +200,8 @@ use Symfony\Component\Uid\UuidV7;
         ),
         new Post(
             uriTemplate: '/room/{id}/join',
-            controller: \App\Controller\Api\Room\MeJoinController::class,
+            input: false,
+            controller: MeJoinController::class,
             read: false,
             name: 'api_room_join',
             openapiContext: [
@@ -261,7 +267,7 @@ use Symfony\Component\Uid\UuidV7;
         new Post(
             uriTemplate: '/room/leave',
             input: false,
-            controller: \App\Controller\Api\Room\MeLeaveController::class,
+            controller: MeLeaveController::class,
             read: false,
             name: 'api_room_leave',
             openapiContext: [
@@ -299,8 +305,8 @@ use Symfony\Component\Uid\UuidV7;
         ),
     ]
 )]
-#[ORM\Entity]
-#[ORM\Table(name: "rooms")]
+
+#[ORM\Entity(repositoryClass: RoomRepository::class)]
 class Room
 {
     #[Groups(['room:read', 'invitation:read'])]

@@ -19,10 +19,10 @@ class RoomRepository extends ServiceEntityRepository
      */
     public function findActiveRoomForUser(User $user): ?Room
     {
-        $result = $this->createQueryBuilder('g')
-        ->join('g.users', 'u')
+        $result = $this->createQueryBuilder('r')
+        ->join('r.users', 'u')
         ->where('u = :user')
-        ->andWhere('g.deletedAt IS NULL')
+        ->andWhere('r.deletedAt IS NULL')
         ->setParameter('user', $user)
         ->getQuery()
         ->getResult();
@@ -35,8 +35,8 @@ class RoomRepository extends ServiceEntityRepository
      */
     public function findAllRoomsForUser(User $user): array
     {
-        return $this->createQueryBuilder('g')
-            ->join('g.users', 'u')
+        return $this->createQueryBuilder('r')
+            ->join('r.users', 'u')
             ->where('u = :user')
             ->setParameter('user', $user)
             ->getQuery()
@@ -48,11 +48,27 @@ class RoomRepository extends ServiceEntityRepository
      */
     public function findPublicWithAvailableSlots(int $maxUsers): array
     {
-        return $this->createQueryBuilder('g')
-            ->where('g.isPublic = true')
-            ->andWhere('(SELECT COUNT(u) FROM g.users u) < :max')
+        return $this->createQueryBuilder('r')
+            ->where('r.isPublic = true')
+            ->andWhere('(SELECT COUNT(u) FROM r.users u) < :max')
             ->setParameter('max', $maxUsers)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @return Room|null
+     */
+    public function findRoomByUserId(string $userId): ?Room
+    {
+        $result = $this->createQueryBuilder('r')
+            ->join('r.users', 'u')
+            ->where('u.id = :userId')
+            ->andWhere('r.deletedAt IS NULL')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+
+        return $result[0] ?? null;
     }
 }

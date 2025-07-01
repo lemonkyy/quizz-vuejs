@@ -8,6 +8,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\InvitationRepository;
 use App\Repository\RoomRepository;
+use App\Service\RoomMembershipService;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
@@ -15,7 +16,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 class MeAcceptController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] $user, string $id, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager, ParameterBagInterface $params): Response {
+    public function __invoke(#[CurrentUser] $user, string $id, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager, ParameterBagInterface $params, RoomMembershipService $roomMembershipService): Response {
 
         $invitation = $invitationRepository->find($id);
 
@@ -41,6 +42,8 @@ class MeAcceptController extends AbstractController
         if ($room->getDeletedAt() !== null) {
             return $this->json(['error' => 'Room has been deleted'], 400);
         }
+
+        $roomMembershipService->handleUserLeavingRoom($user);
 
         $room->addUser($user);
 
