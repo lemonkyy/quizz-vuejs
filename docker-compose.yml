@@ -18,15 +18,15 @@ services:
     volumes:
       - postgres-data-dev:/var/lib/postgresql/data:rw
     networks:
-      - database-backend-bridge  
+      - database-backend-bridge
     healthcheck:
       test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-database}", "-U", "${POSTGRES_USER:-user}"]
       timeout: 5s
       retries: 5
       start_period: 60s
-    
+
   #backend - symfony
-  backend: 
+  backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
@@ -63,7 +63,6 @@ services:
     volumes:
       - ./frontend:/app:delegated
       - /app/node_modules
-      - /app/.next
     container_name: frontend_quiz
     depends_on:
       - backend
@@ -76,7 +75,7 @@ services:
     networks:
       - backend-frontend-bridge
 
-  #ollama - ai 
+  #ollama - ai
   ollama:
     image: ollama/ollama:latest
     container_name: ollama_quiz
@@ -86,7 +85,7 @@ services:
     volumes:
       - ollama-data-dev:/root/.ollama
     networks:
-      - ollama-backend-bridge  
+      - ollama-backend-bridge
     deploy:
       resources:
         reservations:
