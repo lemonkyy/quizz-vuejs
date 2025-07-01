@@ -10,7 +10,7 @@ services:
   #postgres database
   database:
     image: postgres:17.4-alpine
-    container_name: postgres_quizz
+    container_name: postgres_quiz
     environment:
       POSTGRES_USER: ${POSTGRES_USER_DEV}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
@@ -18,15 +18,15 @@ services:
     volumes:
       - postgres-data-dev:/var/lib/postgresql/data:rw
     networks:
-      - database-backend-bridge  
+      - database-backend-bridge
     healthcheck:
       test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-database}", "-U", "${POSTGRES_USER:-user}"]
       timeout: 5s
       retries: 5
       start_period: 60s
-    
+
   #backend - symfony
-  backend: 
+  backend:
     build:
       context: ./backend
       dockerfile: Dockerfile.dev
@@ -34,7 +34,7 @@ services:
         DATABASE_URL: ${DATABASE_URL_DEV}
     ports:
       - "8000:80"
-    container_name: backend_quizz
+    container_name: backend_quiz
     environment:
       APP_ENV: dev
       APP_DEBUG: 1
@@ -63,8 +63,7 @@ services:
     volumes:
       - ./frontend:/app:delegated
       - /app/node_modules
-      - /app/.next
-    container_name: frontend_quizz
+    container_name: frontend_quiz
     depends_on:
       - backend
     environment:
@@ -76,17 +75,17 @@ services:
     networks:
       - backend-frontend-bridge
 
-  #ollama - ai 
+  #ollama - ai
   ollama:
     image: ollama/ollama:latest
-    container_name: ollama_quizz
+    container_name: ollama_quiz
     restart: unless-stopped
     ports:
       - "11434:11434"
     volumes:
       - ollama-data-dev:/root/.ollama
     networks:
-      - ollama-backend-bridge  
+      - ollama-backend-bridge
     deploy:
       resources:
         reservations:
