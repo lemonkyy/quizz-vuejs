@@ -9,15 +9,19 @@ use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
-use App\Controller\UserInfoController;
-use App\Controller\RegisterController;
-use App\Controller\UpdateUsernameController;
+use Symfony\Component\Serializer\Annotation\Groups;
+use Symfony\Component\Uid\UuidV7;
+use App\Controller\Api\User\MeReadController;
+use App\Controller\Api\User\MeUpdateUsernameController;
+use App\Controller\Api\User\RegisterController;
+use App\Repository\UserRepository;
 
 #[ApiResource(
     operations: [
         new Get(
             uriTemplate: '/user/info',
-            controller: UserInfoController::class,
+            input: false,
+            controller: MeReadController::class,
             read: false,
             name: 'api_user_info',
             openapiContext: [
@@ -78,7 +82,8 @@ use App\Controller\UpdateUsernameController;
         ),
         new Put(
             uriTemplate: '/user/username',
-            controller: UpdateUsernameController::class,
+            input: false,
+            controller: MeUpdateUsernameController::class,
             read: false,
             name: 'api_update_username',
             openapiContext: [
@@ -109,21 +114,23 @@ use App\Controller\UpdateUsernameController;
                     ]
                 ]
             ]
-        )
+        ),
     ]
 )]
-#[ORM\Entity]
-#[ORM\Table(name: 'users')]
+
+#[ORM\Entity(repositoryClass: UserRepository::class)]
+#[ORM\Table(name: "`user`")]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    #[Groups(["room:read", "invitation:read"])]
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column(type: 'integer')]
-    private $id;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private UuidV7 $id;
 
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private $email;
 
+    #[Groups(["user:read", "room:read", "invitation:read"])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private $username;
 
@@ -139,7 +146,12 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
-    public function getId(): ?int
+    public function __construct()
+    {
+        $this->id = UuidV7::v7();
+    }
+
+    public function getId(): ?UuidV7
     {
         return $this->id;
     }
