@@ -76,45 +76,45 @@ services:
       - backend-frontend-bridge
 
   #ollama - ai
-  ollama:
-    image: ollama/ollama:latest
-    container_name: ollama_quiz
-    restart: unless-stopped
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data-dev:/root/.ollama
-    networks:
-      - ollama-backend-bridge
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: ["gpu"]
+  # ollama:
+  #   image: ollama/ollama:latest
+  #   container_name: ollama_quiz
+  #   restart: unless-stopped
+  #   ports:
+  #     - "11434:11434"
+  #   volumes:
+  #     - ollama-data-dev:/root/.ollama
+  #   networks:
+  #     - ollama-backend-bridge
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: all
+  #             capabilities: ["gpu"]
 
   #matomo - analytics
-  matomo:
-    image: matomo:latest
-    container_name: matomo
-    restart: unless-stopped
-    depends_on:
-      - database
-    environment:
-      MATOMO_DATABASE_HOST: database
-      MATOMO_DATABASE_ADAPTER: postgres
-      MATOMO_DATABASE_TABLES_PREFIX: matomo_
-      MATOMO_DATABASE_USERNAME: ${POSTGRES_USER_DEV}
-      MATOMO_DATABASE_PASSWORD: ${POSTGRES_PASSWORD_DEV}
-      MATOMO_DATABASE_DBNAME: matomo
-    ports:
-      - "8081:80"
-    volumes:
-      - matomo-data-dev:/var/www/html
-    networks:
-      - backend-frontend-bridge
-      - database-backend-bridge
+  # matomo:
+  #   image: matomo:latest
+  #   container_name: matomo
+  #   restart: unless-stopped
+  #   depends_on:
+  #     - database
+  #   environment:
+  #     MATOMO_DATABASE_HOST: database
+  #     MATOMO_DATABASE_ADAPTER: postgres
+  #     MATOMO_DATABASE_TABLES_PREFIX: matomo_
+  #     MATOMO_DATABASE_USERNAME: ${POSTGRES_USER_DEV}
+  #     MATOMO_DATABASE_PASSWORD: ${POSTGRES_PASSWORD_DEV}
+  #     MATOMO_DATABASE_DBNAME: matomo
+  #   ports:
+  #     - "8081:80"
+  #   volumes:
+  #     - matomo-data-dev:/var/www/html
+  #   networks:
+  #     - backend-frontend-bridge
+  #     - database-backend-bridge
 
 
 volumes:

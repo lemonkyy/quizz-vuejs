@@ -146,6 +146,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'json')]
     private array $roles = [];
 
+    #[ORM\Column(type: 'string', nullable: true)]
+    private $TOTPSecret;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
@@ -220,5 +223,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return $this->email;
+    }
+
+    public function getTotpSecret(): ?string
+    {
+        return $this->totpSecret;
+    }
+
+    public function setTotpSecret(string $totpSecret): self
+    {
+        $this->totpSecret = $totpSecret;
+        return $this;
     }
 }
