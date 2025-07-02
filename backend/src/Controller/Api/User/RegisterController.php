@@ -9,12 +9,11 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\UserRepository;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use App\Service\ValidateUsernameService;
 
 class RegisterController extends AbstractController
 {
-    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UserRepository $userRepository, ParameterBagInterface $params, ValidateUsernameService $validateUsernameService)
+    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UserRepository $userRepository, ValidateUsernameService $validateUsernameService)
     {
         $data = json_decode($request->getContent(), true);
 

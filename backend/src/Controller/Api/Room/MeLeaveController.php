@@ -3,10 +3,8 @@
 namespace App\Controller\Api\Room;
 
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\RoomRepository;
 use App\Service\RoomMembershipService;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -15,7 +13,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 class MeLeaveController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] $user, RoomRepository $roomRepository, EntityManagerInterface $entityManager, RoomMembershipService $roomMembershipService): Response
+    public function __invoke(#[CurrentUser] $user, RoomRepository $roomRepository, RoomMembershipService $roomMembershipService): Response
     {
         $room = $roomRepository->findActiveRoomForUser($user);
 
