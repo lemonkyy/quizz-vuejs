@@ -12,6 +12,7 @@ use App\Controller\Api\Invitation\MeAcceptController;
 use App\Controller\Api\Invitation\MeDenyController;
 use App\Controller\Api\Invitation\MeCancelController;
 use App\Repository\InvitationRepository;
+use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
@@ -309,38 +310,38 @@ class Invitation
     #[Groups(['invitation:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
-    private UuidV7 $id;
+    private ?UuidV7 $id = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: Room::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private $room;
+    private ?Room $room = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private $invitedBy;
+    private ?User $invitedBy = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private $invitedUser;
+    private ?User $invitedUser = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
-    private $invitedAt;
+    private ?DateTimeImmutable $invitedAt = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private $acceptedAt;
+    private ?DateTimeImmutable $acceptedAt = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private $revokedAt;
+    private ?DateTimeImmutable $revokedAt = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private $deniedAt;
+    private ?DateTimeImmutable $deniedAt = null;
 
     public function __construct()
     {

@@ -14,7 +14,10 @@ use Symfony\Component\Uid\UuidV7;
 use App\Controller\Api\User\MeReadController;
 use App\Controller\Api\User\MeUpdateUsernameController;
 use App\Controller\Api\User\RegisterController;
+use App\Controller\Api\User\MeGenerateTOTPSecret;
+use App\Controller\Api\User\VerifyTOTPCode;
 use App\Repository\UserRepository;
+use SpecShaper\EncryptBundle\Annotations\Encrypted;
 
 #[ApiResource(
     operations: [
@@ -115,6 +118,66 @@ use App\Repository\UserRepository;
                 ]
             ]
         ),
+        new Get(
+            uriTemplate: '/user/TOTP/secret',
+            controller: MeGenerateTOTPSecret::class,
+            read: false,
+            name: 'api_user_totp_secret_generate',
+            openapiContext: [
+                'summary' => 'Generate TOTP secret for the current user',
+                'description' => 'Generates a TOTP secret for the current authenticated user.',
+                'responses' => [
+                    '200' => [
+                        'description' => 'TOTP secret generated successfully.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'TOTPSecret' => ['type' => 'string'],
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '400' => [
+                        'description' => 'Failed to generate TOTP key.'
+                    ],
+                    '401' => [
+                        'description' => 'Unauthorized'
+                    ]
+                ]
+            ]
+        ),
+        new Post(
+            uriTemplate: '/login-verify',
+            controller: VerifyTOTPCode::class,
+            read: false,
+            name: 'api_user_totp_verify',
+            openapiContext: [
+                'summary' => 'Verify TOTP code for the current user',
+                'description' => 'Verifies the TOTP code submitted by the user.',
+                'responses' => [
+                    '200' => ['description' => 'TOTP code verified and JWT returned.'],
+                    '400' => ['description' => 'Invalid input.'],
+                    '401' => ['description' => 'Unauthorized or invalid TOTP code.']
+                ],
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'totp_code' => ['type' => 'string'],
+                                    'temp_token' => ['type' => 'string']
+                                ],
+                                'required' => ['totp_code', 'temp_token']
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        )
     ]
 )]
 
@@ -125,26 +188,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Groups(["room:read", "invitation:read"])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
-    private UuidV7 $id;
+    private ?UuidV7 $id = null;
 
     #[ORM\Column(type: 'string', length: 100, unique: true)]
-    private $email;
+    private ?string $email = null;
 
     #[Groups(["user:read", "room:read", "invitation:read"])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
-    private $username;
+    private ?string $username = null;
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column(type: 'string')]
-    private string $password;
+    private ?string $password = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column(type: 'json')]
     private array $roles = [];
+
+    #[Encrypted]
+    #[ORM\Column(type: 'string', nullable: true)]
+    private ?string $TOTPSecret = null;
 
     public function __construct()
     {
@@ -220,5 +281,16 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getUserIdentifier(): string
     {
         return $this->email;
+    }
+
+    public function getTOTPSecret(): ?string
+    {
+        return $this->TOTPSecret;
+    }
+
+    public function setTOTPSecret(?string $TOTPSecret): self
+    {
+        $this->TOTPSecret = $TOTPSecret;
+        return $this;
     }
 }

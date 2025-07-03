@@ -43,6 +43,7 @@ services:
       DATABASE_URL: ${DATABASE_URL_DEV}
       CORS_ALLOW_ORIGIN: '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY}
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images

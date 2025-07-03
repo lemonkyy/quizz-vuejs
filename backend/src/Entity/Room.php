@@ -13,6 +13,8 @@ use App\Controller\Api\Room\MeShowCurrentController;
 use App\Controller\Api\Room\MeJoinController;
 use App\Controller\Api\Room\MeLeaveController;
 use App\Repository\RoomRepository;
+use DateTime;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -312,29 +314,29 @@ class Room
     #[Groups(['room:read', 'invitation:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
-    private UuidV7 $id;
+    private ?UuidV7 $id = null;
 
     #[Groups(['room:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private $owner;
+    private ?User $owner = null;
 
     #[Groups(['room:read'])]
     #[ORM\ManyToMany(targetEntity: User::class)]
     #[ORM\JoinTable(name: 'room_users')]
-    private $users;
+    private Collection $users;
 
     #[Groups(['room:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
-    private $createdAt;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[Groups(['room:read'])]
     #[ORM\Column(type: 'boolean')]
-    private $isPublic = false;
+    private bool $isPublic = false;
 
     #[Groups(['room:read'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
-    private $deletedAt = null;
+    private ?DateTimeImmutable $deletedAt = null;
 
     public function __construct()
     {
@@ -353,7 +355,7 @@ class Room
         return $this->owner;
     }
 
-    public function setOwner(User $owner): self
+    public function setOwner(?User $owner): self
     {
         $this->owner = $owner;
         return $this;
