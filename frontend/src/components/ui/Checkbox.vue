@@ -10,13 +10,20 @@ const props = defineProps({
     className: { type: String, default: '' },
 });
 
+const labelClasses = computed(() => {
+  if (props.style === 'secondary') {
+    return 'text-purple-800';
+  }
+  return 'text-blue-800';
+});
+
 const checkClasses = computed(() => {
   let classes = [];
 
   if (props.style === 'secondary') {
-    classes.push('text-purple-500 focus:ring-purple-500');
+    classes.push('text-purple-800 focus:ring-purple-800');
   } else {
-    classes.push('text-blue-500 focus:ring-blue-500');
+    classes.push('text-blue-800 focus:ring-blue-800');
   }
 
   return classes;
@@ -35,7 +42,7 @@ const checkClasses = computed(() => {
         className,
       ]"
     />
-    
-    <label v-if="label" :for="id" class="ml-2 block text-sm text-gray-900">{{ label }}</label>
+
+    <label v-if="label" :for="id" :class="labelClasses">{{ label }}</label>
   </div>
 </template>

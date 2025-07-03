@@ -69,9 +69,8 @@ services:
       - backend
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: ${VUE_PUBLIC_API_URL}
-      NEXT_SERVER_API_URL: ${VUE_SERVER_API_URL}
-      NEXT_PUBLIC_IMAGES_URL: ${VUE_PUBLIC_IMAGES_URL}
+      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL}
+      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL}
       WATCHPACK_POLLING: true
     networks:
       - backend-frontend-bridge

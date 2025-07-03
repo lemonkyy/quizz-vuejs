@@ -10,7 +10,6 @@ const tag = computed(() => `h${props.level}`);
 
 const titleClasses = computed(() => {
   let classes = ['font-bold'];
-  
   switch (props.level) {
     case 1:
       classes.push('text-4xl');

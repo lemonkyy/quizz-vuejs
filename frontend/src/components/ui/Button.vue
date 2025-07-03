@@ -2,12 +2,15 @@
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
 
+type ButtonType = 'button' | 'submit' | 'reset';
+
+
 const props = defineProps({
   label: { type: String, default: '' },
   style: { type: String, default: 'neutral' },
   redirectTo: { type: String, default: '' },
   onClick: { type: Function, default: () => {} },
-  type: { type: String, default: 'button' },
+  type: { type: String as () => ButtonType, default: 'button' },
   icon: { type: String, default: '' },
   rightIcon: { type: Boolean, default: false },
   transparent: { type: Boolean, default: false },
@@ -36,7 +39,7 @@ const buttonClasses = computed(() => {
   }
 
   if (props.transparent) {
-    classes = classes.filter(c => !c.startsWith('bg-', 'border-'));
+    classes = classes.filter(c => !c.startsWith('bg-') && !c.startsWith('border-'));
     classes.push('bg-transparent');
   }
 

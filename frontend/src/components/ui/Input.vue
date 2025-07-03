@@ -14,21 +14,29 @@ const props = defineProps({
     className: { type: String, default: '' },
 });
 
+
+const labelClasses = computed(() => {
+  if (props.style === 'secondary') {
+    return 'text-purple-800';
+  }
+  return 'text-blue-800';
+});
+
 const inputClasses = computed(() => {
   let classes = [];
 
   if (props.style === 'secondary') {
-    classes.push('bg-purple-500 text-white hover:bg-purple-600 text-purple-500 hover:text-purple-600 border-purple-500 hover:border-purple-600');
+    classes.push('text-black bg-white text-purple-500 hover:text-purple-600 outline-purple-800 focus:outline-purple-400');
   } else {
-    classes.push('bg-blue-500 text-white hover:bg-blue-600 text-blue-500 hover:text-blue-600 border-blue-500 hover:border-blue-600');
+    classes.push('text-black bg-white text-blue-500 hover:text-blue-600 outline-blue-800 focus:outline-blue-400');
   }
 
   if (props.withoutborder) {
-    classes.push('border-none');
+    classes.push('outline-none');
   } else if (props.dashedborder) {
-    classes.push('border-2 border-dashed border-current');
+    classes.push('outline outline-dashed');
   } else {
-    classes.push('border border-transparent');
+    classes.push('outline');
   }
 
   if (props.transparent) {
@@ -42,7 +50,7 @@ const inputClasses = computed(() => {
 
 <template>
   <div>
-    <label v-if="label" :for="id">{{ label }}</label>
+    <label v-if="label" :for="id" :class="labelClasses">{{ label }}</label>
     <input
       :type="type"
       :id="id"
