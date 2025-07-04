@@ -1,21 +1,21 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, type PropType } from 'vue';
 import { useRouter } from 'vue-router';
 
 type ButtonType = 'button' | 'submit' | 'reset';
+type ButtonStyle = 'primary' | 'secondary';
 
 
 const props = defineProps({
-  label: { type: String, default: '' },
-  style: { type: String, default: 'neutral' },
+  theme: { type: String as PropType<ButtonStyle>, default: 'primary' },
   redirectTo: { type: String, default: '' },
   onClick: { type: Function, default: () => {} },
-  type: { type: String as () => ButtonType, default: 'button' },
+  type: { type: String as PropType<ButtonType>, default: 'button' },
   icon: { type: String, default: '' },
   rightIcon: { type: Boolean, default: false },
   transparent: { type: Boolean, default: false },
-  withoutborder: { type: Boolean, default: false },
-  dashedborder: { type: Boolean, default: false },
+  withoutBorder: { type: Boolean, default: false },
+  dashedBorder: { type: Boolean, default: false },
   className: { type: String, default: '' },
 });
 
@@ -24,23 +24,28 @@ const router = useRouter();
 const buttonClasses = computed(() => {
   let classes = [];
 
-  if (props.style === 'secondary') {
-    classes.push('bg-purple-500 text-white hover:bg-purple-600 text-purple-500 hover:text-purple-600 border-purple-500 hover:border-purple-600');
+  if (props.theme === 'secondary') {
+    classes.push('bg-purple-500 text-white hover:bg-purple-600 outline-purple-800');
   } else {
-    classes.push('bg-blue-500 text-white hover:bg-blue-600 text-blue-500 hover:text-blue-600 border-blue-500 hover:border-blue-600');
+    classes.push('bg-blue-500 text-white hover:bg-blue-600 outline-blue-800');
   }
 
-  if (props.withoutborder) {
-    classes.push('border-none');
-  } else if (props.dashedborder) {
-    classes.push('border-2 border-dashed border-current');
+  if (props.withoutBorder) {
+    classes.push('outline-none');
+  } else if (props.dashedBorder) {
+    classes.push('outline-2 outline-dashed');
   } else {
-    classes.push('border border-transparent');
+    classes.push('outline-2 outline-solid');
   }
 
   if (props.transparent) {
-    classes = classes.filter(c => !c.startsWith('bg-') && !c.startsWith('border-'));
+    classes = classes.filter(c => !c.startsWith('bg-') && !c.startsWith('outline-') && !c.startsWith('text-'));
     classes.push('bg-transparent');
+    if (props.theme === 'secondary') {
+    classes.push('text-purple-500 hover:underline');
+  } else {
+    classes.push('text-blue-500 hover:underline');
+  }
   }
 
   return classes;
@@ -59,14 +64,14 @@ const handleClick = () => {
   <button
     :type="type"
     :class="[
-      'flex items-center justify-center px-4 py-2 rounded-md font-semibold transition-colors duration-200',
+      'flex items-center justify-center px-4 py-2 rounded-md font-semibold transition-colors duration-200 cursor-pointer',
       buttonClasses,
       className,
     ]"
     @click="handleClick"
   >
     <span v-if="icon && !rightIcon" :class="['mr-2', icon]"></span>
-    <slot>{{ label }}</slot>
+    <slot></slot>
     <span v-if="icon && rightIcon" :class="['ml-2', icon]"></span>
   </button>
 </template>

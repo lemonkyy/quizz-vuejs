@@ -1,17 +1,19 @@
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, type PropType } from 'vue';
 
 const modelValue = defineModel<boolean>({required: true, default: false});
+
+type CheckboxStyle = 'primary' | 'secondary';
 
 const props = defineProps({
     id: { type: String, required: true },
     label: { type: String, default: '' },
-    style: { type: String, default: 'neutral' },
+    theme: { type: String as PropType<CheckboxStyle>, default: 'primary' },
     className: { type: String, default: '' },
 });
 
 const labelClasses = computed(() => {
-  if (props.style === 'secondary') {
+  if (props.theme === 'secondary') {
     return 'text-purple-800';
   }
   return 'text-blue-800';
@@ -20,7 +22,7 @@ const labelClasses = computed(() => {
 const checkClasses = computed(() => {
   let classes = [];
 
-  if (props.style === 'secondary') {
+  if (props.theme === 'secondary') {
     classes.push('text-purple-800 focus:ring-purple-800');
   } else {
     classes.push('text-blue-800 focus:ring-blue-800');
@@ -31,7 +33,7 @@ const checkClasses = computed(() => {
 </script>
 
 <template>
-  <div class="flex items-center">
+  <div class="flex flex-row items-center gap-2">
     <input
       type="checkbox"
       :id="id"

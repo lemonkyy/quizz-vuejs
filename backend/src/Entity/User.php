@@ -67,6 +67,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                 'properties' => [
                                     'email' => ['type' => 'string'],
                                     'password' => ['type' => 'string'],
+                                    'passwordConfirmation' => ['type' => 'string']
                                 ],
                                 'required' => ['email', 'password']
                             ]

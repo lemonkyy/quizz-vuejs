@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import LoginForm from '@/components/form/LoginForm.vue';
+import RegisterForm from '@/components/form/RegisterForm.vue';
 </script>
 
 <template>
   <div class="bg-gray-100 w-md p-3">
-    <LoginForm />
+    <RegisterForm />
   </div>
 </template>
