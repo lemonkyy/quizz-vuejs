@@ -17,12 +17,8 @@ class RegisterController extends AbstractController
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['email'], $data['password'], $data['passwordConfirmation'])) {
-            return new JsonResponse(['error' => 'Missing email, password or password confirmation'], 400);
-        }
-
-        if ($data['password'] !== $data['passwordConfirmation']) {
-            return new JsonResponse(['error' => 'Passwords do not match'], 400);
+        if (!isset($data['email'], $data['password'])) {
+            return new JsonResponse(['error' => 'Missing email or password'], 400);
         }
 
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {

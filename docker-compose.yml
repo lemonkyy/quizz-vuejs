@@ -41,9 +41,9 @@ services:
       SHELL_VERBOSITY: 3
       APP_SECRET: ${APP_SECRET_DEV}
       CORS_ALLOW_ORIGIN: '${CORS_ALLOW_ORIGIN}'
+      DATABASE_URL: ${DATABASE_URL_DEV}
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
       SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY}
-      DATABASE_URL: ${DATABASE_URL_DEV}
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images

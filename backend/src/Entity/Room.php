@@ -6,7 +6,6 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Delete;
-use App\Controller\Api\Room\ListPublicController;
 use App\Controller\Api\Room\MeKickUserController;
 use App\Controller\Api\Room\MeCreateController;
 use App\Controller\Api\Room\MeDeleteController;
@@ -298,39 +297,6 @@ use Symfony\Component\Uid\UuidV7;
                                     'type' => 'object',
                                     'properties' => [
                                         'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ),
-        new Get(
-            uriTemplate: '/room/public',
-            input: false,
-            controller: ListPublicController::class,
-            read: false,
-            name: 'api_room_list_public',
-            openapiContext: [
-                'summary' => 'Get all public rooms',
-                'description' => 'Returns a list of all public rooms, including their ID, owner, users, creation date, and public status.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'A list of public rooms',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'array',
-                                    'items' => [
-                                        'type' => 'object',
-                                        'properties' => [
-                                            'id' => ['type' => 'string'],
-                                            'owner' => ['type' => 'string'],
-                                            'users' => ['type' => 'array', 'items' => ['type' => 'string']],
-                                            'createdAt' => ['type' => 'string', 'format' => 'date-time'],
-                                            'isPublic' => ['type' => 'boolean'],
-                                        ]
                                     ]
                                 ]
                             ]
