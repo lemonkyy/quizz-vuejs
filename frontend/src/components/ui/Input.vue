@@ -5,6 +5,8 @@ const modelValue = defineModel({required: true, default: ''});
 
 type CheckboxStyle = 'primary' | 'secondary';
 
+type InputType = 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search' | undefined;
+
 const props = defineProps({
     id: { type: String },
     label: { type: String, default: '' },
@@ -14,6 +16,8 @@ const props = defineProps({
     withoutBorder: { type: Boolean, default: false },
     dashedBorder: { type: Boolean, default: false },
     className: { type: String, default: '' },
+    maxlength: { type: Number, default: 255 },
+    inputmode: { type: String as PropType<InputType>, default: undefined }
 });
 
 const labelClasses = computed(() => {
@@ -55,6 +59,8 @@ const inputClasses = computed(() => {
       :type="type"
       :id="id"
       :placeholder="placeholder"
+      :maxlength="maxlength"
+      :inputmode="inputmode"
       v-model="modelValue"
       :class="[
         'px-4 py-2 rounded-md transition-colors duration-200',

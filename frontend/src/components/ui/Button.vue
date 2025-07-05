@@ -11,8 +11,6 @@ const props = defineProps({
   redirectTo: { type: String, default: '' },
   onClick: { type: Function, default: () => {} },
   type: { type: String as PropType<ButtonType>, default: 'button' },
-  icon: { type: String, default: '' },
-  rightIcon: { type: Boolean, default: false },
   transparent: { type: Boolean, default: false },
   withoutBorder: { type: Boolean, default: false },
   dashedBorder: { type: Boolean, default: false },
@@ -70,8 +68,6 @@ const handleClick = () => {
     ]"
     @click="handleClick"
   >
-    <span v-if="icon && !rightIcon" :class="['mr-2', icon]"></span>
-    <slot></slot>
-    <span v-if="icon && rightIcon" :class="['ml-2', icon]"></span>
+    <slot />
   </button>
 </template>
