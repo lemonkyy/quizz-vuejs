@@ -22,6 +22,10 @@
 
 ### Room
 
+- **GET /api/room/public**
+  - Returns a list of all public rooms.
+  - Response: `[{ "id": "room_id", "owner": "user_id", "users": ["user_id"], "createdAt": "datetime", "isPublic": true|false }]`
+
 - **GET /api/user/room**
   - Gets the current room of the user.
   - Requires: `Authorization: Bearer <JWT_TOKEN>` header.

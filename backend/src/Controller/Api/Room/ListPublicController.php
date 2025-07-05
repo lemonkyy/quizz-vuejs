@@ -19,7 +19,7 @@ class ListPublicController extends AbstractController
 
     public function __invoke(RoomRepository $roomRepository): Response
     {
-        $rooms = $roomRepository->findPublicWithAvailableSlots($this->maxRoomUsers);
+        $rooms = $roomRepository->findPublicWithAvailableSlots();
         return $this->json($rooms, 200, [], ['rooms' => ['room:read']]);
     }
 }
