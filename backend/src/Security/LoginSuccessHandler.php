@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Entity\User;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
+use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -41,8 +42,45 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             ]);
         }
 
-        $jwtToken = $this->generateJwtToken($user);
-        return new JsonResponse(['token' => $jwtToken]);
+        #$jwtToken = $this->jwtManager->create($user);
+        #return new JsonResponse(['token' => $jwtToken]);
+        $jwtToken = $this->jwtManager->create($user);
+
+        //split JWT token into parts
+        list($header, $payload, $signature) = explode('.', $jwtToken);
+
+        $response = new JsonResponse(['message' => 'Login successful']);
+
+        $lifetime = 3600;
+        $path = '/';
+        $domain = null;
+        $secure = false; //!set to true in production!
+        $sameSite = 'Strict';
+
+        //first cookie with payload
+        $cookieHp = Cookie::create('jwt_hp')
+            ->withValue($header . '.' . $payload)
+            ->withExpires(time() + $lifetime)
+            ->withPath($path)
+            ->withDomain($domain)
+            ->withSecure($secure)
+            ->withHttpOnly(false)
+            ->withSameSite($sameSite);
+
+        //second cookie with signature
+        $cookieS = Cookie::create('jwt_s')
+            ->withValue($signature)
+            ->withExpires(time() + $lifetime)
+            ->withPath($path)
+            ->withDomain($domain)
+            ->withSecure($secure)
+            ->withHttpOnly(true)
+            ->withSameSite($sameSite);
+
+        $response->headers->setCookie($cookieHp);
+        $response->headers->setCookie($cookieS);
+
+        return $response;
     }
 
     private function generateTempToken($user): string
@@ -62,10 +100,5 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             $item->expiresAfter(120); //cache for 2 mins
             return $user->getId();
         });
-    }
-
-    private function generateJwtToken($user): string
-    {
-        return $this->jwtManager->create($user);
     }
 }
