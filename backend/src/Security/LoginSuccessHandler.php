@@ -3,8 +3,8 @@
 namespace App\Security;
 
 use App\Entity\User;
+use App\Service\JWTCookieService;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -17,11 +17,16 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
 
     private JWTTokenManagerInterface $jwtManager;
     private CacheInterface $cacheManager;
+    private JWTCookieService $cookieService;
 
-    public function __construct(JWTTokenManagerInterface $jwtManager, CacheInterface $cacheManager)
+    public function __construct(
+        JWTTokenManagerInterface $jwtManager,
+        CacheInterface $cacheManager,
+        JWTCookieService $cookieService)
     {
         $this->jwtManager = $jwtManager;
         $this->cacheManager = $cacheManager;
+        $this->cookieService = $cookieService;
     }
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token): JsonResponse
@@ -37,46 +42,20 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             $tempToken = $this->generateTempToken($user);
 
             return new JsonResponse([
+                'code' => 'TOTP_REQUIRED',
                 'message' => 'TOTP code required',
-                'temp_token' => $tempToken
+                'tempToken' => $tempToken
             ]);
         }
 
-        #$jwtToken = $this->jwtManager->create($user);
-        #return new JsonResponse(['token' => $jwtToken]);
         $jwtToken = $this->jwtManager->create($user);
 
-        //split JWT token into parts
-        list($header, $payload, $signature) = explode('.', $jwtToken);
+        $response = new JsonResponse([
+            'code' => 'SUCCESS',
+            'message' => 'Login successful'
+        ]);
 
-        $response = new JsonResponse(['message' => 'Login successful']);
-
-        $lifetime = 3600;
-        $path = '/';
-        $domain = null;
-        $secure = false; //!set to true in production!
-        $sameSite = 'Strict';
-
-        //first cookie with payload
-        $cookieHp = Cookie::create('jwt_hp')
-            ->withValue($header . '.' . $payload)
-            ->withExpires(time() + $lifetime)
-            ->withPath($path)
-            ->withDomain($domain)
-            ->withSecure($secure)
-            ->withHttpOnly(false)
-            ->withSameSite($sameSite);
-
-        //second cookie with signature
-        $cookieS = Cookie::create('jwt_s')
-            ->withValue($signature)
-            ->withExpires(time() + $lifetime)
-            ->withPath($path)
-            ->withDomain($domain)
-            ->withSecure($secure)
-            ->withHttpOnly(true)
-            ->withSameSite($sameSite);
-
+        [$cookieHp, $cookieS] = $this->cookieService->createCookies($jwtToken);
         $response->headers->setCookie($cookieHp);
         $response->headers->setCookie($cookieS);
 

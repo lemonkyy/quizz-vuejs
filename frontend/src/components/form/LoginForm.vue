@@ -1,20 +1,50 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import Input from '@/components/ui/Input.vue';
-import Button from '@/components/ui/Button.vue';
-import Title from '@/components/ui/Title.vue';
+import { ref, computed } from 'vue';
+import Input from '@/components/ui/atoms/Input.vue';
+import Button from '@/components/ui/atoms/Button.vue';
+import Title from '@/components/ui/atoms/Title.vue';
+import Error from '@/components/ui/atoms/Error.vue';
 import { useAuthStore } from '@/store/auth';
-import TOTPModal from '../ui/TOTPModal.vue';
+import TOTPLoginModal from '../ui/modals/TOTPLoginModal.vue';
+import type { AxiosError } from 'axios';
 
 const email = ref<string>('');
 const password = ref<string>('');
 const showTOTPModal = ref(false);
 const tempToken = ref<string | null>(null);
+const formError = ref<string | null>(null);
+const isLoading = ref(false);
 
 const { login, loginVerify } = useAuthStore();
 
+const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
+
+const defaultErrorMessage = 'Une erreur inattendue est survenue.';
+const errorMessages: { [key: string]: string } = {
+  'BAD_CREDENTIALS': 'Adresse e-mail ou mot de passe incorrect.',
+
+  'ERR_MISSING_TOTP_CREDENTIALS': 'Le code de vérification est manquant. Veuillez réessayer.',
+  'ERR_INVALID_TEMP_TOKEN': 'Votre session a expiré. Veuillez vous reconnecter.',
+  'ERR_USER_NOT_FOUND': 'Une erreur est survenue. Utilisateur introuvable.',
+  'ERR_INVALID_TOTP_CODE': 'Le code de vérification est incorrect.',
+};
 
 const handleLogin = async () => {
+  formError.value = null;
+  isLoading.value = true;
+
+  if (!email.value || !password.value) {
+    formError.value = 'Veuillez remplir tous les champs.';
+    isLoading.value = false;
+    return;
+  }
+
+  if (!emailRegex.test(email.value)) {
+    formError.value = "Le format de l'adresse e-mail est invalide.";
+    isLoading.value = false;
+    return;
+  }
+
   try {
     const result = await login(email.value, password.value);
 
@@ -23,7 +53,9 @@ const handleLogin = async () => {
       showTOTPModal.value = true;
     }
   } catch (error) {
-    console.error('Login failed:', error);
+    formError.value = errorMessages.BAD_CREDENTIALS;
+  } finally {
+    isLoading.value = false;
   }
 };
 
@@ -31,25 +63,37 @@ const handleTOTPSubmit = async (code: string) => {
   if (!tempToken.value) {
     return;
   }
+  formError.value = null;
+  isLoading.value = true;
 
   try {
     await loginVerify(code, tempToken.value);
   } catch (error) {
-    console.error('OTP check failed:', error);
+    const axiosError = error as AxiosError<{ code: string; error: string }>;
+    const errorCode = axiosError.response?.data?.code;
+    formError.value = errorCode ? errorMessages[errorCode] || defaultErrorMessage : defaultErrorMessage;
+  } finally {
+    isLoading.value = false;
   }
 };
-
 </script>
 
 <template>
   <div>
     <Title :level="1">Se connecter</Title>
-    <form @submit.prevent="handleLogin" class="flex flex-col gap-5 mt-5">
+    <form @submit.prevent="handleLogin" class="flex flex-col gap-5 mt-5 w-md">
       <Input v-model="email" type="text" placeholder="Adresse e-mail" />
       <Input v-model="password" type="password" placeholder="Mot de passe" />
-      <Button type="submit" className="w-full"> Connexion </Button>
+
+      <Button type="submit" className="w-full" :loading="isLoading" :disabled="isLoading">
+        Connexion
+      </Button>
+
+      <Error v-if="formError">
+        <p>{{ formError }}</p>
+      </Error>
     </form>
 
-    <TOTPModal v-model="showTOTPModal" @valid="handleTOTPSubmit" />
+    <TOTPLoginModal v-model="showTOTPModal" @valid="handleTOTPSubmit" :error="formError" />
   </div>
 </template>

@@ -18,11 +18,11 @@ class MeLeaveController extends AbstractController
         $room = $roomRepository->findActiveRoomForUser($user);
 
         if (!$room) {
-            return $this->json(['error' => 'User is not in an active room'], 400);
+            return $this->json(['code' => 'ERR_NOT_IN_A_ROOM', 'error' => 'User is not in an active room'], 400);
         }
 
         $roomMembershipService->handleUserLeavingRoom($user);
 
-        return $this->json(['message' => 'Left room successfully'], 200);
+        return $this->json(['code' => 'SUCCESS', 'message' => 'Left room successfully'], 200);
     }
 }

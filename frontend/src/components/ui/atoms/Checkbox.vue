@@ -20,7 +20,7 @@ const labelClasses = computed(() => {
 });
 
 const checkClasses = computed(() => {
-  let classes = [];
+  let classes: string[] = [];
 
   if (props.theme === 'secondary') {
     classes.push('text-purple-800 focus:ring-purple-800');

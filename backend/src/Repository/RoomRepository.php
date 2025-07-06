@@ -16,7 +16,7 @@ class RoomRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry, ParameterBagInterface $params)
     {
         parent::__construct($registry, Room::class);
-    $this->maxRoomUsers = $params->get('app.max_room_users');
+        $this->maxRoomUsers = $params->get('app.max_room_users');
     }
 
     /**

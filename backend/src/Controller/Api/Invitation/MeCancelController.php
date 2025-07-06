@@ -18,7 +18,7 @@ class MeCancelController extends AbstractController
         $invitation = $invitationRepository->find($id);
 
         if (!$invitation || $invitation->getInvitedBy() !== $user) {
-            return $this->json(['error' => 'Invitation not found or not allowed'], 404);
+            return $this->json(['code' => 'ERR_INVITATION_NOT_FOUND', 'error' => 'Invitation not found or not allowed'], 404);
         }
 
         $invitation->setRevokedAt(new \DateTimeImmutable());
@@ -26,6 +26,6 @@ class MeCancelController extends AbstractController
         $entityManager->persist($invitation);
         $entityManager->flush();
 
-        return $this->json(['message' => 'Invitation revoked'], 200);
+        return $this->json(['code' => 'SUCCESS', 'message' => 'Invitation revoked'], 200);
     }
 }

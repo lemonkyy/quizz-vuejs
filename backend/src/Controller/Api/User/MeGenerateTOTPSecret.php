@@ -18,7 +18,7 @@ class MeGenerateTOTPSecret extends AbstractController
         $TOTPkey = $TOTPService->generateSecretKey();
 
         if (!$TOTPkey) {
-            return new JsonResponse(['error' => 'Failed to generate TOTP key.'], 500);
+            return new JsonResponse(['code' => 'ERR_TOTP_GENERATION_FAILED', 'error' => 'Failed to generate TOTP key.'], 500);
         }
 
         $user->setTOTPSecret($TOTPkey);
@@ -26,6 +26,6 @@ class MeGenerateTOTPSecret extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return new JsonResponse(['TOTP Secret' => $TOTPkey], 200);
+        return new JsonResponse(['code' => 'SUCCESS', 'TOTPSecret' => $TOTPkey], 200);
     }
 }

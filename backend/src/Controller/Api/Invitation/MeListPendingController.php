@@ -16,6 +16,6 @@ class MeListPendingController extends AbstractController
     {
         $invitations = $invitationRepository->findActiveForUser($user);
 
-        return $this->json($invitations, 200, [], ['groups' => ['invitation:read']]);
+        return $this->json(['code' => 'SUCCESS', 'invitations' => $invitations], 200, [], ['groups' => ['invitation:read']]);
     }
 }

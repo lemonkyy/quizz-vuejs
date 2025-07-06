@@ -1,4 +1,3 @@
-#!!todo: set secure TRUE in prod
 lexik_jwt_authentication:
     secret_key: '%kernel.project_dir%/config/jwt/private.pem'
     public_key: '%kernel.project_dir%/config/jwt/public.pem'
@@ -24,24 +23,24 @@ lexik_jwt_authentication:
                 - jwt_hp #header + payload
                 - jwt_s  #signature
 
-    set_cookies:
-        jwt_hp:
-            lifetime: null
-            samesite: strict
-            path: /
-            domain: null
-            httpOnly: false
-            secure: false
-            split:
-                - header
-                - payload
+    # set_cookies:
+    #     jwt_hp:
+    #         lifetime: null
+    #         samesite: strict
+    #         path: /
+    #         domain: null
+    #         httpOnly: false
+    #         secure: true
+    #         split:
+    #             - header
+    #             - payload
 
-        jwt_s:
-            lifetime: 0
-            samesite: strict
-            path: /
-            domain: null
-            httpOnly: true
-            secure: false
-            split:
-                - signature
+    #     jwt_s:
+    #         lifetime: 0
+    #         samesite: strict
+    #         path: /
+    #         domain: null
+    #         httpOnly: true
+    #         secure: true
+    #         split:
+    #             - signature

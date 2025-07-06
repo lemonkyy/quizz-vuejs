@@ -1,19 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import { ref, watch } from 'vue';
 import Title from './Title.vue';
 import Button from './Button.vue';
 
+const modelValue = defineModel({required: true, default: false});
+
 const props = defineProps({
-  modelValue: {type: Boolean, default: false},
   staticBackdrop: {type: Boolean, default: false},
 });
 
 const emit = defineEmits(['update:modelValue']);
 
-const visible = ref(props.modelValue);
+const visible = ref(modelValue.value);
 
 watch(
-  () => props.modelValue,
+  () => modelValue.value,
   (newVal) => {
     visible.value = newVal;
   }
@@ -24,7 +25,7 @@ function close() {
   emit('update:modelValue', false);
 }
 
-function onBackdropClick(event) {
+function onBackdropClick(event: MouseEvent) {
   if (!props.staticBackdrop) {
     close();
   }
@@ -43,7 +44,7 @@ function onBackdropClick(event) {
         <div
           class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
         >
-          <Title :level=3>
+          <Title :level=3 v-if="$slots.header">
             <slot name="header" />
           </Title>
           <Button

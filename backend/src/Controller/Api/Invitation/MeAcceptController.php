@@ -20,7 +20,7 @@ class MeAcceptController extends AbstractController
         $invitation = $invitationRepository->find($id);
 
         if (!$invitation || $invitation->getInvitedUser() !== $user) {
-            return $this->json(['error' => 'Invitation not found'], 404);
+            return $this->json(['code' => 'ERR_INVITATION_NOT_FOUND', 'error' => 'Invitation not found'], 404);
         }
 
         $expirationThreshold = $params->get('app.invite_expiration_threshold');
@@ -28,18 +28,18 @@ class MeAcceptController extends AbstractController
         $now = new \DateTimeImmutable();
 
         if ($now > $expirationDate) {
-            return $this->json(['error' => 'Invitation has expired'], 400);
+            return $this->json(['code' => 'ERR_INVITATION_EXPIRED', 'error' => 'Invitation has expired'], 400);
         }
 
         if ($invitation->getRevokedAt() !== null) {
-            return $this->json(['error' => 'Invitation has been revoked'], 400);
+            return $this->json(['code' => 'ERR_INVITATION_REVOKED', 'error' => 'Invitation has been revoked'], 400);
         }
 
         $invitation->setAcceptedAt($now);
         $room = $invitation->getRoom();
 
         if ($room->getDeletedAt() !== null) {
-            return $this->json(['error' => 'Room has been deleted'], 400);
+            return $this->json(['code' => 'ERR_ROOM_DELETED', 'error' => 'Room has been deleted'], 400);
         }
 
         $roomMembershipService->handleUserLeavingRoom($user);
@@ -50,6 +50,6 @@ class MeAcceptController extends AbstractController
         $entityManager->persist($invitation);
         $entityManager->flush();
 
-        return $this->json(['message' => 'Invitation accepted'], 200);
+        return $this->json(['code' => 'SUCCESS', 'message' => 'Invitation accepted'], 200);
     }
 }

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, type PropType } from 'vue';
+import { computed, ref, type PropType } from 'vue';
 
 const modelValue = defineModel({required: true, default: ''});
 
@@ -17,7 +17,7 @@ const props = defineProps({
     dashedBorder: { type: Boolean, default: false },
     className: { type: String, default: '' },
     maxlength: { type: Number, default: 255 },
-    inputmode: { type: String as PropType<InputType>, default: undefined }
+    inputmode: { type: String as PropType<InputType>, default: undefined },
 });
 
 const labelClasses = computed(() => {
@@ -28,7 +28,7 @@ const labelClasses = computed(() => {
 });
 
 const inputClasses = computed(() => {
-  let classes = [];
+  let classes: string[] = [];
 
   if (props.theme === 'secondary') {
     classes.push('text-black bg-white outline-purple-800 focus:outline-purple-400');
@@ -55,18 +55,20 @@ const inputClasses = computed(() => {
 <template>
   <div class="flex flex-row items-center gap-2 max-w-[500px]">
     <label v-if="label" :for="id" :class="labelClasses">{{ label }}</label>
-    <input
-      :type="type"
-      :id="id"
-      :placeholder="placeholder"
-      :maxlength="maxlength"
-      :inputmode="inputmode"
-      v-model="modelValue"
-      :class="[
-        'px-4 py-2 rounded-md transition-colors duration-200',
-        inputClasses,
-        className,
-      ]"
-    />
+    <div class="relative w-full">
+      <input
+        :type="type"
+        :id="id"
+        :placeholder="placeholder"
+        :maxlength="maxlength"
+        :inputmode="inputmode"
+        v-model="modelValue"
+        :class="[
+          'px-4 py-2 rounded-md transition-colors duration-200 w-full',
+          inputClasses,
+          className,
+        ]"
+      />
+    </div>
   </div>
 </template>

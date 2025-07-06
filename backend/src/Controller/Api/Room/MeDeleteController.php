@@ -19,7 +19,7 @@ class MeDeleteController extends AbstractController
         $room = $roomRepository->findOneBy(['owner' => $user, 'deletedAt' => null]);
 
         if (!$room) {
-            return $this->json(['error' => 'No active room found for user as owner'], 404);
+            return $this->json(['code' => 'ERR_ROOM_NOT_FOUND', 'error' => 'No active room found for user as owner'], 404);
         }
 
         $room->setDeletedAt(new \DateTimeImmutable());
@@ -32,6 +32,6 @@ class MeDeleteController extends AbstractController
         $entityManager->persist($room);
         $entityManager->flush();
 
-        return $this->json(['message' => 'Room deleted'], 200);
+        return $this->json(['code' => 'SUCCESS', 'message' => 'Room deleted'], 200);
     }
 }

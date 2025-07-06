@@ -1,13 +1,15 @@
 import { defineStore } from 'pinia';
 import type { User, JWTUserPayload } from '@/types';
 import { onMounted, ref } from 'vue';
-import {login as loginService, register as registerService, logout as logoutService, loginVerify as loginVerifyService} from '@/services/userService';
+import {login as loginService, register as registerService, logout as logoutService, loginVerify as loginVerifyService, generateTotpSecret as generateTotpSecretService} from '@/services/userService';
 import { jwtDecode } from 'jwt-decode';
 import router from '@/router';
+import { useToast } from "vue-toastification";
 
 export const useAuthStore = defineStore("auth",  () => {
 
   const user = ref<User |null>(null);
+  const toast = useToast();
 
   //get the cookie containing user info
   const getJwtHpFromCookie = (): string | null => {
@@ -20,7 +22,6 @@ export const useAuthStore = defineStore("auth",  () => {
 
     const jwtHp = getJwtHpFromCookie();
 
-    console.log("jwt: " + jwtHp)
     if (jwtHp) {
       try {
         const userData = jwtDecode<JWTUserPayload>(jwtHp);
@@ -29,7 +30,6 @@ export const useAuthStore = defineStore("auth",  () => {
           email: userData.email,
           roles: userData.roles,
         };
-        console.log(user.value);
       } catch (error) {
         console.warn('Invalid JWT in cookie:', error);
       }
@@ -37,15 +37,25 @@ export const useAuthStore = defineStore("auth",  () => {
   };
   onMounted(initUserFromCookie);
 
-  const register = async (email: string, password: string, passwordConfirmation: string) => {
+  const register = async (email: string, password: string, username?: string) => {
       try {
-          const response = await registerService({ email, password, passwordConfirmation });
-          console.log(response.message);
+          await registerService({ email, password, username });
+          toast.success('Compte enregistré !');
         } catch (error) {
-          console.error('Registration failed:', error);
           throw error;
         }
     };
+
+    const loginVerify = async (totpCode: string, tempToken: string) => {
+      try {
+        await loginVerifyService({ totpCode, tempToken });
+        initUserFromCookie();
+        toast.success('Connexion réussie !');
+        router.push('/');
+      } catch (error) {
+        throw error;
+      }
+    }
 
   const login = async (email: string, password: string): Promise<{code: string, tempToken?: string}> => {
     try {
@@ -59,38 +69,37 @@ export const useAuthStore = defineStore("auth",  () => {
 
       } else {
         initUserFromCookie();
+        toast.success('Connexion réussie !');
         router.push('/');
         return { code: 'SUCCESS' };
       }
 
     } catch (error) {
-      console.error('Login failed:', error);
       throw error;
     }
   };
-
-  const loginVerify = async (totpCode: string, tempToken: string) => {
-    try {
-      await loginVerifyService({ totpCode, tempToken });
-      initUserFromCookie();
-      router.push('/');
-    } catch (error) {
-      console.error('Login failed:', error);
-      throw error;
-    }
-  }
 
   const logout = async () => {
     try {
       await logoutService();
 
-      document.cookie = "jwt_hp=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      document.cookie = "jwt_s=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie = 'jwt_hp=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+      document.cookie = 'jwt_s=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT';
 
       user.value = null;
       router.push('/');
+      toast.success('Vous êtes déconnecté. ');
     } catch (error) {
-      console.error('Logout failed:', error);
+      throw error;
+    }
+  }
+
+  const generateTotpSecret = async () => {
+    try {
+      const response = await generateTotpSecretService();
+      return response;
+    } catch(error) {
+      toast.error('Erreur lors de la génération du secret OTP.')
       throw error;
     }
   }
@@ -100,7 +109,8 @@ export const useAuthStore = defineStore("auth",  () => {
     register,
     login,
     loginVerify,
-    logout
+    logout,
+    generateTotpSecret
   }
 
 })

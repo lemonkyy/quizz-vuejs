@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import Button from '@/components/ui/Button.vue';
-import Input from '@/components/ui/Input.vue';
-import Select from '@/components/ui/Select.vue';
-import Checkbox from '@/components/ui/Checkbox.vue';
-import Title from '@/components/ui/Title.vue';
+import Button from '@/components/ui/atoms/Button.vue';
+import Input from '@/components/ui/atoms/Input.vue';
+import Select from '@/components/ui/atoms/Select.vue';
+import Checkbox from '@/components/ui/atoms/Checkbox.vue';
+import Title from '@/components/ui/atoms/Title.vue';
 import { ref } from 'vue';
 
 const selectOptions = [
@@ -34,11 +34,11 @@ function handleClick() {
   <div class="p-6 space-y-12">
     <Title :level="1"> UI Preview </Title>
     <div class="flex flex-row gap-8 flex-wrap">
-      <Button theme="primary" type="button" :onClick ="handleClick"> Primary button </Button>
+      <Button theme="primary" type="button"> Primary button </Button>
       <Button theme="primary" type="button" redirectTo = "/" transparent> Primary button </Button>
       <Button theme="primary" type="button" redirectTo = "/" withoutBorder> Primary button </Button>
       <Button theme="primary" type="button" redirectTo = "/" dashedBorder> Primary button </Button>
-      <Button theme="secondary" type="button" :onClick ="handleClick"> Secondary button </Button>
+      <Button theme="secondary" type="button"> Secondary button </Button>
     </div>
     <div class="flex flex-row gap-8 flex-wrap">
       <Input id="input1" label="primary input" theme="primary" type="text" placeholder="Enter text" v-model="input1" />
@@ -46,7 +46,7 @@ function handleClick() {
       <Input id="input3" label="secondary input" theme="secondary" type="text" placeholder="Enter text" v-model="input3" />
     </div>
     <div class="flex flex-row gap-8 flex-wrap">
-      <Select v-model="select1" label="primary select" theme="primary" id="select1" :defaultOption="null" withoutBorder>
+      <Select v-model="select1" label="primary select" theme="primary" id="select1" withoutBorder>
         <option v-for="option in selectOptions" :key="option.value" :value="option.value">
           {{ option.text }}
         </option>

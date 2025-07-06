@@ -2,8 +2,8 @@
 
 namespace App\Controller\Api\User;
 
-use App\Entity\User;
 use App\Repository\UserRepository;
+use App\Service\JWTCookieService;
 use App\Service\TOTPService;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -15,14 +15,14 @@ use Symfony\Contracts\Cache\ItemInterface;
 //handles TOTP code check
 class VerifyTOTPCode extends AbstractController
 {
-    public function __invoke(Request $request, TOTPService $TOTPService, JWTTokenManagerInterface $jwtManager, CacheInterface $cache, UserRepository $userRepository): JsonResponse
+    public function __invoke(Request $request, TOTPService $TOTPService, JWTTokenManagerInterface $jwtManager, CacheInterface $cache, UserRepository $userRepository, JWTCookieService $cookieService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
-        $tempToken = $data['temp_token'] ?? null;
-        $totpCode = $data['totp_code'] ?? null;
+        $tempToken = $data['tempToken'] ?? null;
+        $totpCode = $data['totpCode'] ?? null;
 
         if (!$tempToken || !$totpCode) {
-            return new JsonResponse(['error' => 'Temporary token and TOTP code are required.'], 400);
+            return new JsonResponse(['code' => 'ERR_MISSING_TOTP_CREDENTIALS', 'error' => 'Temporary token and TOTP code are required.'], 400);
         }
 
         $cacheKey = 'temp_token_' . $tempToken;
@@ -32,21 +32,30 @@ class VerifyTOTPCode extends AbstractController
                 throw new \Exception('Cache miss');
             });
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Invalid temporary token.'], 401);
+            return new JsonResponse(['code' => 'ERR_INVALID_TEMP_TOKEN', 'error' => 'Invalid temporary token.'], 401);
         }
 
         $user = $userRepository->find($userId);
 
         if (!$user) {
-            return new JsonResponse(['error' => 'User not found.'], 404);
+            return new JsonResponse(['code' => 'ERR_USER_NOT_FOUND', 'error' => 'User not found.'], 404);
         }
 
         if (!$TOTPService->verifyTOTP($user->getTOTPSecret(), $totpCode)) {
-            return new JsonResponse(['error' => 'Invalid TOTP code.'], 401);
+            return new JsonResponse(['code' => 'ERR_INVALID_TOTP_CODE', 'error' => 'Invalid TOTP code.'], 401);
         }
 
         $jwtToken = $jwtManager->create($user);
 
-        return new JsonResponse(['token' => $jwtToken]);
+        $response = new JsonResponse([
+            'code' => 'SUCCESS',
+            'message' => 'Login successful'
+        ]);
+
+        [$cookieHp, $cookieS] = $cookieService->createCookies($jwtToken);
+        $response->headers->setCookie($cookieHp);
+        $response->headers->setCookie($cookieS);
+
+        return $response;
     }
 }

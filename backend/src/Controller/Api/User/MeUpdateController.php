@@ -11,27 +11,25 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Service\ValidateUsernameService;
 
-class MeUpdateUsernameController extends AbstractController
+class MeUpdateController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function __invoke(#[CurrentUser] ?User $user, Request $request, EntityManagerInterface $entityManager, ValidateUsernameService $validateUsernameService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['username'])) {
-            return new JsonResponse(['error' => 'Invalid username'], 400);
+        if (isset($data['newUsername'])) {
+            $error = $validateUsernameService->validate($data['newUsername'], $user ? $user->getId() : null);
+    
+            if ($error) {
+                return new JsonResponse(['code' => $error['code'], 'error' => $error['message']], 400);
+            }
+
+            $user->setUsername($data['newUsername']);
         }
-
-        $error = $validateUsernameService->validate($data['username'], $user ? $user->getId() : null);
-
-        if ($error) {
-            return new JsonResponse(['error' => $error], 400);
-        }
-
-        $user->setUsername($data['username']);
 
         $entityManager->flush();
 
-        return new JsonResponse(['status' => 'Username updated', 'username' => $user->getUsername()]);
+        return new JsonResponse(['code' => 'SUCCESS', 'message' => 'Username updated', 'username' => $user->getUsername()]);
     }
 }

@@ -12,9 +12,9 @@ class CheckAuth extends AbstractController
     public function checkAuthAction(): JsonResponse
     {
         if(is_null($this->getUser())) {
-            return new JsonResponse(['error' => 'Unauthorized'], 401);
+            return new JsonResponse(['code' => 'ERR_UNAUTHORIZED', 'error' => 'Unauthorized'], 401);
         }else {
-            return new JsonResponse(['success' => 'Authorized'], 200);
+            return new JsonResponse(['code' => 'SUCCESS', 'message' => 'Authorized'], 200);
         }
     }
 

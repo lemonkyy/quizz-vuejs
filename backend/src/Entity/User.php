@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
 use App\Controller\Api\User\MeReadController;
-use App\Controller\Api\User\MeUpdateUsernameController;
+use App\Controller\Api\User\MeUpdateController;
 use App\Controller\Api\User\RegisterController;
 use App\Controller\Api\User\MeGenerateTOTPSecret;
 use App\Controller\Api\User\VerifyTOTPCode;
@@ -38,8 +38,14 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'username' => ['type' => 'string'],
-                                        'email' => ['type' => 'string'],
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'user' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'username' => ['type' => 'string'],
+                                                'email' => ['type' => 'string'],
+                                            ]
+                                        ]
                                     ]
                                 ]
                             ]
@@ -76,10 +82,32 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                 ],
                 'responses' => [
                     '201' => [
-                        'description' => 'User created.'
+                        'description' => 'User created.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'message' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
                     ],
                     '400' => [
-                        'description' => 'Invalid input or email already in use.'
+                        'description' => 'Invalid input or email already in use.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['MISSING_CREDENTIALS', 'INVALID_EMAIL', 'EMAIL_ALREADY_IN_USE', 'USERNAME_VALIDATION_FAILED', 'USERNAME_GENERATION_FAILED', 'ERR_PASSWORD_WEAK']],
+                                        'error' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
                     ]
                 ]
             ]
@@ -87,31 +115,53 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
         new Put(
             uriTemplate: '/user/username',
             input: false,
-            controller: MeUpdateUsernameController::class,
+            controller: MeUpdateController::class,
             read: false,
-            name: 'api_update_username',
+            name: 'api_update_user',
             openapiContext: [
-                'summary' => 'Update current user username',
-                'description' => 'Updates the username of the current authenticated user.',
+                'summary' => 'Update current user',
+                'description' => 'Updates the authenticated user.',
                 'requestBody' => [
                     'content' => [
                         'application/json' => [
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'username' => ['type' => 'string'],
-                                ],
-                                'required' => ['username']
+                                    'newUsername' => ['type' => 'string'],
+                                ]
                             ]
                         ]
                     ]
                 ],
                 'responses' => [
                     '200' => [
-                        'description' => 'Username updated.'
+                        'description' => 'Username updated.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'message' => ['type' => 'string'],
+                                        'username' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
                     ],
                     '400' => [
-                        'description' => 'Invalid username or already in use.'
+                        'description' => 'Invalid username or already in use.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['INVALID_USERNAME', 'ERR_USERNAME_INVALID_TYPE', 'ERR_USERNAME_CONTAINS_SPACES', 'ERR_USERNAME_LENGTH', 'ERR_USERNAME_INAPPROPRIATE', 'ERR_USERNAME_TAKEN']],
+                                        'error' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
                     ],
                     '401' => [
                         'description' => 'Unauthorized.'
@@ -135,6 +185,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'TOTPSecret' => ['type' => 'string'],
                                     ]
                                 ]
@@ -142,7 +193,18 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                         ]
                     ],
                     '400' => [
-                        'description' => 'Failed to generate TOTP key.'
+                        'description' => 'Failed to generate TOTP key.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['TOTP_GENERATION_FAILED']],
+                                        'error' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
                     ],
                     '401' => [
                         'description' => 'Unauthorized'
@@ -159,9 +221,48 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                 'summary' => 'Verify TOTP code for the current user',
                 'description' => 'Verifies the TOTP code submitted by the user.',
                 'responses' => [
-                    '200' => ['description' => 'TOTP code verified and JWT returned.'],
-                    '400' => ['description' => 'Invalid input.'],
-                    '401' => ['description' => 'Unauthorized or invalid TOTP code.']
+                    '200' => [
+                        'description' => 'TOTP code verified and JWT returned.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'token' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '400' => [
+                        'description' => 'Invalid input.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['MISSING_TOTP_CREDENTIALS']],
+                                        'error' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '401' => [
+                        'description' => 'Unauthorized or invalid TOTP code.',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['INVALID_TEMP_TOKEN', 'INVALID_TOTP_CODE']],
+                                        'error' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
                 ],
                 'requestBody' => [
                     'content' => [
@@ -169,10 +270,10 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                             'schema' => [
                                 'type' => 'object',
                                 'properties' => [
-                                    'totp_code' => ['type' => 'string'],
-                                    'temp_token' => ['type' => 'string']
+                                    'totpCode' => ['type' => 'string'],
+                                    'tempToken' => ['type' => 'string']
                                 ],
-                                'required' => ['totp_code', 'temp_token']
+                                'required' => ['totpCode', 'tempToken']
                             ]
                         ]
                     ]

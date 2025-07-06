@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { useAuthStore } from '@/store/auth';
 import { computed } from 'vue';
-import LogoutButton from '@/components/LogoutButton.vue';
+import LogoutButton from '@/components/ui/LogoutButton.vue';
 
 const auth = useAuthStore();
 
-const userName = computed(() => auth.user?.username || '');
+const username = computed(() => auth.user?.username || '');
 
 </script>
 
@@ -19,8 +19,8 @@ const userName = computed(() => auth.user?.username || '');
         <li><router-link to="/ui" class="hover:text-gray-300">page UI</router-link></li>
       </ul>
       <ul v-if="auth.user" class="flex flex-row gap-2">
-        <li v-if="auth.user" class="ml-auto">Bienvenue {{ userName }}</li>
-        <li v-if="auth.user" class="ml-auto"><LogoutButton /></li>
+        <li><router-link to="/profile" class="text-blue-700 hover:underline"> {{ username }} </router-link></li>
+        <li class="ml-auto"><LogoutButton /></li>
       </ul>
     </ul>
   </nav>

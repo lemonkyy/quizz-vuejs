@@ -19,15 +19,15 @@ class MeJoinController extends AbstractController
         $room = $roomRepository->findOneBy(['id' => $id]);
 
         if (!$room) {
-            return $this->json(['error' => 'Room not found'], 404);
+            return $this->json(['code' => 'ERR_ROOM_NOT_FOUND', 'error' => 'Room not found'], 404);
         }
 
         if ($room->getDeletedAt() !== null) {
-            return $this->json(['error' => 'Room has been deleted'], 400);
+            return $this->json(['code' => 'ERR_ROOM_DELETED', 'error' => 'Room has been deleted'], 400);
         }
 
         if ($room->getUsers()->contains($user)) {
-            return $this->json(['error' => 'User is already in this room'], 400);
+            return $this->json(['code' => 'ERR_USER_ALREADY_IN_ROOM', 'error' => 'User is already in this room'], 400);
         }
 
         $roomMembershipService->handleUserLeavingRoom($user);
@@ -37,6 +37,6 @@ class MeJoinController extends AbstractController
         $entityManager->persist($room);
         $entityManager->flush();
 
-        return $this->json($room, 200, [], ['groups' => ['room:read']]);
+        return $this->json(['code' => 'SUCCESS', 'room' => $room], 200, [], ['groups' => ['room:read']]);
     }
 }
