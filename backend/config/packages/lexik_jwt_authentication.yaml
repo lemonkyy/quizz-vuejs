@@ -4,3 +4,43 @@ lexik_jwt_authentication:
     pass_phrase: '%env(JWT_PASSPHRASE)%'
     token_ttl: 3600
     user_id_claim: email
+
+    blocklist_token:
+        enabled: true
+        cache: cache.app
+
+    api_platform:
+        check_path: /api/login
+        username_path: email
+        password_path: password
+
+    token_extractors:
+        authorization_header:
+            enabled: false
+        split_cookie:
+            enabled: true
+            cookies:
+                - jwt_hp #header + payload
+                - jwt_s  #signature
+
+    # set_cookies:
+    #     jwt_hp:
+    #         lifetime: null
+    #         samesite: strict
+    #         path: /
+    #         domain: null
+    #         httpOnly: false
+    #         secure: true
+    #         split:
+    #             - header
+    #             - payload
+
+    #     jwt_s:
+    #         lifetime: 0
+    #         samesite: strict
+    #         path: /
+    #         domain: null
+    #         httpOnly: true
+    #         secure: true
+    #         split:
+    #             - signature

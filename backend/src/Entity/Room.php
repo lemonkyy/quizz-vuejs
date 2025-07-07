@@ -31,7 +31,33 @@ use Symfony\Component\Uid\UuidV7;
             name: 'api_user_room',
             openapiContext: [
                 'summary' => 'Get the current room of the user',
-                'description' => 'Show the room the user currently belongs to (code, users, owner, createdAt, isPublic).'
+                'description' => 'Show the room the user currently belongs to (code, users, owner, createdAt, isPublic).',
+                'responses' => [
+                    '200' => [
+                        'description' => 'Current room details',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'room' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'string'],
+                                                'code' => ['type' => 'string'],
+                                                'createdAt' => ['type' => 'string', 'format' => 'date-time'],
+                                                'isPublic' => ['type' => 'boolean'],
+                                                'owner' => ['type' => 'string'],
+                                                'users' => ['type' => 'array', 'items' => ['type' => 'string']]
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
             ]
         ),
         new Post(
@@ -67,6 +93,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'message' => ['type' => 'string']
                                     ]
                                 ]
@@ -80,6 +107,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['MISSING_USER_ID', 'CANNOT_KICK_SELF', 'NOT_IN_A_ROOM', 'USER_NOT_IN_ROOM']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -93,6 +121,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['NOT_ROOM_OWNER']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -106,6 +135,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['USER_NOT_FOUND']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -147,12 +177,18 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'id' => ['type' => 'string'],
-                                        'code' => ['type' => 'string'],
-                                        'createdAt' => ['type' => 'string', 'format' => 'date-time'],
-                                        'isPublic' => ['type' => 'boolean'],
-                                        'owner' => ['type' => 'string'],
-                                        'users' => ['type' => 'array', 'items' => ['type' => 'string']]
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'room' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'string'],
+                                                'code' => ['type' => 'string'],
+                                                'createdAt' => ['type' => 'string', 'format' => 'date-time'],
+                                                'isPublic' => ['type' => 'boolean'],
+                                                'owner' => ['type' => 'string'],
+                                                'users' => ['type' => 'array', 'items' => ['type' => 'string']]
+                                            ]
+                                        ]
                                     ]
                                 ]
                             ]
@@ -178,6 +214,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'message' => ['type' => 'string']
                                     ]
                                 ]
@@ -191,6 +228,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['ROOM_NOT_FOUND']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -226,12 +264,18 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'id' => ['type' => 'string'],
-                                        'code' => ['type' => 'string'],
-                                        'createdAt' => ['type' => 'string', 'format' => 'date-time'],
-                                        'isPublic' => ['type' => 'boolean'],
-                                        'owner' => ['type' => 'string'],
-                                        'users' => ['type' => 'array', 'items' => ['type' => 'string']]
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'room' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'string'],
+                                                'code' => ['type' => 'string'],
+                                                'createdAt' => ['type' => 'string', 'format' => 'date-time'],
+                                                'isPublic' => ['type' => 'boolean'],
+                                                'owner' => ['type' => 'string'],
+                                                'users' => ['type' => 'array', 'items' => ['type' => 'string']]
+                                            ]
+                                        ]
                                     ]
                                 ]
                             ]
@@ -244,6 +288,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['ROOM_DELETED', 'USER_ALREADY_IN_ROOM']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -257,6 +302,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['ROOM_NOT_FOUND']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -283,6 +329,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'message' => ['type' => 'string']
                                     ]
                                 ]
@@ -296,6 +343,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['NOT_IN_A_ROOM']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -304,7 +352,7 @@ use Symfony\Component\Uid\UuidV7;
                     ]
                 ]
             ]
-        ),
+        )
     ]
 )]
 

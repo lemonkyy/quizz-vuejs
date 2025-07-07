@@ -6,12 +6,17 @@ use App\Entity\Room;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class RoomRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+
+    private string $maxRoomUsers;
+
+    public function __construct(ManagerRegistry $registry, ParameterBagInterface $params)
     {
         parent::__construct($registry, Room::class);
+        $this->maxRoomUsers = $params->get('app.max_room_users');
     }
 
     /**
@@ -46,11 +51,15 @@ class RoomRepository extends ServiceEntityRepository
     /**
      * @return Room[]
      */
-    public function findPublicWithAvailableSlots(int $maxUsers): array
+    public function findPublicWithAvailableSlots(): array
     {
+        $maxUsers = $this->maxRoomUsers;
+        
         return $this->createQueryBuilder('r')
+            ->leftJoin('r.users', 'u')
             ->where('r.isPublic = true')
-            ->andWhere('(SELECT COUNT(u) FROM r.users u) < :max')
+            ->groupBy('r.id')
+            ->having('COUNT(u) < :max')
             ->setParameter('max', $maxUsers)
             ->getQuery()
             ->getResult();

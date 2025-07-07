@@ -1,18 +1,9 @@
+<script setup lang="ts">
+import LoginForm from '@/components/form/LoginForm.vue';
+</script>
+
 <template>
-  <div class="bg-gray-100 w-md p-3">
-    <h1> Login </h1>
-    <form class="flex flex-col gap-5 mt-5">
-      <input class="border" type="text" placeholder="Username" />
-      <input class="border" type="password" placeholder="Password" />
-      <button type="submit">Login</button>
-    </form>
+  <div class="bg-gray-100 p-3 flex justify-center items-center w-auto min-h-full">
+    <LoginForm />
   </div>
 </template>
-
-<script lang="ts">
-import { defineComponent } from 'vue';
-
-export default defineComponent({
-  name: 'LoginPage',
-});
-</script>

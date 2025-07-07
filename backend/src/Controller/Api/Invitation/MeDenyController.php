@@ -18,7 +18,7 @@ class MeDenyController extends AbstractController
         $invitation = $invitationRepository->find($id);
 
         if (!$invitation || $invitation->getInvitedUser() !== $user) {
-            return $this->json(['error' => 'Invitation not found'], 404);
+            return $this->json(['code' => 'ERR_INVITATION_NOT_FOUND', 'error' => 'Invitation not found'], 404);
         }
 
         $invitation->setDeniedAt(new \DateTimeImmutable());
@@ -26,6 +26,6 @@ class MeDenyController extends AbstractController
         $entityManager->persist($invitation);
         $entityManager->flush();
 
-        return $this->json(['message' => 'Invitation denied'], 200);
+        return $this->json(['code' => 'SUCCESS', 'message' => 'Invitation denied'], 200);
     }
 }

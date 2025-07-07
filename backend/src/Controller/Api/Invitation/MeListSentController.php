@@ -31,6 +31,6 @@ class MeListSentController extends AbstractController
 
         $invitations = $entityManager->getRepository(Invitation::class)->findBy($criteria);
 
-        return $this->json($invitations, 200, [], ['groups' => ['invitation:read']]);
+        return $this->json(['code' => 'SUCCESS', 'invitations' => $invitations], 200, [], ['groups' => ['invitation:read']]);
     }
 }

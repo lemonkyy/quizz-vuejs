@@ -31,7 +31,7 @@ class UserFixtures extends AbstractFixtures
             'username' => 'user1',
             'password' => 'user1',
             'roles' => ['ROLE_USER'],
-            'TOTPSecret' => 'NOO4I7MLZ6UZMJLIWMM6TKRSYM'
+            'totpSecret' => 'NOO4I7MLZ6UZMJLIWMM6TKRSYM'
         ];
 
         yield [

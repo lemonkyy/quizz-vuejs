@@ -2,7 +2,7 @@
 
 namespace App\Service;
 
-class TOTPService
+class TotpService
 {
     private string $alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 
@@ -11,7 +11,7 @@ class TOTPService
         return $this->base32Encode(random_bytes(16));
     }
 
-    public function generateTOTP(string $secretKey): string
+    public function generateTotp(string $secretKey): string
     {
         //take the current time, divide by 30 to get the time step
         $time = floor(time() / 30);
@@ -33,9 +33,9 @@ class TOTPService
         return str_pad($code, 6, '0', STR_PAD_LEFT);
     }
 
-    public function verifyTOTP(string $secretKey, string $userCode): bool
+    public function verifyTotp(string $secretKey, string $userCode): bool
     {
-        $currentCode = $this->generateTOTP($secretKey);
+        $currentCode = $this->generateTotp($secretKey);
 
         return hash_equals($currentCode, $userCode);
     }

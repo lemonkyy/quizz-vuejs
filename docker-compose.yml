@@ -40,8 +40,8 @@ services:
       APP_DEBUG: 1
       SHELL_VERBOSITY: 3
       APP_SECRET: ${APP_SECRET_DEV}
+      CORS_ALLOW_ORIGIN: '${CORS_ALLOW_ORIGIN}'
       DATABASE_URL: ${DATABASE_URL_DEV}
-      CORS_ALLOW_ORIGIN: '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
       SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY}
     volumes:
@@ -63,15 +63,16 @@ services:
       - "5173:80"
     volumes:
       - ./frontend:/app:delegated
-      - /app/node_modules
+      - node-modules:/app/node_modules
     container_name: frontend_quiz
     depends_on:
       - backend
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: ${VUE_PUBLIC_API_URL}
-      NEXT_SERVER_API_URL: ${VUE_SERVER_API_URL}
-      NEXT_PUBLIC_IMAGES_URL: ${VUE_PUBLIC_IMAGES_URL}
+      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL}
+      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL}
+      PATH: /app/node_modules/.bin:$PATH
+
       WATCHPACK_POLLING: true
     networks:
       - backend-frontend-bridge
@@ -87,13 +88,6 @@ services:
       - ollama-data-dev:/root/.ollama
     networks:
       - ollama-backend-bridge
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: ["gpu"]
 
   #matomo - analytics
   matomo:
@@ -123,3 +117,4 @@ volumes:
   uploads-data-dev:
   ollama-data-dev:
   matomo-data-dev:
+  node-modules:

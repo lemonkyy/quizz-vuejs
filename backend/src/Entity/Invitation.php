@@ -52,6 +52,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'message' => ['type' => 'string']
                                     ]
                                 ]
@@ -65,6 +66,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['MISSING_USER_ID', 'CANNOT_INVITE_SELF', 'NOT_IN_A_ROOM', 'USER_ALREADY_IN_ROOM', 'ROOM_FULL', 'INVITATION_ALREADY_SENT']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -78,6 +80,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['USER_NOT_FOUND']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -111,8 +114,14 @@ use Symfony\Component\Uid\UuidV7;
                         'content' => [
                             'application/json' => [
                                 'schema' => [
-                                    'type' => 'array',
-                                    'items' => [ 'type' => 'object' ]
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'invitations' => [
+                                            'type' => 'array',
+                                            'items' => [ 'type' => 'object' ]
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]
@@ -135,8 +144,14 @@ use Symfony\Component\Uid\UuidV7;
                         'content' => [
                             'application/json' => [
                                 'schema' => [
-                                    'type' => 'array',
-                                    'items' => [ 'type' => 'object' ]
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'invitations' => [
+                                            'type' => 'array',
+                                            'items' => [ 'type' => 'object' ]
+                                        ]
+                                    ]
                                 ]
                             ]
                         ]
@@ -170,6 +185,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'message' => ['type' => 'string']
                                     ]
                                 ]
@@ -183,6 +199,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['INVITATION_EXPIRED', 'INVITATION_REVOKED', 'ROOM_DELETED']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -196,6 +213,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['INVITATION_NOT_FOUND']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -231,6 +249,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'message' => ['type' => 'string']
                                     ]
                                 ]
@@ -244,6 +263,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['INVITATION_NOT_FOUND']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -279,6 +299,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'message' => ['type' => 'string']
                                     ]
                                 ]
@@ -292,6 +313,7 @@ use Symfony\Component\Uid\UuidV7;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['INVITATION_NOT_FOUND']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]

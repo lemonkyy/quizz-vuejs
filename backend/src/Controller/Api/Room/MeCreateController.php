@@ -30,6 +30,6 @@ class MeCreateController extends AbstractController
         $entityManager->persist($room);
         $entityManager->flush();
 
-        return $this->json($room, 201, [], ['groups' => ['room:read']]);
+        return $this->json(['code' => 'SUCCESS', 'room' => $room], 201, [], ['groups' => ['room:read']]);
     }
 }

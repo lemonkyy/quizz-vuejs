@@ -12,6 +12,6 @@ class MeReadController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function __invoke(#[CurrentUser] $user): JsonResponse
     {
-        return $this->json($user, 200, [], ['groups' => ['user:read']]);
+        return $this->json(['code' => 'SUCCESS', 'user' => $user], 200, [], ['groups' => ['user:read']]);
     }
 }

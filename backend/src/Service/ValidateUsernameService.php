@@ -21,30 +21,30 @@ class ValidateUsernameService
     }
 
     //excludeUserId is to prevent the user's new username from being rejected if it matches their current username
-    public function validate(?string $username, ?string $excludeUserId = null): ?string
+    public function validate(?string $username, ?string $excludeUserId = null): ?array
     {
         if (!is_string($username)) {
-            return 'Username must be a string';
+            return ['code' => 'ERR_USERNAME_INVALID_TYPE', 'message' => 'Username must be a string'];
         }
 
         if (preg_match('/\s/', $username)) {
-            return 'Username must not contain spaces';
+            return ['code' => 'ERR_USERNAME_CONTAINS_SPACES', 'message' => 'Username must not contain spaces'];
         }
 
         $len = strlen($username);
 
         if ($len < $this->minLength || $len > $this->maxLength) {
-            return 'Username must be between ' . $this->minLength . ' and ' . $this->maxLength . ' characters';
+            return ['code' => 'ERR_USERNAME_LENGTH', 'message' => 'Username must be between ' . $this->minLength . ' and ' . $this->maxLength . ' characters'];
         }
 
         if ($this->swearWordChecker->containsSwearWord($username)) {
-            return 'Username contains inappropriate language';
+            return ['code' => 'ERR_USERNAME_INAPPROPRIATE', 'message' => 'Username contains inappropriate language'];
         }
 
         $existing = $this->userRepository->findOneBy(['username' => $username]);
 
         if ($existing && (!$excludeUserId || $existing->getId() !== $excludeUserId)) {
-            return 'Username already in use';
+            return ['code' => 'ERR_USERNAME_TAKEN', 'message' => 'Username already in use'];
         }
 
         return null;

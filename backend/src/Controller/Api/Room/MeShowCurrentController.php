@@ -16,6 +16,6 @@ class MeShowCurrentController extends AbstractController
     {
         $room = $roomRepository->findActiveRoomForUser($user);
 
-        return $this->json($room, 200, [], ['groups' => ['room:read']]);
+        return $this->json(['code' => 'SUCCESS', 'room' => $room], 200, [], ['groups' => ['room:read']]);
     }
 }

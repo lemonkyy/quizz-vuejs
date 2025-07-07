@@ -21,35 +21,35 @@ class MeKickUserController extends AbstractController
         $targetUserId = $data['user_id'] ?? null;
 
         if (!$targetUserId) {
-            return $this->json(['error' => 'Missing user_id'], 400);
+            return $this->json(['code' => 'ERR_MISSING_USER_ID', 'error' => 'Missing user_id'], 400);
         }
 
         if ($targetUserId == $user->getId()) {
-            return $this->json(['error' => 'You cannot kick yourself'], 400);
+            return $this->json(['code' => 'ERR_CANNOT_KICK_SELF', 'error' => 'You cannot kick yourself'], 400);
         }
 
         $room = $roomRepository->findActiveRoomForUser($user);
         if (!$room) {
-            return $this->json(['error' => 'You are not in a room'], 400);
+            return $this->json(['code' => 'ERR_NOT_IN_A_ROOM', 'error' => 'You are not in a room'], 400);
         }
 
         if ($room->getOwner()->getId() !== $user->getId()) {
-            return $this->json(['error' => 'Only the room owner can kick users'], 403);
+            return $this->json(['code' => 'ERR_NOT_ROOM_OWNER', 'error' => 'Only the room owner can kick users'], 403);
         }
 
         $targetUser = $userRepository->find($targetUserId);
         if (!$targetUser) {
-            return $this->json(['error' => 'User not found'], 404);
+            return $this->json(['code' => 'ERR_USER_NOT_FOUND', 'error' => 'User not found'], 404);
         }
 
         if (!$room->getUsers()->contains($targetUser)) {
-            return $this->json(['error' => 'User is not in your room'], 400);
+            return $this->json(['code' => 'ERR_USER_NOT_IN_ROOM', 'error' => 'User is not in your room'], 400);
         }
 
         $room->removeUser($targetUser);
 
         $entityManager->flush();
 
-        return $this->json(['message' => 'User kicked from room'], 200);
+        return $this->json(['code' => 'SUCCESS', 'message' => 'User kicked from room'], 200);
     }
 }

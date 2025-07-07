@@ -10,23 +10,29 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Repository\UserRepository;
 use App\Service\ValidateUsernameService;
+use App\Service\ValidatePasswordService;
 
 class RegisterController extends AbstractController
 {
-    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UserRepository $userRepository, ValidateUsernameService $validateUsernameService)
+    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UserRepository $userRepository, ValidateUsernameService $validateUsernameService, ValidatePasswordService $validatePasswordService)
     {
         $data = json_decode($request->getContent(), true);
 
         if (!isset($data['email'], $data['password'])) {
-            return new JsonResponse(['error' => 'Missing email or password'], 400);
+            return new JsonResponse(['code' => 'ERR_MISSING_CREDENTIALS', 'error' => 'Missing email or password'], 400);
+        }
+
+        $passwordValidation = $validatePasswordService->validate($data['password']);
+        if ($passwordValidation) {
+            return new JsonResponse($passwordValidation, 400);
         }
 
         if (!filter_var($data['email'], FILTER_VALIDATE_EMAIL)) {
-            return new JsonResponse(['error' => 'Invalid email address'], 400);
+            return new JsonResponse(['code' => 'ERR_INVALID_EMAIL', 'error' => 'Invalid email address'], 400);
         }
 
         if ($userRepository->findOneBy(['email' => $data['email']])) {
-            return new JsonResponse(['error' => 'Email already in use'], 400);
+            return new JsonResponse(['code' => 'ERR_EMAIL_ALREADY_IN_USE', 'error' => 'Email already in use'], 400);
         }
 
         if (isset($data['username']) && is_string($data['username'])) {
@@ -35,7 +41,7 @@ class RegisterController extends AbstractController
             $error = $validateUsernameService->validate($username);
 
             if ($error) {
-                return new JsonResponse(['error' => $error], 400);
+                return new JsonResponse($error, 400);
             }
 
         } else {
@@ -49,7 +55,7 @@ class RegisterController extends AbstractController
                 $attempts++;
                 $error = $validateUsernameService->validate($username);
                 if ($attempts > $maxAttempts) {
-                    return new JsonResponse(['error' => 'Could not generate unique username.'], 500);
+                    return new JsonResponse(['code' => 'ERR_USERNAME_GENERATION_FAILED', 'error' => 'Could not generate unique username.'], 500);
                 }
 
             } while ($error);
@@ -64,6 +70,6 @@ class RegisterController extends AbstractController
         $entityManager->persist($user);
         $entityManager->flush();
 
-        return new JsonResponse(['status' => 'User created.'], 201);
+        return new JsonResponse(['code' => 'SUCCESS', 'message' => 'User created.'], 201);
     }
 }
