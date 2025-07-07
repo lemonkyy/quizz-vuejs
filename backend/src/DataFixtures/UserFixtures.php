@@ -31,6 +31,7 @@ class UserFixtures extends AbstractFixtures
             'username' => 'user1',
             'password' => 'user1',
             'roles' => ['ROLE_USER'],
+            // gg-ignore
             'totpSecret' => 'NOO4I7MLZ6UZMJLIWMM6TKRSYM'
         ];
 
