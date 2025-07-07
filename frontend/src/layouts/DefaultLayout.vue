@@ -15,7 +15,7 @@ export default defineComponent({
 <template>
   <div class="flex flex-col min-h-screen">
     <Menu />
-    <main class="flex-grow ">
+    <main class="flex-grow font-lexend">
       <router-view />
     </main>
     <Footer />

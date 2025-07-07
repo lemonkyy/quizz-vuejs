@@ -3,14 +3,15 @@ import { computed, ref, type PropType } from 'vue';
 
 const modelValue = defineModel({required: true, default: ''});
 
-type CheckboxStyle = 'primary' | 'secondary';
-
 type InputType = 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search' | undefined;
+type InputStyle = 'primary' | 'secondary';
+type ButtonRadius = 'sm' | 'md' | 'lg';
 
 const props = defineProps({
-    id: { type: String },
+    id: { type: String, required: true },
     label: { type: String, default: '' },
-    theme: { type: String as PropType<CheckboxStyle>, default: 'primary' },
+    theme: { type: String as PropType<InputStyle>, default: 'primary' },
+    rounded: { type: String as PropType<ButtonRadius>, default: 'md' },
     type: { type: String, default: 'text' },
     placeholder: { type: String, default: '' },
     withoutBorder: { type: Boolean, default: false },
@@ -22,26 +23,41 @@ const props = defineProps({
 
 const labelClasses = computed(() => {
   if (props.theme === 'secondary') {
-    return 'text-purple-800';
+    return 'text-alt';
   }
-  return 'text-blue-800';
+  return 'text-highlight';
 });
 
 const inputClasses = computed(() => {
-  let classes: string[] = [];
+  let classes: string[] = ['px-custom-x py-custom-y transition-colors duration-200 w-full border-none'];
 
   if (props.theme === 'secondary') {
-    classes.push('text-black bg-white outline-purple-800 focus:outline-purple-400');
+    classes.push('text-alt bg-neutral outline-highlight focus:outline-primary');
   } else {
-    classes.push('text-black bg-white outline-blue-800 focus:outline-blue-400');
+    classes.push('text-highlight bg-white outline-secondary focus:outline-primary');
+  }
+
+  switch (props.rounded) {
+    case 'sm':
+      classes.push('rounded-custom-sm');
+      break;
+    case 'md':
+      classes.push('rounded-custom-md');
+      break;
+    case 'lg':
+      classes.push('rounded-custom-lg');
+      break;
+    default:
+      classes.push('rounded-custom-md');
+      break;
   }
 
   if (props.withoutBorder) {
-    classes.push('outline-none underline');
+    classes.push('outline-none focus:outline-1 focus:outline-solid');
   } else if (props.dashedBorder) {
     classes.push('outline-2 outline-dashed');
   } else {
-    classes.push('outline-2 outline-solid');
+    classes.push('outline-1 outline-solid');
   }
 
   if (props.label === '') {
@@ -53,7 +69,7 @@ const inputClasses = computed(() => {
 </script>
 
 <template>
-  <div class="flex flex-row items-center gap-2 max-w-[500px]">
+  <div class="flex flex-row items-center gap-2">
     <label v-if="label" :for="id" :class="labelClasses">{{ label }}</label>
     <div class="relative w-full">
       <input
@@ -64,7 +80,6 @@ const inputClasses = computed(() => {
         :inputmode="inputmode"
         v-model="modelValue"
         :class="[
-          'px-4 py-2 rounded-md transition-colors duration-200 w-full',
           inputClasses,
           className,
         ]"

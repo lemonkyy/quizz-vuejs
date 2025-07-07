@@ -3,18 +3,19 @@ import { computed, type PropType } from 'vue';
 const modelValue = defineModel({required: true, default: ''});
 
 type SelectStyle = 'primary' | 'secondary';
-
 type DefaultOption = {
     value: string;
     label: string;
     disabled?: boolean;
 };
+type ButtonRadius = 'sm' | 'md' | 'lg';
 
 const props = defineProps({
-    id: { type: String },
-    defaultOption: { type: Object as PropType<DefaultOption>, default: () => ({ label: 'Sélectionner une option...', value: '', disabled: true })},
+    id: { type: String, required: true },
     label: { type: String, default: '' },
     theme: { type: String as PropType<SelectStyle>, default: 'primary' },
+    rounded: { type: String as PropType<ButtonRadius>, default: 'md' },
+    defaultOption: { type: Object as PropType<DefaultOption>, default: () => ({ label: 'Sélectionner une option...', value: '', disabled: true })},
     transparent: { type: Boolean, default: false },
     withoutBorder: { type: Boolean, default: false },
     dashedBorder: { type: Boolean, default: false },
@@ -23,22 +24,37 @@ const props = defineProps({
 
 const labelClasses = computed(() => {
   if (props.theme === 'secondary') {
-    return 'text-purple-800';
+    return 'text-alt';
   }
-  return 'text-blue-800';
+  return 'text-highlight';
 });
 
 const inputClasses = computed(() => {
-  let classes = [];
+  let classes = ['px-custom-x py-custom-y rounded-md transition-colors duration-200 cursor-pointer border-none'];
 
   if (props.theme === 'secondary') {
-    classes.push('text-black bg-white text-purple-500 hover:text-purple-600 outline-purple-800 focus:outline-purple-400');
+    classes.push('text-alt bg-neutral outline-highlight focus:outline-primary');
   } else {
-    classes.push('text-black bg-white text-blue-500 hover:text-blue-600 outline-blue-800 focus:outline-blue-400');
+    classes.push('text-highlight bg-white outline-secondary focus:outline-primary');
+  }
+
+  switch (props.rounded) {
+    case 'sm':
+      classes.push('rounded-custom-sm');
+      break;
+    case 'md':
+      classes.push('rounded-custom-md');
+      break;
+    case 'lg':
+      classes.push('rounded-custom-lg');
+      break;
+    default:
+      classes.push('rounded-custom-md');
+      break;
   }
 
   if (props.withoutBorder) {
-    classes.push('outline-none');
+    classes.push('outline-none focus:outline-1 focus:outline-solid');
   } else if (props.dashedBorder) {
     classes.push('outline-2 outline-dashed');
   } else {
@@ -65,7 +81,6 @@ const inputClasses = computed(() => {
       :id="id"
       v-model="modelValue"
       :class="[
-        'px-3 py-2 rounded-md transition-colors duration-200',
         inputClasses,
         className,
       ]"

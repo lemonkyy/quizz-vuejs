@@ -1,1 +1,23 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
+
+@theme {
+    --font-lexend: "lexend", sans-serif;
+    --color-primary: #F2C247; 
+    --color-primary-focus: #d8a00f;
+    --color-secondary: #F2E8CC; 
+    --color-secondary-focus: #e7d4a0;
+    --color-neutral: #F2F0E8;
+    --color-alt: #827A66;
+    --color-highlight: #9C854A;
+
+    --radius-custom-sm: 8px;
+    --radius-custom-md: 12px;
+    --radius-custom-lg: 20px;
+
+    --spacing-custom-x: 16px;
+    --spacing-custom-y: 10px;
+
+    --spacing-button-xl-width: 480px;
+}

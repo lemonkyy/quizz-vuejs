@@ -1,76 +1,76 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue';
-import { useRouter } from 'vue-router';
 
 type ButtonType = 'button' | 'submit' | 'reset';
 type ButtonStyle = 'primary' | 'secondary';
+type ButtonRadius = 'sm' | 'md' | 'lg';
 
 
 const props = defineProps({
   theme: { type: String as PropType<ButtonStyle>, default: 'primary' },
-  redirectTo: { type: String, default: '' },
+  rounded: { type: String as PropType<ButtonRadius>, default: 'md' },
+  xl: {type: Boolean, default: false},
   type: { type: String as PropType<ButtonType>, default: 'button' },
   transparent: { type: Boolean, default: false },
-  withoutBorder: { type: Boolean, default: false },
-  dashedBorder: { type: Boolean, default: false },
   className: { type: String, default: '' },
   loading: { type: Boolean, default: false },
 });
 
-const router = useRouter();
-
 const buttonClasses = computed(() => {
-  let classes: string[] = [];
+  let classes: string[] = ['flex items-center justify-center px-custom-x py-custom-y font-semibold transition-colors duration-200'];
 
   if (props.theme === 'secondary') {
-    classes.push('bg-purple-500 text-white hover:bg-purple-600 outline-purple-800');
+    classes.push('bg-secondary text-black hover:bg-secondary-focus');
   } else {
-    classes.push('bg-blue-500 text-white hover:bg-blue-600 outline-blue-800');
-  }
-
-  if (props.withoutBorder) {
-    classes.push('outline-none');
-  } else if (props.dashedBorder) {
-    classes.push('outline-2 outline-dashed');
-  } else {
-    classes.push('outline-2 outline-solid');
+    classes.push('bg-primary text-black hover:bg-primary-focus');
   }
 
   if (props.transparent) {
     classes = classes.filter(c => !c.startsWith('bg-') && !c.startsWith('outline-') && !c.startsWith('text-'));
     classes.push('bg-transparent');
     if (props.theme === 'secondary') {
-    classes.push('text-purple-500 hover:underline');
-  } else {
-    classes.push('text-blue-500 hover:underline');
+      classes.push('text-secondary hover:underline hover:text-secondary-focus');
+    } else {
+      classes.push('text-primary hover:underline hover:text-primary-focus');
+    }
   }
+
+  switch (props.rounded) {
+    case 'sm':
+      classes.push('rounded-custom-sm');
+      break;
+    case 'md':
+      classes.push('rounded-custom-md');
+      break;
+    case 'lg':
+      classes.push('rounded-custom-lg');
+      break;
+    default:
+      classes.push('rounded-custom-md');
+      break;
+  }
+  
+  if (props.xl) {
+    classes.push('max-w-button-xl-width w-full')
   }
 
   if (props.loading) {
-    classes.push('opacity-50 cursor-not-allowed');
+    classes.push('cursor-not-allowed bg-alt ');
   } else {
     classes.push('cursor-pointer')
   }
 
   return classes;
 });
-
-const handleClick = () => {
-  if (props.redirectTo) {
-    router.push(props.redirectTo);
-  }
-};
 </script>
 
 <template>
   <button
     :type="type"
     :class="[
-      'flex items-center justify-center px-4 py-2 rounded-md font-semibold transition-colors duration-200 max-w-md',
       buttonClasses,
       className,
     ]"
-    @click="handleClick"
     :disabled="loading"
   >
     <slot v-if="loading" name="loading">

@@ -1,50 +1,26 @@
 <script setup lang="ts">
-import { computed, type PropType } from 'vue';
-
 const modelValue = defineModel<boolean>({required: true, default: false});
 
-type CheckboxStyle = 'primary' | 'secondary';
-
-const props = defineProps({
+defineProps({
     id: { type: String, required: true },
     label: { type: String, default: '' },
-    theme: { type: String as PropType<CheckboxStyle>, default: 'primary' },
     className: { type: String, default: '' },
-});
-
-const labelClasses = computed(() => {
-  if (props.theme === 'secondary') {
-    return 'text-purple-800';
-  }
-  return 'text-blue-800';
-});
-
-const checkClasses = computed(() => {
-  let classes: string[] = [];
-
-  if (props.theme === 'secondary') {
-    classes.push('text-purple-800 focus:ring-purple-800');
-  } else {
-    classes.push('text-blue-800 focus:ring-blue-800');
-  }
-
-  return classes;
+    checkboxLeft: { type: Boolean, default: false },
 });
 </script>
 
 <template>
-  <div class="flex flex-row items-center gap-2">
+  <div class="flex items-center gap-5" :class="[checkboxLeft ? 'flex-row' : 'flex-row-reverse']">
     <input
       type="checkbox"
       :id="id"
       v-model="modelValue"
       :class="[
-        'h-4 w-4 rounded border-gray-300',
-        checkClasses,
+        'h-5 w-5 rounded border-alt', 'text-primary focus:ring-primary cursor-pointer',
         className,
       ]"
     />
 
-    <label v-if="label" :for="id" :class="labelClasses">{{ label }}</label>
+    <label v-if="label" :for="id" class="text-black cursor-pointer">{{ label }}</label>
   </div>
 </template>
