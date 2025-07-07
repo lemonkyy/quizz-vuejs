@@ -5,7 +5,7 @@ import Button from '@/components/ui/atoms/Button.vue';
 import Title from '@/components/ui/atoms/Title.vue';
 import Error from '@/components/ui/atoms/Error.vue';
 import { useAuthStore } from '@/store/auth';
-import type { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
 
 const email = ref<string>('');
 const password = ref<string>('');
@@ -76,6 +76,18 @@ const handleRegister = async () => {
     formError.value = errorMessages.ERR_PASSWORD_WEAK;
     isLoading.value = false;
     return;
+  }
+
+  try {
+    await register(email.value, password.value, username.value);
+  } catch (error) {
+    if (error instanceof AxiosError && error.response?.data?.code) {
+      formError.value = errorMessages[error.response.data.code] || defaultErrorMessage;
+    } else {
+      formError.value = defaultErrorMessage;
+    }
+  } finally {
+    isLoading.value = false;
   }
 }
 </script>

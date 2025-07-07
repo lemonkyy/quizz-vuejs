@@ -4,7 +4,7 @@ namespace App\Controller\Api\User;
 
 use App\Repository\UserRepository;
 use App\Service\JWTCookieService;
-use App\Service\TOTPService;
+use App\Service\TotpService;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -13,9 +13,9 @@ use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
 //handles TOTP code check
-class VerifyTOTPCode extends AbstractController
+class VerifyTotpCode extends AbstractController
 {
-    public function __invoke(Request $request, TOTPService $TOTPService, JWTTokenManagerInterface $jwtManager, CacheInterface $cache, UserRepository $userRepository, JWTCookieService $cookieService): JsonResponse
+    public function __invoke(Request $request, TotpService $totpService, JWTTokenManagerInterface $jwtManager, CacheInterface $cache, UserRepository $userRepository, JWTCookieService $cookieService): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
         $tempToken = $data['tempToken'] ?? null;
@@ -41,7 +41,8 @@ class VerifyTOTPCode extends AbstractController
             return new JsonResponse(['code' => 'ERR_USER_NOT_FOUND', 'error' => 'User not found.'], 404);
         }
 
-        if (!$TOTPService->verifyTOTP($user->getTOTPSecret(), $totpCode)) {
+        $isValid = $totpService->verifyTotp($user->getTotpSecret(), $totpCode);
+        if (!$isValid) {
             return new JsonResponse(['code' => 'ERR_INVALID_TOTP_CODE', 'error' => 'Invalid TOTP code.'], 401);
         }
 

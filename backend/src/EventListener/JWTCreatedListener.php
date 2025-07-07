@@ -21,6 +21,7 @@ class JWTCreatedListener
 
         $payload = $event->getData();
         $payload['username'] = $user->getUsername();
+        $payload['hasTotp'] = $user->getTotpSecret() ? true : false;
 
         // if ($request) {
         //     $payload['ip'] = $request->getClientIp();

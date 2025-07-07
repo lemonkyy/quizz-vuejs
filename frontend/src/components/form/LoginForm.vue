@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref } from 'vue';
 import Input from '@/components/ui/atoms/Input.vue';
 import Button from '@/components/ui/atoms/Button.vue';
 import Title from '@/components/ui/atoms/Title.vue';
 import Error from '@/components/ui/atoms/Error.vue';
 import { useAuthStore } from '@/store/auth';
-import TOTPLoginModal from '../ui/modals/TOTPLoginModal.vue';
+import TotpLoginModal from '../ui/modals/TotpLoginModal.vue';
 import type { AxiosError } from 'axios';
 
 const email = ref<string>('');
 const password = ref<string>('');
-const showTOTPModal = ref(false);
+const showTotpModal = ref(false);
 const tempToken = ref<string | null>(null);
 const formError = ref<string | null>(null);
 const isLoading = ref(false);
@@ -50,7 +50,7 @@ const handleLogin = async () => {
 
     if (result.code === 'TOTP_REQUIRED') {
       tempToken.value = result.tempToken ?? null;
-      showTOTPModal.value = true;
+      showTotpModal.value = true;
     }
   } catch (error) {
     formError.value = errorMessages.BAD_CREDENTIALS;
@@ -59,7 +59,7 @@ const handleLogin = async () => {
   }
 };
 
-const handleTOTPSubmit = async (code: string) => {
+const handleTotpSubmit = async (code: string) => {
   if (!tempToken.value) {
     return;
   }
@@ -94,6 +94,6 @@ const handleTOTPSubmit = async (code: string) => {
       </Error>
     </form>
 
-    <TOTPLoginModal v-model="showTOTPModal" @valid="handleTOTPSubmit" :error="formError" />
+    <TotpLoginModal v-model="showTotpModal" @valid="handleTotpSubmit" :error="formError" />
   </div>
 </template>

@@ -14,15 +14,15 @@ use Symfony\Component\Uid\UuidV7;
 use App\Controller\Api\User\MeReadController;
 use App\Controller\Api\User\MeUpdateController;
 use App\Controller\Api\User\RegisterController;
-use App\Controller\Api\User\MeGenerateTOTPSecret;
-use App\Controller\Api\User\VerifyTOTPCode;
+use App\Controller\Api\User\MeGenerateTotpSecret;
+use App\Controller\Api\User\VerifyTotpCode;
 use App\Repository\UserRepository;
 use SpecShaper\EncryptBundle\Annotations\Encrypted;
 
 #[ApiResource(
     operations: [
         new Get(
-            uriTemplate: '/user/info',
+            uriTemplate: '/user',
             input: false,
             controller: MeReadController::class,
             read: false,
@@ -113,14 +113,14 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
             ]
         ),
         new Put(
-            uriTemplate: '/user/username',
+            uriTemplate: '/user',
             input: false,
             controller: MeUpdateController::class,
             read: false,
             name: 'api_update_user',
             openapiContext: [
                 'summary' => 'Update current user',
-                'description' => 'Updates the authenticated user.',
+                'description' => 'Updates the authenticated user and refreshes his cookies.',
                 'requestBody' => [
                     'content' => [
                         'application/json' => [
@@ -128,6 +128,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                 'type' => 'object',
                                 'properties' => [
                                     'newUsername' => ['type' => 'string'],
+                                    'clearTotpSecret' => ['type' => 'boolean']
                                 ]
                             ]
                         ]
@@ -170,12 +171,12 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
             ]
         ),
         new Get(
-            uriTemplate: '/user/TOTP/secret',
-            controller: MeGenerateTOTPSecret::class,
+            uriTemplate: '/user/totp/secret',
+            controller: MeGenerateTotpSecret::class,
             read: false,
             name: 'api_user_totp_secret_generate',
             openapiContext: [
-                'summary' => 'Generate TOTP secret for the current user',
+                'summary' => 'Generate TOTP secret for the current user and refreshes his cookies',
                 'description' => 'Generates a TOTP secret for the current authenticated user.',
                 'responses' => [
                     '200' => [
@@ -186,7 +187,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                     'type' => 'object',
                                     'properties' => [
                                         'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'TOTPSecret' => ['type' => 'string'],
+                                        'totpSecret' => ['type' => 'string'],
                                     ]
                                 ]
                             ]
@@ -214,7 +215,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
         ),
         new Post(
             uriTemplate: '/login-verify',
-            controller: VerifyTOTPCode::class,
+            controller: VerifyTotpCode::class,
             read: false,
             name: 'api_user_totp_verify',
             openapiContext: [
@@ -307,7 +308,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Encrypted]
     #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $TOTPSecret = null;
+    private ?string $totpSecret = null;
 
     public function __construct()
     {
@@ -385,14 +386,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function getTOTPSecret(): ?string
+    public function getTotpSecret(): ?string
     {
-        return $this->TOTPSecret;
+        return $this->totpSecret;
     }
 
-    public function setTOTPSecret(?string $TOTPSecret): self
+    public function setTotpSecret(?string $totpSecret): self
     {
-        $this->TOTPSecret = $TOTPSecret;
+        $this->totpSecret = $totpSecret;
         return $this;
     }
 }

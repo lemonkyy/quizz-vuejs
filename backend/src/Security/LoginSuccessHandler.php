@@ -37,7 +37,7 @@ class LoginSuccessHandler implements AuthenticationSuccessHandlerInterface
             return new JsonResponse(['message' => 'Invalid user'], 401);
         }
 
-        if ($user->getTOTPSecret()) {
+        if ($user->getTotpSecret()) {
             //user has TOTP enabled: generate a temporary token for TOTP verification
             $tempToken = $this->generateTempToken($user);
 

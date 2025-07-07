@@ -25,11 +25,12 @@ function close() {
   emit('update:modelValue', false);
 }
 
-function onBackdropClick(event: MouseEvent) {
+function onBackdropClick() {
   if (!props.staticBackdrop) {
     close();
   }
 }
+
 </script>
 
 <template>
@@ -39,10 +40,10 @@ function onBackdropClick(event: MouseEvent) {
     @click.self="onBackdropClick"
   >
     <div class="relative p-4 w-full max-w-2xl max-h-full">
-      <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+      <div class="relative bg-white rounded-lg shadow-sm">
 
         <div
-          class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200"
+          class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-200"
         >
           <Title :level=3 v-if="$slots.header">
             <slot name="header" />
@@ -72,13 +73,13 @@ function onBackdropClick(event: MouseEvent) {
           </Button>
         </div>
 
-        <div class="p-4 md:p-5 space-y-4 text-gray-500 dark:text-gray-400">
+        <div class="p-4 md:p-5 space-y-4 text-gray-500">
           <slot />
         </div>
 
         <div
           v-if="$slots.footer"
-          class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600"
+          class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b"
         >
           <slot name="footer" />
         </div>

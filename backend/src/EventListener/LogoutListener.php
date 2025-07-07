@@ -28,7 +28,6 @@ class LogoutListener
         $this->sameSite = $params->get('jwt_cookie_same_site');
     }
 
-
     public function __invoke(LogoutEvent $logoutEvent): void
     {
         $response = new JsonResponse(['message' => 'Logged out successfully']);

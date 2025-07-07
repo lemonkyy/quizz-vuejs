@@ -36,9 +36,18 @@ export async function loginVerify(params: {totpCode: string, tempToken: string})
   }
 }
 
-export async function generateTotpSecret(): Promise<{code: string, TOTPSecret?: string, error?: string}> {
+export async function generateTotpSecret(): Promise<{code: string, totpSecret?: string, error?: string}> {
   try {
-    const response = await axios.get('/user/TOTP/secret', {withCredentials: true});
+    const response = await axios.get('/user/totp/secret', {withCredentials: true});
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateUser(params: {newUsername?: string, clearTotpSecret?: boolean}): Promise<{code: string, message?: string, error?: string}> {
+  try {
+    const response = await axios.put('/user', params, {withCredentials: true});
     return response.data;
   } catch (error) {
     throw error;

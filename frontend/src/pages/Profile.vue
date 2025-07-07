@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useAuthStore } from '@/store/auth';
 import Button from '@/components/ui/atoms/Button.vue';
-import TOTPShowSecretModal from '@/components/ui/modals/TOTPShowSecretModal.vue';
+import TotpShowSecretModal from '@/components/ui/modals/TotpShowSecretModal.vue';
 
 const auth = useAuthStore();
 
@@ -10,20 +10,39 @@ const username = computed(() => auth.user?.username || 'N/A');
 const email = computed(() => auth.user?.email || 'N/A');
 const isLoading = ref(false);
 
-const showTOTPModal = ref(false);
+const showTotpModal = ref(false);
 const totpSecret = ref<string | null>(null);
 
 const fetchTotpSecret = async () => {
   try {
     isLoading.value = true;
     const response = await auth.generateTotpSecret();
-    totpSecret.value = response.TOTPSecret ?? "";
-    showTOTPModal.value = true;
+    totpSecret.value = response.totpSecret ?? "";
+    showTotpModal.value = true;
   } catch (error) {
   } finally {
     isLoading.value = false;
   }
 };
+
+const clearTotpSecret = async () => {
+  try {
+    isLoading.value = true;
+    await auth.clearTotpSecret();
+  } catch (error) {
+  } finally {
+    isLoading.value = false
+  }
+}
+
+//if user has totp -> button to turn it off, if user doesn't have it -> button to turn it on
+const totpToggle = async () => {
+  if (auth.user?.hasTotp) {
+    clearTotpSecret();
+  } else {
+    fetchTotpSecret();
+  }
+}
 </script>
 
 <template>
@@ -33,9 +52,12 @@ const fetchTotpSecret = async () => {
       <p class="text-lg mb-2"><strong class="font-semibold">Username:</strong> {{ username }}</p>
       <p class="text-lg"><strong class="font-semibold">Email:</strong> {{ email }}</p>
 
-      <Button @click="fetchTotpSecret" :loading="isLoading" :disabled="isLoading">Ajouter le TOTP à votre compte.</Button>
+      <Button @click="totpToggle" :loading="isLoading" :disabled="isLoading">
+        <span v-if="auth.user?.hasTotp">Désactiver le TOTP</span>
+        <span v-else>Ajouter le TOTP</span>
+      </Button>
     </div>
 
-    <TOTPShowSecretModal v-if="totpSecret" v-model="showTOTPModal" :totpSecret="totpSecret" />
+    <TotpShowSecretModal v-if="totpSecret" v-model="showTotpModal" :totpSecret="totpSecret" />
   </div>
 </template>
