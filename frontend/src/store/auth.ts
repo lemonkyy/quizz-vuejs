@@ -43,10 +43,12 @@ export const useAuthStore = defineStore("auth",  () => {
   };
   onMounted(initUserFromCookie);
 
-  const register = async (email: string, password: string, username?: string) => {
+  const register = async (email: string, password: string, tosAgreedTo: boolean, username?: string) => {
     try {
-        await registerService({ email, password, username });
+        await registerService({ email, password, tosAgreedTo, username });
         toast.success('Compte enregistré !');
+        router.push('/');
+        return { code: 'SUCCESS' };
       } catch (error) {
         throw error;
       }

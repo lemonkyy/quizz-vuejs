@@ -6,6 +6,7 @@ import Title from '@/components/ui/atoms/Title.vue';
 import Error from '@/components/ui/atoms/Error.vue';
 import { useAuthStore } from '@/store/auth';
 import { AxiosError } from 'axios';
+import Checkbox from '../ui/atoms/Checkbox.vue';
 
 const email = ref<string>('');
 const password = ref<string>('');
@@ -13,6 +14,7 @@ const username = ref<string>('');
 const confirmPassword = ref<string>('');
 const formError = ref<string | null>(null);
 const isLoading = ref(false);
+const tosAgreedTo = ref(false);
 
 const { register } = useAuthStore();
 
@@ -30,6 +32,7 @@ const errorMessages: { [key: string]: string } = {
   'ERR_USERNAME_TAKEN': 'Ce pseudonyme est déjà utilisé.',
   'ERR_PASSWORD_MISMATCH': 'Les mots de passe ne correspondent pas.',
   'ERR_PASSWORD_WEAK': 'Le mot de passe est trop faible. Il doit contenir au moins 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.',
+  'ERR_TOS_REFUSED' : 'Veuillez accepter les termes de service.'
 };
 
 const validatePasswordComplexity = (pwd: string): boolean => {
@@ -78,8 +81,14 @@ const handleRegister = async () => {
     return;
   }
 
+  if (!tosAgreedTo.value) {
+    formError.value = errorMessages.ERR_TOS_REFUSED;
+    isLoading.value = false;
+    return;
+  }
+
   try {
-    await register(email.value, password.value, username.value);
+    await register(email.value, password.value, tosAgreedTo.value, username.value);
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.code) {
       formError.value = errorMessages[error.response.data.code] || defaultErrorMessage;
@@ -94,36 +103,22 @@ const handleRegister = async () => {
 
 <template>
     <div>
-        <Title :level="1"> Créer un compte </Title>
-        <form @submit.prevent="handleRegister" class="flex flex-col gap-5 mt-5 w-md">
-        <Input
-            v-model="email"
-            type="text"
-            placeholder="Adresse e-mail"
-        />
-        <Input
-            v-model="username"
-            type="text"
-            placeholder="Pseudonyme"
-        />
-        <Input
-            v-model="password"
-            type="password"
-            placeholder="Mot de passe"
-        />
-        <Input
-            v-model="confirmPassword"
-            type="password"
-            placeholder="Confirmation du mot de passe"
-        />
+        <Title :level="1" center> Create your account </Title>
+        <form @submit.prevent="handleRegister" class="flex flex-col gap-7 mt-5 w-full sm:w-xl">
+          <Input id="email-register" theme="secondary" v-model="email" type="text" placeholder="Email" className="mx-4" without-border/>
+          <Input id="username-register" theme="secondary" v-model="username" type="text" placeholder="Username" className="mx-4" without-border/>
+          <Input id="password-register" theme="secondary" v-model="password" type="password" placeholder="Password" className="mx-4" without-border/>
+          <Input id="password-verify-register" theme="secondary" v-model="confirmPassword" type="password"placeholder="Password Confirmation" className="mx-4" without-border/>
+          <Checkbox id="tos-register" theme="secondary" label="I agree to the Terms of Service" v-model="tosAgreedTo" />
 
-        <Error v-if="formError">
-            <p>{{ formError }}</p>
-        </Error>
-
-        <Button type="submit" className="w-full" :loading="isLoading" :disabled="isFormDisabled">
-            Créer un compte
-        </Button>
+          <Error v-if="formError" className="mx-4">
+              <p>{{ formError }}</p>
+          </Error>
+          
+          <Button theme="secondary" type="submit" className="w-full" :loading="isLoading" :disabled="isFormDisabled">
+            Sign up
+          </Button>
+          <Button transparent theme="primary"><router-link to="/login">Already have an account? Sign in</router-link></Button>
         </form>
     </div>
 </template>

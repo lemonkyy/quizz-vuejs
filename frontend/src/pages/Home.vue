@@ -1,8 +1,13 @@
 <script setup lang="ts">
+import CreateRoom from '@/components/home/CreateRoom.vue';
+import FeaturedQuizzes from '@/components/home/FeaturedQuizzes.vue';
+import JoinRoom from '@/components/home/JoinRoom.vue';
 </script>
 
 <template>
-  <div class="bg-gray-100">
-    <h1 class="text-4xl font-bold text-gray-800">Welcome to the Quiz App</h1>
+  <div class="flex flex-col gap-12 my-12">
+    <FeaturedQuizzes />
+    <JoinRoom />
+    <CreateRoom />
   </div>
 </template>

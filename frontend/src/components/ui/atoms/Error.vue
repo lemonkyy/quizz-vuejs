@@ -1,8 +1,11 @@
 <script setup lang="ts">
+defineProps({
+  className: {type: String, default: ''}
+})
 </script>
 
 <template>
-  <div class="rounded-md bg-red-50 p-4 my-4">
+  <div :class="['rounded-md bg-red-50 p-4 my-4', className]">
     <div class="flex">
       <div class="flex-shrink-0">
         <svg class="h-5 w-5 text-red-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">

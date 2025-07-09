@@ -72,10 +72,12 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                 'type' => 'object',
                                 'properties' => [
                                     'email' => ['type' => 'string'],
+                                    'username' => ['type' => 'string'],
                                     'password' => ['type' => 'string'],
-                                    'passwordConfirmation' => ['type' => 'string']
+                                    'passwordConfirmation' => ['type' => 'string'],
+                                    'tosAgreedTo' => ['type' => 'boolean']
                                 ],
-                                'required' => ['email', 'password']
+                                'required' => ['email', 'password', 'tosAgreedTo']
                             ]
                         ]
                     ]
@@ -102,7 +104,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['MISSING_CREDENTIALS', 'INVALID_EMAIL', 'EMAIL_ALREADY_IN_USE', 'USERNAME_VALIDATION_FAILED', 'USERNAME_GENERATION_FAILED', 'ERR_PASSWORD_WEAK']],
+                                        'code' => ['type' => 'string', 'enum' => ['MISSING_CREDENTIALS', 'INVALID_EMAIL', 'EMAIL_ALREADY_IN_USE', 'USERNAME_VALIDATION_FAILED', 'USERNAME_GENERATION_FAILED', 'ERR_PASSWORD_WEAK', 'ERR_TOS_REFUSED']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]

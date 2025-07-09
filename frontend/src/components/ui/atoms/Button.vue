@@ -2,7 +2,7 @@
 import { computed, type PropType } from 'vue';
 
 type ButtonType = 'button' | 'submit' | 'reset';
-type ButtonStyle = 'primary' | 'secondary';
+type ButtonStyle = 'primary' | 'secondary' | 'monochrome';
 type ButtonRadius = 'sm' | 'md' | 'lg';
 
 const props = defineProps({
@@ -15,23 +15,22 @@ const props = defineProps({
   className: { type: String, default: '' },
 });
 
+const emit = defineEmits(['click']);
+
 const buttonClasses = computed(() => {
-  let classes: string[] = ['flex items-center justify-center px-custom-x py-custom-y font-semibold transition-colors duration-200'];
+  let classes: string[] = ['font-semibold transition-colors duration-200 h-auto'];
 
   if (props.theme === 'secondary') {
-    classes.push('bg-button-secondary text-button-secondary-text hover:bg-button-secondary-hover');
+    classes.push('bg-button-secondary text-button-secondary-text hover:bg-button-secondary-hover px-7 py-3');
+  }else if (props.theme === 'monochrome'){
+    classes.push('bg-button-monochrome text-button-monochrome-text hover:bg-button-monochrome-hover p-4');
   } else {
-    classes.push('bg-button-primary text-button-primary-text hover:bg-button-primary-hover');
+    classes.push('bg-button-primary text-button-primary-text hover:bg-button-primary-hover px-7 py-3');
   }
 
   if (props.transparent) {
     classes = classes.filter(c => !c.startsWith('bg-') && !c.startsWith('outline-') && !c.startsWith('text-'));
-    classes.push('bg-transparent');
-    if (props.theme === 'secondary') {
-      classes.push('text-button-secondary hover:underline hover:text-button-secondary-focus');
-    } else {
-      classes.push('text-button-primary hover:underline hover:text-button-primary-focus');
-    }
+    classes.push('bg-transparent text-button-transparent-text hover:underline hover:text-button-secondary-focus');
   }
 
   switch (props.rounded) {
@@ -50,7 +49,7 @@ const buttonClasses = computed(() => {
   }
   
   if (props.xl) {
-    classes.push('max-w-button-xl-width w-full')
+    classes.push('max-w-custom-xl w-full')
   }
 
   if (props.loading) {
@@ -71,6 +70,7 @@ const buttonClasses = computed(() => {
       className,
     ]"
     :disabled="loading"
+    @click="emit('click')"
   >
     <slot v-if="loading" name="loading">
       <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

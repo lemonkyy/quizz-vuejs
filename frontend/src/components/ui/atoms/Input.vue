@@ -12,6 +12,7 @@ const props = defineProps({
     label: { type: String, default: '' },
     theme: { type: String as PropType<InputStyle>, default: 'primary' },
     rounded: { type: String as PropType<ButtonRadius>, default: 'md' },
+    xl: {type: Boolean, default: false},
     type: { type: String, default: 'text' },
     placeholder: { type: String, default: '' },
     withoutBorder: { type: Boolean, default: false },
@@ -23,18 +24,24 @@ const props = defineProps({
 
 const labelClasses = computed(() => {
   if (props.theme === 'secondary') {
-    return 'text-alt';
+    return 'text-input-second-text';
   }
-  return 'text-highlight';
+  return 'text-input-primary-text';
 });
 
+const parentClasses = computed(() => {
+  if (props.xl || props.label === '') {
+    return 'w-full';
+  }
+})
+
 const inputClasses = computed(() => {
-  let classes: string[] = ['px-custom-x py-custom-y transition-colors duration-200 w-full border-none focus:ring-0'];
+  let classes: string[] = ['p-4 transition-colors duration-200 border-none focus:ring-0 text-lg'];
 
   if (props.theme === 'secondary') {
-    classes.push('text-input-secondary-text bg-input-secondary-background outline-input-secondary-outline focus:outline-secondary-outline-focus');
-  } else {
-    classes.push('text-input-primary-text bg-input-primary-background outline-input-primary-outline focus:outline-input-primary-outline-focus');
+    classes.push('text-input-secondary-text placeholder-input-secondary-placeholder bg-input-secondary-background outline-input-secondary-outline focus:outline-secondary-outline-focus');
+  }else{
+    classes.push('text-input-primary-text placeholder-input-primary-placeholder bg-input-primary-background outline-input-primary-outline focus:outline-input-primary-outline-focus');
   }
 
   switch (props.rounded) {
@@ -64,14 +71,17 @@ const inputClasses = computed(() => {
     classes.push('w-full');
   }
 
+  if (props.xl) {
+    classes.push('max-w-custom-xl w-full')
+  }
+
   return classes;
 });
 </script>
 
 <template>
-  <div class="flex flex-row items-center gap-2">
+  <div :class="['flex flex-row items-center gap-2', parentClasses]">
     <label v-if="label" :for="id" :class="labelClasses">{{ label }}</label>
-    <div class="relative w-full">
       <input
         :type="type"
         :id="id"
@@ -84,6 +94,5 @@ const inputClasses = computed(() => {
           className,
         ]"
       />
-    </div>
   </div>
 </template>

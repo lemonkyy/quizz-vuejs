@@ -18,7 +18,7 @@ export async function logout(): Promise<{code: string, message?: string, error?:
   }
 }
 
-export async function register(params: {email: string, password: string, username?: string}): Promise<{code: string, message?: string, error?: string}> {
+export async function register(params: {email: string, password: string, tosAgreedTo: boolean, username?: string}): Promise<{code: string, message?: string, error?: string}> {
   try {
     const response = await axios.post('/register', params);
     return response.data;

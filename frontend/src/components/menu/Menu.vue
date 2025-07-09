@@ -1,21 +1,27 @@
 <script setup lang="ts">
-import LogoutButton from '@/components/ui/buttons/LogoutButton.vue';
+import HelpButton from '../ui/buttons/HelpButton.vue';
 import { useAuthStore } from '@/store/auth';
-import { computed } from 'vue';
 import NotificationButton from '../ui/buttons/NotificationButton.vue';
+import UserIcon from '../user/UserIcon.vue';
+import MenuElement from './MenuElement.vue';
 
 const auth = useAuthStore();
-
-const username = computed(() => auth.user?.username || '');
+const userInGame = false; //temporary
 </script>
 
 <template>
-    <ul class="text-menu-text text-sm flex flex-row justify-around items-center gap-4 font-bold">
-        <li><router-link to="/">Home</router-link></li>
-        <li><router-link to="/login">Login</router-link></li>
-        <li><router-link to="/register">Register</router-link></li>
-        <ul v-if="auth.user" class="flex flex-row gap-2">
+    <ul class="flex flex-row justify-around items-center gap-12">
+        <ul class="flex flex-row justify-around items-center gap-12" v-if="!userInGame">
+            <MenuElement links-to="/">Home</MenuElement>
+            <MenuElement links-to="/create" v-if="auth.user">Create</MenuElement>
+            <MenuElement links-to="/join" v-if="auth.user">Join</MenuElement>
+            <MenuElement links-to="/register" v-if="!auth.user">Register</MenuElement>
+            <MenuElement links-to="/login" v-if="!auth.user">Login</MenuElement>
+        </ul>
+        <li v-else> <HelpButton /> </li>
+        <ul v-if="auth.user" class="flex flex-row items-center gap-6">
             <li> <NotificationButton /> </li>
+            <li> <UserIcon /> </li>
         </ul>
     </ul>
 </template>

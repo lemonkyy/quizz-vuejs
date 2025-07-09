@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import Button from '../atoms/Button.vue';
-import Notification from '@/assets/images/icons/notification.svg';
+import Help from '@/assets/images/icons/help.svg';
 import Image from '../atoms/Image.vue';
 
 </script>
@@ -8,8 +8,8 @@ import Image from '../atoms/Image.vue';
 <template>
   <Button
     type="button"
-    theme="monochrome"
+    theme="square"
   >
-    <Image :src="Notification" alt="notification" :size="1.3"/>
+    <Image :src="Help" alt="notification" :size="1.3"/>
   </Button>
 </template>
