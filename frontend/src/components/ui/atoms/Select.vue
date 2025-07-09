@@ -24,18 +24,18 @@ const props = defineProps({
 
 const labelClasses = computed(() => {
   if (props.theme === 'secondary') {
-    return 'text-alt';
+    return 'text-select-secondary-text';
   }
-  return 'text-highlight';
+  return 'text-select-primary-text';
 });
 
 const inputClasses = computed(() => {
   let classes = ['px-custom-x py-custom-y rounded-md transition-colors duration-200 cursor-pointer border-none'];
 
   if (props.theme === 'secondary') {
-    classes.push('text-alt bg-neutral outline-highlight focus:outline-primary');
+    classes.push('text-select-secondary-text bg-select-secondary-background outline-select-secondary-outline focus:outline-select-secondary-outline-focus');
   } else {
-    classes.push('text-highlight bg-white outline-secondary focus:outline-primary');
+    classes.push('text-select-primary-text bg-select-primary-background outline-select-primary-outline focus:outline-select-primary-outline-focus');
   }
 
   switch (props.rounded) {
