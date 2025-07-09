@@ -13,9 +13,9 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex flex-col min-h-screen">
+  <div class="flex flex-col min-h-screen bg-website-background">
     <Header />
-    <main class="flex-grow">
+    <main class="flex-grow px-12 md:px-64 h-full">
       <router-view />
     </main>
     <Footer />

@@ -7,11 +7,11 @@
 
     --color-white: #ffffff;
     --color-black: #1C170D;
-    --color-gray-1: #e5e7eb;
-    --color-gray-2: #9ca3af;
-    --color-gray-3: #6b7281;
-    --color-gray-4: #11182c;
-    --color-gray-5: #E5E8EB;
+    --color-grey-1: #e5e7eb;
+    --color-grey-2: #9ca3af;
+    --color-grey-3: #6b7281;
+    --color-grey-4: #11182c;
+    --color-grey-5: #E5E8EB;
 
     --color-yellow-1: #e7d4a0;
     --color-yellow-2: #F2C247;
@@ -19,8 +19,11 @@
     --color-light-yellow-1: #F2F0E8;
     --color-light-yellow-2: #F5F2F2;
     --color-light-yellow-3: #F2E8CC;
+    --color-light-yellow-4: #FCFAF7;
     --color-brown-1: #9C854A;
     --color-brown-2: #827A66;
+
+    --website-background: var(--color-light-yellow-4);
 
     --color-primary: var(--color-yellow-2);
     --color-primary-focus: var(--color-yellow-3);
@@ -41,14 +44,26 @@
     --color-button-secondary-hover: var(--color-yellow-1);
     --color-button-secondary-text: var(--color-black);
 
+    --color-button-monochrome: var(--color-light-yellow-1);
+    --color-button-monochrome-hover: var(--color-light-yellow-3);
+    --color-button-monochrome-text: var(--color-black);
+
+    --color-button-square: var(--color-light-yellow-1);
+    --color-button-square-hover: var(--color-yellow-2);
+    --color-button-square-text: var(--color-black);
+
+    --color-button-transparent-text: var(--color-brown-2);
+
     --color-input-primary-background: var(--color-white);
     --color-input-primary-outline: var(--color-light-yellow-3);
     --color-input-primary-outline-focus: var(--color-yellow-2);
-    --color-input-primary-text: var(--color-brown-2);
+    --color-input-primary-placeholder: var(--color-brown-2);
+    --color-input-primary-text: var(--color-black);
 
     --color-input-secondary-background: var(--color-light-yellow-2);
     --color-input-secondary-outline: var(--color-brown-1);
     --color-input-secondary-outline-focus: var(--color-yellow-2);
+    --color-input-primary-placeholder: var(--color-brown-2);
     --color-input-secondary-text: var(--color-black);
 
     --color-select-primary-background: var(--color-white);
@@ -63,11 +78,11 @@
 
     --color-modal-backdrop: rgba(0, 0, 0, 0.4);
     --color-modal-background: var(--color-white);
-    --color-modal-border: var(--color-gray-1);
-    --color-modal-close-button-text: var(--color-gray-2);
-    --color-modal-close-button-background-hover: var(--color-gray-1);
-    --color-modal-close-button-text-hover: var(--color-gray-4);
-    --color-modal-content-text: var(--color-gray-3);
+    --color-modal-border: var(--color-grey-1);
+    --color-modal-close-button-text: var(--color-grey-2);
+    --color-modal-close-button-background-hover: var(--color-grey-1);
+    --color-modal-close-button-text-hover: var(--color-grey-4);
+    --color-modal-content-text: var(--color-grey-3);
 
     --color-checkbox-border: var(--color-yellow-1);
     --color-checkbox-tick: var(--color-primary);
@@ -76,17 +91,14 @@
     --color-checkbox-label: var(--color-black);
 
     --color-menu-background: var(--color-white);
-    --color-menu-border: var(--color-gray-5);
+    --color-menu-border: var(--color-grey-5);
     --color-menu-text: var(--color-black);
 
     --radius-custom-sm: 8px;
     --radius-custom-md: 12px;
     --radius-custom-lg: 20px;
 
-    --spacing-custom-x: 16px;
-    --spacing-custom-y: 10px;
-
-    --spacing-button-xl-width: 480px;
+    --spacing-custom-xl: 480px;
 }
 
 @layer base{

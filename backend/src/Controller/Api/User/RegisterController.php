@@ -22,6 +22,10 @@ class RegisterController extends AbstractController
             return new JsonResponse(['code' => 'ERR_MISSING_CREDENTIALS', 'error' => 'Missing email or password'], 400);
         }
 
+        if (!$data['tosAgreedTo']) {
+            return new JsonResponse(['code' => 'ERR_TOS_REFUSED', 'error' => 'TOS not agreed to'], 400);
+        }
+
         $passwordValidation = $validatePasswordService->validate($data['password']);
         if ($passwordValidation) {
             return new JsonResponse($passwordValidation, 400);

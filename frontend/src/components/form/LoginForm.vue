@@ -80,14 +80,15 @@ const handleTotpSubmit = async (code: string) => {
 
 <template>
   <div>
-    <Title :level="1">Se connecter</Title>
-    <form @submit.prevent="handleLogin" class="flex flex-col gap-5 mt-5 w-md">
-      <Input v-model="email" type="text" placeholder="Adresse e-mail" />
-      <Input v-model="password" type="password" placeholder="Mot de passe" />
+    <Title :level="1" center>Welcome Back</Title>
+    <form @submit.prevent="handleLogin" class="flex flex-col gap-7 mt-5 w-full sm:w-xl">
+      <Input id="username-login" v-model="email" type="text" placeholder="Email" className="mx-4" theme="secondary" without-border />
+      <Input id="password-ligin" v-model="password" type="password" placeholder="Password" className="mx-4" theme="secondary" without-border />
 
-      <Button type="submit" className="w-full" :loading="isLoading" :disabled="isLoading">
-        Connexion
+      <Button theme="secondary" type="submit" className="w-full" :loading="isLoading" :disabled="isLoading">
+        Log In
       </Button>
+      <Button transparent theme="primary"><router-link to="/register">Don't have an account? Sign up</router-link></Button>
 
       <Error v-if="formError">
         <p>{{ formError }}</p>

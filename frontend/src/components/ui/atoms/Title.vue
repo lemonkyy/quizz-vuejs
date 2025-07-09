@@ -4,6 +4,7 @@ import { computed } from 'vue';
 const props = defineProps({
     level: { type: Number, default: 1 },
     className: { type: String, default: '' },
+    center: { type: Boolean, default: false}
 });
 
 const tag = computed(() => `h${props.level}`);
@@ -26,6 +27,10 @@ const titleClasses = computed(() => {
     default:
       classes.push('text-lg');
       break;
+  }
+
+  if (props.center){
+    classes.push('text-center');
   }
 
   return classes;

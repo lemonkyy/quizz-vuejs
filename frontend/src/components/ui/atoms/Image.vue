@@ -32,7 +32,7 @@ const imageClasses = computed(() => {
   }
 
   if (!props.size) {
-    classes.push('w-full');
+    classes.push('w-auto');
   }
 
   return classes;
