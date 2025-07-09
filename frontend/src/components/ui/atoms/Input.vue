@@ -29,12 +29,12 @@ const labelClasses = computed(() => {
 });
 
 const inputClasses = computed(() => {
-  let classes: string[] = ['px-custom-x py-custom-y transition-colors duration-200 w-full border-none'];
+  let classes: string[] = ['px-custom-x py-custom-y transition-colors duration-200 w-full border-none focus:ring-0'];
 
   if (props.theme === 'secondary') {
-    classes.push('text-alt bg-neutral outline-highlight focus:outline-primary');
+    classes.push('text-input-secondary-text bg-input-secondary-background outline-input-secondary-outline focus:outline-secondary-outline-focus');
   } else {
-    classes.push('text-highlight bg-white outline-secondary focus:outline-primary');
+    classes.push('text-input-primary-text bg-input-primary-background outline-input-primary-outline focus:outline-input-primary-outline-focus');
   }
 
   switch (props.rounded) {

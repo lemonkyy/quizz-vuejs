@@ -5,33 +5,32 @@ type ButtonType = 'button' | 'submit' | 'reset';
 type ButtonStyle = 'primary' | 'secondary';
 type ButtonRadius = 'sm' | 'md' | 'lg';
 
-
 const props = defineProps({
   theme: { type: String as PropType<ButtonStyle>, default: 'primary' },
   rounded: { type: String as PropType<ButtonRadius>, default: 'md' },
   xl: {type: Boolean, default: false},
   type: { type: String as PropType<ButtonType>, default: 'button' },
   transparent: { type: Boolean, default: false },
-  className: { type: String, default: '' },
   loading: { type: Boolean, default: false },
+  className: { type: String, default: '' },
 });
 
 const buttonClasses = computed(() => {
   let classes: string[] = ['flex items-center justify-center px-custom-x py-custom-y font-semibold transition-colors duration-200'];
 
   if (props.theme === 'secondary') {
-    classes.push('bg-secondary text-black hover:bg-secondary-focus');
+    classes.push('bg-button-secondary text-button-secondary-text hover:bg-button-secondary-hover');
   } else {
-    classes.push('bg-primary text-black hover:bg-primary-focus');
+    classes.push('bg-button-primary text-button-primary-text hover:bg-button-primary-hover');
   }
 
   if (props.transparent) {
     classes = classes.filter(c => !c.startsWith('bg-') && !c.startsWith('outline-') && !c.startsWith('text-'));
     classes.push('bg-transparent');
     if (props.theme === 'secondary') {
-      classes.push('text-secondary hover:underline hover:text-secondary-focus');
+      classes.push('text-button-secondary hover:underline hover:text-button-secondary-focus');
     } else {
-      classes.push('text-primary hover:underline hover:text-primary-focus');
+      classes.push('text-button-primary hover:underline hover:text-button-primary-focus');
     }
   }
 
@@ -55,7 +54,7 @@ const buttonClasses = computed(() => {
   }
 
   if (props.loading) {
-    classes.push('cursor-not-allowed bg-alt ');
+    classes.push('cursor-not-allowed bg-button-loading');
   } else {
     classes.push('cursor-pointer')
   }

@@ -36,14 +36,14 @@ function onBackdropClick() {
 <template>
   <div
     v-if="visible"
-    class="fixed inset-0 z-50 flex justify-center items-center overflow-auto bg-black/40"
+    class="fixed inset-0 z-50 flex justify-center items-center overflow-auto bg-modal-backdrop"
     @click.self="onBackdropClick"
   >
     <div class="relative p-4 w-full max-w-2xl max-h-full">
-      <div class="relative bg-white rounded-lg shadow-sm">
+      <div class="relative bg-modal-background rounded-lg shadow-sm">
 
         <div
-          class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-gray-200"
+          class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-modal-border"
         >
           <Title :level=3 v-if="$slots.header">
             <slot name="header" />
@@ -51,7 +51,7 @@ function onBackdropClick() {
           <Button
             withoutBorder
             transparent
-            class="text-gray-400 hover:bg-gray-200 hover:text-gray-900 h-10 cursor-pointer"
+            class="text-modal-close-button-text hover:bg-modal-close-button-background-hover hover:text-modal-close-button-text-hover h-10 cursor-pointer"
             @click="close"
             aria-label="Close modal"
           >
@@ -73,13 +73,13 @@ function onBackdropClick() {
           </Button>
         </div>
 
-        <div class="p-4 md:p-5 space-y-4 text-gray-500">
+        <div class="p-4 md:p-5 space-y-4 text-modal-content-text">
           <slot />
         </div>
 
         <div
           v-if="$slots.footer"
-          class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b"
+          class="flex items-center p-4 md:p-5 border-t border-modal-border rounded-b"
         >
           <slot name="footer" />
         </div>

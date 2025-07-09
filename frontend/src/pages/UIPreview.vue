@@ -3,7 +3,6 @@ import Button from '@/components/ui/atoms/Button.vue';
 import Input from '@/components/ui/atoms/Input.vue';
 import Select from '@/components/ui/atoms/Select.vue';
 import Checkbox from '@/components/ui/atoms/Checkbox.vue';
-import Radio from '@/components/ui/atoms/Radio.vue';
 import Title from '@/components/ui/atoms/Title.vue';
 import { ref } from 'vue';
 
@@ -11,6 +10,7 @@ const selectOptions = [
   { value: 'option1', text: 'Option 1' },
   { value: 'option2', text: 'Option 2' },
   { value: 'option3', text: 'Option 3' },
+  { value: 'option4', text: 'Option4' },
 ];
 
 let input1 = ref<string>('');
@@ -24,12 +24,7 @@ let select3 = ref<string>('');
 let checkbox1 = ref<boolean>(false);
 let checkbox2 = ref<boolean>(false);
 let checkbox3 = ref<boolean>(false);
-
-let radio = ref<string>('');
-
-function handleClick() {
-  console.log('Button clicked');
-}
+let checkbox4 = ref<boolean>(false);
 
 </script>
 
@@ -69,11 +64,7 @@ function handleClick() {
       <Checkbox id="checkbox1" label="primary checkbox" theme="primary" v-model="checkbox1" />
       <Checkbox id="checkbox2" label="" v-model="checkbox2" />
       <Checkbox id="checkbox3" label="primary checkbox" theme="secondary" v-model="checkbox3" checkboxLeft />
-    </div>
-    <div class="flex flex-col gap-8 flex-wrap">
-      <Radio id="radio1" label="option 1" theme="primary" v-model="radio" name="radio" value="a" />
-      <Radio id="radio2" label="option 2" v-model="radio" name="radio" value="b" />
-      <Radio id="radio3" label="option 3" theme="secondary" v-model="radio" radioLeft name="radio" value="c" />
+      <Checkbox id="checkbox4" label="primary checkbox" theme="secondary" v-model="checkbox4" round />
     </div>
   </div>
 </template>

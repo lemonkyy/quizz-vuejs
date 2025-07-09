@@ -1,12 +1,12 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import Menu from './Menu.vue';
+import Header from './Header.vue';
 import Footer from './Footer.vue';
 
 export default defineComponent({
   name: 'DefaultLayout',
   components: {
-    Menu,
+    Header,
     Footer,
   },
 });
@@ -14,8 +14,8 @@ export default defineComponent({
 
 <template>
   <div class="flex flex-col min-h-screen">
-    <Menu />
-    <main class="flex-grow font-lexend">
+    <Header />
+    <main class="flex-grow">
       <router-view />
     </main>
     <Footer />

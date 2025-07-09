@@ -33,6 +33,7 @@ function validateCode(code: string) {
     <!-- @vue-ignore -->
     <template #default>
       <Input
+        id="login-modal-input"
         type="text"
         inputmode="numeric"
         :maxlength=6
