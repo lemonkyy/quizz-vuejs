@@ -19,14 +19,14 @@ const { login, loginVerify } = useAuthStore();
 
 const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
 
-const defaultErrorMessage = 'Une erreur inattendue est survenue.';
+const defaultErrorMessage = 'An unexpected error occurred.';
 const errorMessages: { [key: string]: string } = {
-  'BAD_CREDENTIALS': 'Adresse e-mail ou mot de passe incorrect.',
+  'BAD_CREDENTIALS': 'Incorrect email or password.',
 
-  'ERR_MISSING_TOTP_CREDENTIALS': 'Le code de vérification est manquant. Veuillez réessayer.',
-  'ERR_INVALID_TEMP_TOKEN': 'Votre session a expiré. Veuillez vous reconnecter.',
-  'ERR_USER_NOT_FOUND': 'Une erreur est survenue. Utilisateur introuvable.',
-  'ERR_INVALID_TOTP_CODE': 'Le code de vérification est incorrect.',
+  'ERR_MISSING_TOTP_CREDENTIALS': 'Verification code is missing. Please try again.',
+  'ERR_INVALID_TEMP_TOKEN': 'Your session has expired. Please log in again.',
+  'ERR_USER_NOT_FOUND': 'An error occurred. User not found.',
+  'ERR_INVALID_TOTP_CODE': 'Incorrect verification code.',
 };
 
 const handleLogin = async () => {
@@ -34,13 +34,13 @@ const handleLogin = async () => {
   isLoading.value = true;
 
   if (!email.value || !password.value) {
-    formError.value = 'Veuillez remplir tous les champs.';
+    formError.value = 'Please fill in all fields.';
     isLoading.value = false;
     return;
   }
 
   if (!emailRegex.test(email.value)) {
-    formError.value = "Le format de l'adresse e-mail est invalide.";
+    formError.value = 'Invalid email format.';
     isLoading.value = false;
     return;
   }

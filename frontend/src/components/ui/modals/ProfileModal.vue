@@ -28,7 +28,7 @@ function showEditProfile() {
 </script>
 
 <template>
-  <Modal v-model="modelValue" :show-back-button="currentView !== 'menu'" @back="showMenu" modal-class-name="h-full sm:h-auto">
+  <Modal v-model="modelValue" :show-back-button="currentView !== 'menu'" @back="showMenu">
     <template #default>
       <div class="grid">
         <MenuBody
