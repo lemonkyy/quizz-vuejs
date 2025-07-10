@@ -7,8 +7,7 @@ const props = defineProps({
   src: {type: String, required: true},
   alt: {type: String, required: true},
   rounded: {type: String as PropType<ImageRadius>, default: 'none'},
-  size: {type: [Number] as PropType<number | null>, default: null},
-  className: { type: String, default: '' },
+  width: {type: [Number] as PropType<number | null>, default: null},
 });
 
 const imageClasses = computed(() => {
@@ -31,7 +30,7 @@ const imageClasses = computed(() => {
       classes.push('rounded-none');
   }
 
-  if (!props.size) {
+  if (!props.width) {
     classes.push('w-auto');
   }
 
@@ -40,5 +39,5 @@ const imageClasses = computed(() => {
 </script>
 
 <template>
-  <img :src="src" :alt="alt" :class="[imageClasses, className]" :style="size ? { width: `${size}rem` } : {}"/>
+  <img :src="src" :alt="alt" :class="imageClasses" :style="width ? { width: `${width}rem` } : {}"/>
 </template>

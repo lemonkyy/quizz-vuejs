@@ -85,7 +85,7 @@ const handleTotpSubmit = async (code: string) => {
       <Input id="username-login" v-model="email" type="text" placeholder="Email" className="mx-4" theme="secondary" without-border />
       <Input id="password-ligin" v-model="password" type="password" placeholder="Password" className="mx-4" theme="secondary" without-border />
 
-      <Button theme="secondary" type="submit" className="w-full" :loading="isLoading" :disabled="isLoading">
+      <Button theme="primary" type="submit" class="w-full" :loading="isLoading" :disabled="isLoading">
         Log In
       </Button>
       <Button transparent theme="primary"><router-link to="/register">Don't have an account? Sign up</router-link></Button>

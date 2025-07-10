@@ -12,18 +12,17 @@ const props = defineProps({
   type: { type: String as PropType<ButtonType>, default: 'button' },
   transparent: { type: Boolean, default: false },
   loading: { type: Boolean, default: false },
-  className: { type: String, default: '' },
 });
 
 const emit = defineEmits(['click']);
 
 const buttonClasses = computed(() => {
-  let classes: string[] = ['font-semibold transition-colors duration-200 h-auto'];
+  let classes: string[] = ['font-semibold transition-colors duration-200 h-auto flex flex-row justify-center items-center'];
 
   if (props.theme === 'secondary') {
     classes.push('bg-button-secondary text-button-secondary-text hover:bg-button-secondary-hover px-7 py-3');
   }else if (props.theme === 'monochrome'){
-    classes.push('bg-button-monochrome text-button-monochrome-text hover:bg-button-monochrome-hover p-4');
+    classes.push('bg-button-monochrome text-button-monochrome-text hover:bg-button-monochrome-hover p-3');
   } else {
     classes.push('bg-button-primary text-button-primary-text hover:bg-button-primary-hover px-7 py-3');
   }
@@ -65,10 +64,7 @@ const buttonClasses = computed(() => {
 <template>
   <button
     :type="type"
-    :class="[
-      buttonClasses,
-      className,
-    ]"
+    :class="buttonClasses"
     :disabled="loading"
     @click="emit('click')"
   >

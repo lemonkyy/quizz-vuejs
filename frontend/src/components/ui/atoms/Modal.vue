@@ -1,15 +1,20 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import Title from './Title.vue';
-import Button from './Button.vue';
+import CrossButton from '../buttons/CrossButton.vue';
 
 const modelValue = defineModel({required: true, default: false});
 
+import BackButton from '../buttons/BackButton.vue';
+
 const props = defineProps({
   staticBackdrop: {type: Boolean, default: false},
+  bodyClassName: {type: String, default: ''},
+  modalClassName: {type: String, default: ''},
+  showBackButton: {type: Boolean, default: false}
 });
 
-const emit = defineEmits(['update:modelValue']);
+const emit = defineEmits(['update:modelValue', 'back']);
 
 const visible = ref(modelValue.value);
 
@@ -36,44 +41,28 @@ function onBackdropClick() {
 <template>
   <div
     v-if="visible"
-    class="fixed inset-0 z-50 flex justify-center items-center overflow-auto bg-modal-backdrop"
+    class="fixed inset-0 z-50 flex justify-center items-center overflow-auto bg-modal-backdrop text-black"
     @click.self="onBackdropClick"
   >
-    <div class="relative p-4 w-full max-w-2xl max-h-full">
-      <div class="relative bg-modal-background rounded-lg shadow-sm">
-
+    <div :class="['relative p-4 w-full max-w-2xl max-h-full', modalClassName]">
+      <div class="relative bg-modal-background rounded-lg shadow-sm h-full">
+        <div v-if="showBackButton" class="absolute left-1 p-3">
+          <BackButton @click="emit('back')" />
+        </div>
+        <div v-if="!$slots.header" class="absolute right-1 p-3">
+          <CrossButton @click="close" />
+        </div>
         <div
-          class="flex items-center justify-between p-4 md:p-5 border-b rounded-t border-modal-border"
+          v-else
+          class="flex items-center justify-between p-4 border-b rounded-t border-modal-border "
         >
-          <Title :level=3 v-if="$slots.header">
+          <Title :level=3>
             <slot name="header" />
           </Title>
-          <Button
-            withoutBorder
-            transparent
-            class="text-modal-close-button-text hover:bg-modal-close-button-background-hover hover:text-modal-close-button-text-hover h-10 cursor-pointer"
-            @click="close"
-            aria-label="Close modal"
-          >
-            <svg
-              class="w-3 h-3"
-              aria-hidden="true"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 14 14"
-            >
-              <path
-                stroke="currentColor"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
-              />
-            </svg>
-          </Button>
+          <CrossButton @click="close" />
         </div>
 
-        <div class="p-4 md:p-5 space-y-4 text-modal-content-text">
+        <div :class="['p-4 md:p-5 space-y-4', bodyClassName]">
           <slot />
         </div>
 

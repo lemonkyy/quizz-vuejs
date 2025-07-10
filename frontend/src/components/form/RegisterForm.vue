@@ -111,11 +111,11 @@ const handleRegister = async () => {
           <Input id="password-verify-register" theme="secondary" v-model="confirmPassword" type="password"placeholder="Password Confirmation" className="mx-4" without-border/>
           <Checkbox id="tos-register" theme="secondary" label="I agree to the Terms of Service" v-model="tosAgreedTo" />
 
-          <Error v-if="formError" className="mx-4">
+          <Error v-if="formError" class="mx-4">
               <p>{{ formError }}</p>
           </Error>
           
-          <Button theme="secondary" type="submit" className="w-full" :loading="isLoading" :disabled="isFormDisabled">
+          <Button theme="primary" type="submit" class="w-full" :loading="isLoading" :disabled="isFormDisabled">
             Sign up
           </Button>
           <Button transparent theme="primary"><router-link to="/login">Already have an account? Sign in</router-link></Button>

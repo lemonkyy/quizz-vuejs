@@ -2,11 +2,15 @@
 import HelpButton from '../ui/buttons/HelpButton.vue';
 import { useAuthStore } from '@/store/auth';
 import NotificationButton from '../ui/buttons/NotificationButton.vue';
-import UserIcon from '../user/UserIcon.vue';
+import UserIcon from '../profile/UserIcon.vue';
 import MenuElement from './MenuElement.vue';
+import ProfileModal from '../ui/modals/ProfileModal.vue';
+import { ref } from 'vue';
 
 const auth = useAuthStore();
 const userInGame = false; //temporary
+const showProfileModal = ref(false);
+
 </script>
 
 <template>
@@ -21,7 +25,8 @@ const userInGame = false; //temporary
         <li v-else> <HelpButton /> </li>
         <ul v-if="auth.user" class="flex flex-row items-center gap-6">
             <li> <NotificationButton /> </li>
-            <li> <UserIcon /> </li>
+            <li> <UserIcon class="cursor-pointer" v-on:click="() => {showProfileModal = !showProfileModal}" /> </li>
         </ul>
     </ul>
+    <ProfileModal v-model="showProfileModal" no-header />
 </template>

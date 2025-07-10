@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import logo from '@/assets/images/icons/logo.svg';
-import Image from './atoms/Image.vue';
+import Image from '../ui/atoms/Image.vue';
 </script>
 
 <template>

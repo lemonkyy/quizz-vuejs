@@ -3,7 +3,6 @@ import { computed } from 'vue';
 
 const props = defineProps({
     level: { type: Number, default: 1 },
-    className: { type: String, default: '' },
     center: { type: Boolean, default: false}
 });
 
@@ -38,7 +37,7 @@ const titleClasses = computed(() => {
 </script>
 
 <template>
-  <component :is="tag" :class="[titleClasses, className]">
+  <component :is="tag" :class="titleClasses">
     <slot></slot>
   </component>
 </template>

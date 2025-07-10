@@ -23,7 +23,7 @@ const quizzes = [
 
 <template>
     <section>
-        <Title :level="1" class-name="mb-7">Featured Quizzes</Title>
+        <Title :level="1" class="mb-7">Featured Quizzes</Title>
         <div class="flex flex-row flex-wrap gap-3 items-center">
             <QuizCard 
                 v-for="(quiz, index) in quizzes" 

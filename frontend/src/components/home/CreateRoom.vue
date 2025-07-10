@@ -5,7 +5,7 @@ import Button from '../ui/atoms/Button.vue';
 
 <template>
     <section>
-        <Title :level="2" class-name="mb-7">Create Your Own</Title>
+        <Title :level="2" class="mb-7">Create Your Own</Title>
         <Button theme="monochrome" rounded="sm"><router-link to="/create-quiz">Create Quiz</router-link> </Button>
     </section>
 </template>
