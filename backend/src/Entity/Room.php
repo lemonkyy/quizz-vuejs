@@ -367,12 +367,7 @@ class Room
     #[Groups(['room:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $owner = null;
-
-    #[Groups(['room:read'])]
-    #[ORM\ManyToMany(targetEntity: User::class)]
-    #[ORM\JoinTable(name: 'room_users')]
-    private Collection $users;
+    private ?User $owner = null;    
 
     #[Groups(['room:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
@@ -386,18 +381,19 @@ class Room
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
-    #[ORM\OneToOne(mappedBy: 'room', cascade: ['persist', 'remove'])]
-    private ?RoomPlayer $roomPlayer = null;
-
     #[Groups(["room:read"])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private ?string $code = null;
 
+    #[Groups(['room:read'])]
+    #[ORM\OneToMany(mappedBy: 'room', targetEntity: RoomPlayer::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
+    private Collection $roomPlayers;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
-        $this->users = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->roomPlayers = new ArrayCollection();
     }
 
     public function getId(): ?UuidV7
@@ -416,24 +412,7 @@ class Room
         return $this;
     }
 
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-        }
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        $this->users->removeElement($user);
-        return $this;
-    }
+    
 
     public function getCreatedAt(): \DateTimeImmutable
     {
@@ -468,23 +447,6 @@ class Room
         return $this;
     }
 
-    public function getRoomPlayer(): ?RoomPlayer
-    {
-        return $this->roomPlayer;
-    }
-
-    public function setRoomPlayer(RoomPlayer $roomPlayer): static
-    {
-        // set the owning side of the relation if necessary
-        if ($roomPlayer->getRoom() !== $this) {
-            $roomPlayer->setRoom($this);
-        }
-
-        $this->roomPlayer = $roomPlayer;
-
-        return $this;
-    }
-
     public function getCode(): ?string
     {
         return $this->code;
@@ -493,6 +455,36 @@ class Room
     public function setCode(string $code): self
     {
         $this->code = $code;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RoomPlayer>|\RoomPlayer[]
+     */
+    public function getRoomPlayers(): Collection
+    {
+        return $this->roomPlayers;
+    }
+
+    public function addRoomPlayer(RoomPlayer $roomPlayer): self
+    {
+        if (!$this->roomPlayers->contains($roomPlayer)) {
+            $this->roomPlayers->add($roomPlayer);
+            $roomPlayer->setRoom($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoomPlayer(RoomPlayer $roomPlayer): self
+    {
+        if ($this->roomPlayers->removeElement($roomPlayer)) {
+            // set the owning side to null (unless already changed)
+            if ($roomPlayer->getRoom() === $this) {
+                $roomPlayer->setRoom(null);
+            }
+        }
+
         return $this;
     }
 }

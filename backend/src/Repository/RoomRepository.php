@@ -25,27 +25,15 @@ class RoomRepository extends ServiceEntityRepository
     public function findActiveRoomForUser(User $user): ?Room
     {
         $result = $this->createQueryBuilder('r')
-        ->join('r.users', 'u')
-        ->where('u = :user')
-        ->andWhere('r.deletedAt IS NULL')
-        ->setParameter('user', $user)
-        ->getQuery()
-        ->getResult();
-
-        return $result[0] ?? null;
-    }
-
-    /**
-     * @return Room[]
-     */
-    public function findAllRoomsForUser(User $user): array
-    {
-        return $this->createQueryBuilder('r')
-            ->join('r.users', 'u')
+            ->join('r.roomPlayers', 'rp')
+            ->join('rp.user', 'u')
             ->where('u = :user')
+            ->andWhere('r.deletedAt IS NULL')
             ->setParameter('user', $user)
             ->getQuery()
             ->getResult();
+
+        return $result[0] ?? null;
     }
 
     /**
@@ -56,9 +44,9 @@ class RoomRepository extends ServiceEntityRepository
         $maxUsers = $this->maxRoomUsers;
         
         return $this->createQueryBuilder('r')
-            ->leftJoin('r.users', 'u')
-            ->where('r.isPublic = true')
-            ->groupBy('r.id')
+            ->leftJoin('r.roomPlayers', 'rp')
+            ->where('rp.isPublic = true')
+            ->groupBy('rp.id')
             ->having('COUNT(u) < :max')
             ->setParameter('max', $maxUsers)
             ->getQuery()
@@ -70,14 +58,12 @@ class RoomRepository extends ServiceEntityRepository
      */
     public function findRoomByUserId(string $userId): ?Room
     {
-        $result = $this->createQueryBuilder('r')
-            ->join('r.users', 'u')
-            ->where('u.id = :userId')
+        return $this->createQueryBuilder('r')
+            ->join('r.roomPlayers', 'rp')
+            ->where('rp.user = :userId')
             ->andWhere('r.deletedAt IS NULL')
             ->setParameter('userId', $userId)
             ->getQuery()
-            ->getResult();
-
-        return $result[0] ?? null;
+            ->getOneOrNullResult();
     }
 }

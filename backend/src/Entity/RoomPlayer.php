@@ -15,20 +15,19 @@ class RoomPlayer
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'roomPlayers')]
-    #[ORM\JoinColumn(nullable: false)]
+    #[ORM\OneToOne(mappedBy: 'roomPlayer', targetEntity: User::class)]
     private ?User $player = null;
 
-    #[ORM\OneToOne(inversedBy: 'roomPlayer', cascade: ['persist', 'remove'])]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Room $room = null;
-
-    #[ORM\Column(nullable: true)]
+    #[ORM\Column()]
     private ?int $score = null;
 
-    public function getId(): ?int
+    #[ORM\ManyToOne(inversedBy: 'roomPlayers')]
+    #[ORM\JoinColumn(nullable: true)]
+    private ?Room $room = null;
+
+    public function __construct()
     {
-        return $this->id;
+        $this->id = UuidV7::v7();
     }
 
     public function getPlayer(): ?User
@@ -43,18 +42,6 @@ class RoomPlayer
         return $this;
     }
 
-    public function getRoom(): ?Room
-    {
-        return $this->room;
-    }
-
-    public function setRoom(Room $room): static
-    {
-        $this->room = $room;
-
-        return $this;
-    }
-
     public function getScore(): ?int
     {
         return $this->score;
@@ -63,6 +50,23 @@ class RoomPlayer
     public function setScore(?int $score): static
     {
         $this->score = $score;
+
+        return $this;
+    }
+
+    public function getId(): ?UuidV7
+    {
+        return $this->id;
+    }
+
+    public function getRoom(): ?Room
+    {
+        return $this->room;
+    }
+
+    public function setRoom(?Room $room): static
+    {
+        $this->room = $room;
 
         return $this;
     }

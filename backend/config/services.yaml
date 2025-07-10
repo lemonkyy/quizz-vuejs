@@ -17,6 +17,8 @@ parameters:
     jwt_cookie_http_only_s: true
     jwt_cookie_same_site: 'strict'
 
+    profile_picture_path: '/images/profilePictures/'
+
 services:
     # default configuration for services in *this* file
     _defaults:

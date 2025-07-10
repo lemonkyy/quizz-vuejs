@@ -3,6 +3,7 @@
 namespace App\Controller\Api\User;
 
 use App\Entity\User;
+use App\Entity\ProfilePicture;
 use App\Service\JWTCookieService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -29,6 +30,22 @@ class MeUpdateController extends AbstractController
             }
 
             $user->setUsername($data['newUsername']);
+        }
+
+        if (isset($data['newProfilePictureId'])) {
+
+            if (empty($data['newProfilePictureId'])) {
+                return new JsonResponse(['code' => "ERR_NULL_PROFILE_PICTURE", 'error' => "User's profile picture cannot be set to null."], 400);
+            }
+
+            $profilePictureRepository = $entityManager->getRepository(ProfilePicture::class);
+            $profilePicture = $profilePictureRepository->find($data['newProfilePictureId']);
+
+            if (!$profilePicture) {
+                return new JsonResponse(['code' => 'ERR_PROFILE_PICTURE_NOT_FOUND', 'error' => 'Profile picture not found.'], 400);
+            }
+
+            $user->setProfilePicture($profilePicture);
         }
 
         if (!empty($data['clearTotpSecret'])) {
