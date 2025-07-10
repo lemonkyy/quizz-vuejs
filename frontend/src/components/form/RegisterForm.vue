@@ -20,19 +20,19 @@ const { register } = useAuthStore();
 
 const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
 
-const defaultErrorMessage = 'Une erreur inattendue est survenue.';
+const defaultErrorMessage = 'An unexpected error occurred.';
 const errorMessages: { [key: string]: string } = {
-  'ERR_MISSING_CREDENTIALS': 'Veuillez remplir tous les champs.',
-  'ERR_INVALID_EMAIL': "Le format de l'adresse e-mail est invalide.",
-  'ERR_EMAIL_ALREADY_IN_USE': 'Cette adresse e-mail est déjà utilisée.',
-  'ERR_USERNAME_VALIDATION_FAILED': 'Le pseudonyme est invalide.',
-  'ERR_USERNAME_CONTAINS_SPACES': 'Le pseudonyme ne doit pas contenir d\'espaces.',
-  'ERR_USERNAME_LENGTH': 'Le pseudonyme doit contenir entre 1 et 255 caractères.', // Assuming default min/max from backend
-  'ERR_USERNAME_INAPPROPRIATE': 'Le pseudonyme contient des mots inappropriés.',
-  'ERR_USERNAME_TAKEN': 'Ce pseudonyme est déjà utilisé.',
-  'ERR_PASSWORD_MISMATCH': 'Les mots de passe ne correspondent pas.',
-  'ERR_PASSWORD_WEAK': 'Le mot de passe est trop faible. Il doit contenir au moins 12 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial.',
-  'ERR_TOS_REFUSED' : 'Veuillez accepter les termes de service.'
+  'ERR_MISSING_CREDENTIALS': 'Please fill in all fields.',
+  'ERR_INVALID_EMAIL': 'Invalid email format.',
+  'ERR_EMAIL_ALREADY_IN_USE': 'This email is already in use.',
+  'ERR_USERNAME_VALIDATION_FAILED': 'Invalid username.',
+  'ERR_USERNAME_CONTAINS_SPACES': 'Username must not contain spaces.',
+  'ERR_USERNAME_LENGTH': 'Username must be between 1 and 255 characters.',
+  'ERR_USERNAME_INAPPROPRIATE': 'Username contains inappropriate words.',
+  'ERR_USERNAME_TAKEN': 'This username is already taken.',
+  'ERR_PASSWORD_MISMATCH': 'Passwords do not match.',
+  'ERR_PASSWORD_WEAK': 'Password is too weak. It must contain at least 12 characters, one uppercase, one lowercase, one number, and one special character.',
+  'ERR_TOS_REFUSED' : 'Please accept the terms of service.'
 };
 
 const validatePasswordComplexity = (pwd: string): boolean => {
@@ -111,11 +111,11 @@ const handleRegister = async () => {
           <Input id="password-verify-register" theme="secondary" v-model="confirmPassword" type="password"placeholder="Password Confirmation" className="mx-4" without-border/>
           <Checkbox id="tos-register" theme="secondary" label="I agree to the Terms of Service" v-model="tosAgreedTo" />
 
-          <Error v-if="formError" className="mx-4">
+          <Error v-if="formError" class="mx-4">
               <p>{{ formError }}</p>
           </Error>
           
-          <Button theme="secondary" type="submit" className="w-full" :loading="isLoading" :disabled="isFormDisabled">
+          <Button theme="primary" type="submit" class="w-full" :loading="isLoading" :disabled="isFormDisabled">
             Sign up
           </Button>
           <Button transparent theme="primary"><router-link to="/login">Already have an account? Sign in</router-link></Button>

@@ -24,9 +24,10 @@ const handleLogout = async () => {
 <template>
   <Button
     type="button"
+    theme="monochrome"
     @click="handleLogout"
     :loading="isLoading"
   >
-    Déconnexion
+    Log Out
   </Button>
 </template>

@@ -39,7 +39,6 @@ function validateCode(code: string) {
         :maxlength=6
         placeholder="111111"
         v-model="code"
-        className=""
       />
     </template>
   </Modal>

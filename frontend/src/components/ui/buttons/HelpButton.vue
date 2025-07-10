@@ -8,8 +8,8 @@ import Image from '../atoms/Image.vue';
 <template>
   <Button
     type="button"
-    theme="square"
+    theme="monochrome"
   >
-    <Image :src="Help" alt="notification" :size="1.3"/>
+    <Image :src="Help" alt="notification" :width="1.4"/>
   </Button>
 </template>

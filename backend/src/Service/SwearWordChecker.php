@@ -9,7 +9,8 @@ class SwearWordChecker
     public function __construct()
     {
         $this->swearWords = [
-            "con", "connard", "connasse", "conne", "enculé", "encule", "enculee", "fdp", "fils de pute", "pute", "salope", "salopard", "merde", "merdique", "chiant", "chieuse", "chieur", "niquer", "nique", "nq", "ntm", "ta mère", "ta mere", "tg", "batard", "bâtard", "batarde", "bâtarde", "bouffon", "bouffonne", "pd", "pédé", "pede", "tapette", "gouine", "encu", "zgeg", "teubé", "abruti", "débile", "mongol", "mongole", "attardé", "attardee", "putain", "put1", "ptn", "bordel", "cul", "trou du cul", "tarlouze", "grognasse", "baltringue", "clochard", "cassos", "bougnoule", "négro", "negro", "youpin", "clocharde"
+            "con", "connard", "connasse", "conne", "enculé", "encule", "enculee", "fdp", "fils de pute", "pute", "salope", "salopard", "merde", "merdique", "chiant", "chieuse", "chieur", "niquer", "nique", "nq", "ntm", "ta mère", "ta mere", "tg", "batard", "bâtard", "batarde", "bâtarde", "bouffon", "bouffonne", "pd", "pédé", "pede", "tapette", "gouine", "encu", "zgeg", "teubé", "abruti", "débile", "mongol", "mongole", "attardé", "attardee", "putain", "put1", "ptn", "bordel", "cul", "trou du cul", "tarlouze", "grognasse", "baltringue", "clochard", "cassos", "bougnoule", "négro", "negro", "youpin", "clocharde",
+            "fuck", "fucker", "fucking", "motherfucker", "asshole", "bitch", "cunt", "dick", "pussy", "slut", "whore", "shit", "shitty", "bastard", "douchebag", "wanker", "twat", "cock", "dickhead", "prick", "faggot", "fag", "crap", "damn", "hell"
         ];
     }
 

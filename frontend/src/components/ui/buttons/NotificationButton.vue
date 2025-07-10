@@ -10,6 +10,6 @@ import Image from '../atoms/Image.vue';
     type="button"
     theme="monochrome"
   >
-    <Image :src="Notification" alt="notification" :size="1.3"/>
+    <Image :src="Notification" alt="notification" :width="1.4"/>
   </Button>
 </template>
