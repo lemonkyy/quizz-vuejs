@@ -386,6 +386,13 @@ class Room
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
+    #[ORM\OneToOne(mappedBy: 'room', cascade: ['persist', 'remove'])]
+    private ?RoomPlayer $roomPlayer = null;
+
+    #[Groups(["room:read"])]
+    #[ORM\Column(type: 'string', length: 20, unique: true)]
+    private ?string $code = null;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
@@ -458,6 +465,34 @@ class Room
     public function setDeletedAt(?\DateTimeImmutable $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
+        return $this;
+    }
+
+    public function getRoomPlayer(): ?RoomPlayer
+    {
+        return $this->roomPlayer;
+    }
+
+    public function setRoomPlayer(RoomPlayer $roomPlayer): static
+    {
+        // set the owning side of the relation if necessary
+        if ($roomPlayer->getRoom() !== $this) {
+            $roomPlayer->setRoom($this);
+        }
+
+        $this->roomPlayer = $roomPlayer;
+
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): self
+    {
+        $this->code = $code;
         return $this;
     }
 }

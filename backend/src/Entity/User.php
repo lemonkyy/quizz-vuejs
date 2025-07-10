@@ -6,6 +6,8 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -312,9 +314,19 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $totpSecret = null;
 
+    #[ORM\Column(length: 255)]
+    private ?string $profilePicture = null;
+
+    /**
+     * @var Collection<int, RoomPlayer>
+     */
+    #[ORM\OneToMany(mappedBy: 'player', targetEntity: RoomPlayer::class, orphanRemoval: true)]
+    private Collection $roomPlayers;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
+        $this->roomPlayers = new ArrayCollection();
     }
 
     public function getId(): ?UuidV7
@@ -396,6 +408,48 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTotpSecret(?string $totpSecret): self
     {
         $this->totpSecret = $totpSecret;
+        return $this;
+    }
+
+    public function getProfilePicture(): ?string
+    {
+        return $this->profilePicture;
+    }
+
+    public function setProfilePicture(string $profilePicture): static
+    {
+        $this->profilePicture = $profilePicture;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RoomPlayer>
+     */
+    public function getRoomPlayers(): Collection
+    {
+        return $this->roomPlayers;
+    }
+
+    public function addRoomPlayer(RoomPlayer $roomPlayer): static
+    {
+        if (!$this->roomPlayers->contains($roomPlayer)) {
+            $this->roomPlayers->add($roomPlayer);
+            $roomPlayer->setPlayer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoomPlayer(RoomPlayer $roomPlayer): static
+    {
+        if ($this->roomPlayers->removeElement($roomPlayer)) {
+            // set the owning side to null (unless already changed)
+            if ($roomPlayer->getPlayer() === $this) {
+                $roomPlayer->setPlayer(null);
+            }
+        }
+
         return $this;
     }
 }
