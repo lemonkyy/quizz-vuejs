@@ -8,6 +8,11 @@ parameters:
     app.invite_expiration_threshold: '10 minutes'
     app.min_username_length: 1
     app.max_username_length: 20
+    app.max_friends: 200
+    app.max_sent_friend_requests: 100
+    app.max_received_friend_requests: 200
+    app.max_sent_invitations: 100
+    app.max_received_invitations: 200
 
     jwt_cookie_lifetime: 3600
     jwt_cookie_path: '/'

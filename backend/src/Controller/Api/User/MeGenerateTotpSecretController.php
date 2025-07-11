@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 //generate TOTP secret
-class MeGenerateTotpSecret extends AbstractController
+class MeGenerateTotpSecretController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function __invoke(#[CurrentUser] $user, TotpService $totpService, EntityManagerInterface $entityManager, JWTCookieService $cookieService, JWTTokenManagerInterface $jwtManager): JsonResponse

@@ -22,7 +22,7 @@ class InvitationRepository extends ServiceEntityRepository
      * @return Invitation[]
      * find pending invites for user, may also be filtered by sender user
      */
-    public function findActiveForUser(User $invitedUser, ?User $SenderUser = null): array
+    public function findActiveForUser(User $invitedUser, ?int $limit = null): array
     {
         $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold);
 
@@ -35,9 +35,8 @@ class InvitationRepository extends ServiceEntityRepository
             ->setParameter('user', $invitedUser)
             ->setParameter('minDate', $expiredThreshold);
 
-        if ($SenderUser) {
-            $qb->andWhere('i.invitedBy = :sender')
-               ->setParameter('sender', $SenderUser);
+        if ($limit !== null) {
+            $qb->setMaxResults($limit);
         }
 
         return $qb->getQuery()->getResult();

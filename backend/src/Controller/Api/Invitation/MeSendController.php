@@ -18,9 +18,12 @@ use App\Repository\InvitationRepository;
 class MeSendController extends AbstractController
 {
     private int $maxRoomUsers;
+    private int $maxSentInvitations;
+
     public function __construct(ParameterBagInterface $params)
     {
         $this->maxRoomUsers = $params->get('app.max_room_users');
+        $this->maxSentInvitations = $params->get('app.max_sent_invitations');
     }
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
@@ -63,6 +66,10 @@ class MeSendController extends AbstractController
 
         if ($existing) {
             return $this->json(['code' => 'ERR_INVITATION_ALREADY_SENT', 'error' => 'Invitation already sent'], 400);
+        }
+
+        if (count($user->getSentInvitations()) >= $this->maxSentInvitations) {
+            return $this->json(['code' => 'ERR_MAX_SENT_INVITATIONS_REACHED', 'error' => 'You have reached the maximum number of sent invitations'], 400);
         }
 
         $invitation = new Invitation();

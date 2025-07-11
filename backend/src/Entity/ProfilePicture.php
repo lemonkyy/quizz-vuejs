@@ -5,7 +5,6 @@ namespace App\Entity;
 use App\Repository\ProfilePictureRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\UuidV7;
-use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: ProfilePictureRepository::class)]
 class ProfilePicture
@@ -14,7 +13,6 @@ class ProfilePicture
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
 
-    #[Groups(['room:read', 'user:read'])]
     #[ORM\Column(length: 255, type: "string", unique: true)]
     private ?string $fileName = null;
 

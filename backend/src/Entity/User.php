@@ -6,6 +6,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -16,10 +17,13 @@ use Symfony\Component\Uid\UuidV7;
 use App\Controller\Api\User\MeReadController;
 use App\Controller\Api\User\MeUpdateController;
 use App\Controller\Api\User\RegisterController;
-use App\Controller\Api\User\MeGenerateTotpSecret;
-use App\Controller\Api\User\VerifyTotpCode;
+use App\Controller\Api\User\MeGenerateTotpSecretController;
+use App\Controller\Api\User\MeListFriendsController;
+use App\Controller\Api\User\RemoveFriendController;
+use App\Controller\Api\User\VerifyTotpCodeController;
 use App\Repository\UserRepository;
 use SpecShaper\EncryptBundle\Annotations\Encrypted;
+use App\Controller\Api\User\SearchController;
 
 #[ApiResource(
     operations: [
@@ -47,6 +51,59 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                                 'username' => ['type' => 'string'],
                                                 'email' => ['type' => 'string'],
                                                 'profilePictureURL' => ['type' => 'string'],
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '401' => [
+                        'description' => 'Unauthorized'
+                    ]
+                ]
+            ]
+        ),
+        new Post(
+            uriTemplate: '/user/search',
+            controller: SearchController::class,
+            read: false,
+            name: 'api_user_search',
+            openapiContext: [
+                'summary' => 'Search for users by username',
+                'description' => 'Returns a list of users matching the provided username, with pagination.',
+                'requestBody' => [
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'username' => ['type' => 'string', 'description' => 'The username to search for', 'example' => 'testuser'],
+                                    'page' => ['type' => 'integer', 'default' => 1, 'description' => 'The page number for pagination'],
+                                    'limit' => ['type' => 'integer', 'default' => 10, 'description' => 'The number of results per page']
+                                ],
+                                'required' => ['username']
+                            ]
+                        ]
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'List of users',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'users' => ['type' => 'array',
+                                            'items' => [
+                                                'type' => 'object',
+                                                'properties' => [
+                                                    'id' => ['type' => 'string'],
+                                                    'username' => ['type' => 'string'],
+                                                    'profilePictureUrl' => ['type' => 'string']
+                                                ]
                                             ]
                                         ]
                                     ]
@@ -178,7 +235,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
         ),
         new Get(
             uriTemplate: '/user/totp/secret',
-            controller: MeGenerateTotpSecret::class,
+            controller: MeGenerateTotpSecretController::class,
             read: false,
             name: 'api_user_totp_secret_generate',
             openapiContext: [
@@ -221,7 +278,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
         ),
         new Post(
             uriTemplate: '/login-verify',
-            controller: VerifyTotpCode::class,
+            controller: VerifyTotpCodeController::class,
             read: false,
             name: 'api_user_totp_verify',
             openapiContext: [
@@ -286,7 +343,47 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                     ]
                 ]
             ]
-        )
+        ),
+        new Delete(
+            uriTemplate: '/user/friends/{id}',
+            controller: RemoveFriendController::class,
+            read: false,
+            name: 'api_user_remove_friend',
+            openapiContext: [
+                'summary' => 'Remove a friend',
+                'description' => 'Removes a friend from the current user\'s friend list.',
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => ['type' => 'string'],
+                        'description' => 'The ID of the friend to remove.'
+                    ]
+                ],
+                'responses' => [
+                    '200' => ['description' => 'Friend removed successfully'],
+                    '400' => ['description' => 'Invalid request'],
+                    '404' => ['description' => 'User not found or not a friend'],
+                    '401' => ['description' => 'Unauthorized']
+                ]
+            ]
+        ),
+        new Get(
+            uriTemplate: '/user/friends',
+            controller: MeListFriendsController::class,
+            read: false,
+            name: 'api_user_list_friends',
+            openapiContext: [
+                'summary' => 'List current user\'s friends',
+                'description' => 'Lists all friends of the current authenticated user.',
+                'responses' => [
+                    '200' => ['description' => 'List of friends'],
+                    '401' => ['description' => 'Unauthorized']
+                ]
+            ]
+        ),
+        
     ]
 )]
 
@@ -294,7 +391,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['room:read', 'invitation:read'])]
+    #[Groups(['room:read', 'invitation:read', 'friendRequest:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
@@ -302,7 +399,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private ?string $email = null;
 
-    #[Groups(['user:read', 'room:read', 'invitation:read'])]
+    #[Groups(['user:read', 'room:read', 'invitation:read', 'friendRequest:read'])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private ?string $username = null;
 
@@ -319,7 +416,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'player', targetEntity: RoomPlayer::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?RoomPlayer $roomPlayer = null;
 
-    #[Groups(['user:read','room:read'])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?ProfilePicture $profilePicture = null;
@@ -450,7 +546,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'room:read', 'user:read', 'invitation:read', 'friendRequest:read'])]
     public function getProfilePictureUrl(): ?string
     {
         if (!$this->profilePicture) {
