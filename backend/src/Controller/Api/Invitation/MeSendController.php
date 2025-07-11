@@ -24,21 +24,17 @@ class MeSendController extends AbstractController
     }
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] $user, Request $request, UserRepository $userRepository, RoomRepository $roomRepository, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager): Response
+    public function __invoke(#[CurrentUser] $user, string $id, Request $request, UserRepository $userRepository, RoomRepository $roomRepository, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager): Response
     {
-        $data = json_decode($request->getContent(), true);
-
-        $targetUserId = $data['user_id'] ?? null;
-
-        if (!$targetUserId) {
+        if (!$id) {
             return $this->json(['code' => 'ERR_MISSING_USER_ID', 'error' => 'Missing user_id'], 400);
         }
 
-        if ($targetUserId == $user->getId()) {
+        if ($id == $user->getId()) {
             return $this->json(['code' => 'ERR_CANNOT_INVITE_SELF', 'error' => 'Cannot invite yourself'], 400);
         }
 
-        $targetUser = $userRepository->find($targetUserId);
+        $targetUser = $userRepository->find($id);
         if (!$targetUser) {
             return $this->json(['code' => 'ERR_USER_NOT_FOUND', 'error' => 'User not found'], 404);
         }
@@ -48,11 +44,11 @@ class MeSendController extends AbstractController
             return $this->json(['code' => 'ERR_NOT_IN_A_ROOM', 'error' => 'You are not in a room'], 400);
         }
 
-        if ($room->getUsers()->contains($targetUser)) {
+        if ($room->getRoomPlayers()->contains($targetUser->getRoomPlayer())) {
             return $this->json(['code' => 'ERR_USER_ALREADY_IN_ROOM', 'error' => 'User is already in the room'], 400);
         }
 
-        if (count($room->getUsers()) >= $this->maxRoomUsers) {
+        if (count($room->getRoomPlayers()) >= $this->maxRoomUsers) {
             return $this->json(['code' => 'ERR_ROOM_FULL', 'error' => 'Room is at max capacity'], 400);
         }
 

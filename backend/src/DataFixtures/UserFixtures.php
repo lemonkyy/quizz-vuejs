@@ -2,10 +2,12 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\ProfilePicture;
 use App\Entity\User;
+use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class UserFixtures extends AbstractFixtures
+class UserFixtures extends AbstractFixtures implements DependentFixtureInterface
 {
     public function __construct(
         private UserPasswordHasherInterface $passwordHasher,
@@ -32,7 +34,7 @@ class UserFixtures extends AbstractFixtures
             'password' => 'user1',
             'roles' => ['ROLE_USER'],
             // gg-ignore
-            'totpSecret' => 'NOO4I7MLZ6UZMJLIWMM6TKRSYM'
+            'totpSecret' => 'NOO4I7MLZ6UZMJLIWMM6TKRSYM',
         ];
 
         yield [
@@ -71,8 +73,20 @@ class UserFixtures extends AbstractFixtures
         ];
     }
 
-    protected function postInstantiate($entity): void
+    protected function postInstantiate(object $entity, array $data): void
     {
         $entity->setPassword($this->passwordHasher->hashPassword($entity, $entity->getPassword()));
+
+        $randomNumber = rand(1, 3);
+        $randomReferenceKey = 'ProfilePicture_' . $randomNumber;
+        $profilePicture = $this->getReference($randomReferenceKey, ProfilePicture::class);
+        $entity->setProfilePicture($profilePicture);
+    }
+
+    public function getDependencies(): array
+    {
+        return [
+            ProfilePictureFixtures::class,
+        ];
     }
 }

@@ -20,28 +20,20 @@ use Symfony\Component\Uid\UuidV7;
 #[ApiResource(
     operations: [
         new Post(
-            uriTemplate: '/invitation/send',
+            uriTemplate: '/invitation/send/{id}',
             controller: MeSendController::class,
             read: false,
             name: 'api_invitation_send',
             openapiContext: [
                 'summary' => 'Send a room invitation',
                 'description' => 'Send an invitation to another user to join your current room. Only possible if you are in a room, the user is not already in the room, and the room is not full.',
-                'requestBody' => [
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'user_id' => [
-                                        'type' => 'string',
-                                        'description' => 'ID of the user to invite'
-                                    ]
-                                ],
-                                'required' => ['user_id']
-                            ]
-                        ]
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [ 'type' => 'string' ],
+                        'description' => 'ID of the user to invite'
                     ]
                 ],
                 'responses' => [
@@ -160,7 +152,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/invitation/{id}/accept',
+            uriTemplate: '/invitation/accept/{id}',
             input: false,
             controller: MeAcceptController::class,
             read: false,
@@ -224,7 +216,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/invitation/{id}/deny',
+            uriTemplate: '/invitation/deny/{id}',
             input: false,
             controller: MeDenyController::class,
             read: false,
@@ -274,7 +266,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/invitation/{id}/cancel',
+            uriTemplate: '/invitation/cancel/{id}',
             input: false,
             controller: MeCancelController::class,
             read: false,

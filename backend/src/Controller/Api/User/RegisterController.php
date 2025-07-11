@@ -8,13 +8,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Repository\ProfilePictureRepository;
 use App\Repository\UserRepository;
 use App\Service\ValidateUsernameService;
 use App\Service\ValidatePasswordService;
 
 class RegisterController extends AbstractController
 {
-    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UserRepository $userRepository, ValidateUsernameService $validateUsernameService, ValidatePasswordService $validatePasswordService)
+    public function __invoke(Request $request, EntityManagerInterface $entityManager, UserPasswordHasherInterface $passwordHasher, UserRepository $userRepository, ValidateUsernameService $validateUsernameService, ValidatePasswordService $validatePasswordService, ProfilePictureRepository $profilePictureRepository)
     {
         $data = json_decode($request->getContent(), true);
 
@@ -65,11 +66,15 @@ class RegisterController extends AbstractController
             } while ($error);
         }
 
+        $profilePictures = $profilePictureRepository->findAll();
+        $randomProfilePicture = $profilePictures[array_rand($profilePictures)];
+
         $user = new User();
         $user->setUsername($username);
         $user->setEmail($data['email']);
         $user->setRoles(['ROLE_USER']);
         $user->setPassword($passwordHasher->hashPassword($user, $data['password']));
+        $user->setProfilePicture($randomProfilePicture);
 
         $entityManager->persist($user);
         $entityManager->flush();

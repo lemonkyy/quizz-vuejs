@@ -3,6 +3,7 @@
 namespace App\Controller\Api\Room;
 
 use App\Entity\Room;
+use App\Entity\RoomPlayer;
 use App\Service\RoomMembershipService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -15,20 +16,12 @@ use Doctrine\ORM\EntityManagerInterface;
 class MeCreateController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] $user, Request $request, EntityManagerInterface $entityManager, RoomMembershipService $roomMembershipService): Response
+    public function __invoke(#[CurrentUser] $user, Request $request, RoomMembershipService $roomMembershipService): Response
     {
-        $roomMembershipService->handleUserLeavingRoom($user);
-
         $data = json_decode($request->getContent(), true);
         $isPublic = $data['isPublic'] ?? false;
 
-        $room = new Room();
-        $room->setOwner($user);
-        $room->addUser($user);
-        $room->setIsPublic($isPublic);
-
-        $entityManager->persist($room);
-        $entityManager->flush();
+        $room = new Room($roomMembershipService->handleUserCreatingRoom($user, $isPublic));
 
         return $this->json(['code' => 'SUCCESS', 'room' => $room], 201, [], ['groups' => ['room:read']]);
     }

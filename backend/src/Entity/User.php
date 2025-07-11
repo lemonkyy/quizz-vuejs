@@ -6,6 +6,8 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
@@ -44,6 +46,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                             'properties' => [
                                                 'username' => ['type' => 'string'],
                                                 'email' => ['type' => 'string'],
+                                                'profilePictureURL' => ['type' => 'string'],
                                             ]
                                         ]
                                     ]
@@ -130,6 +133,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                 'type' => 'object',
                                 'properties' => [
                                     'newUsername' => ['type' => 'string'],
+                                    'newProfilePictureId' => ['type' => 'string'],
                                     'clearTotpSecret' => ['type' => 'boolean']
                                 ]
                             ]
@@ -159,7 +163,7 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
                                 'schema' => [
                                     'type' => 'object',
                                     'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['INVALID_USERNAME', 'ERR_USERNAME_INVALID_TYPE', 'ERR_USERNAME_CONTAINS_SPACES', 'ERR_USERNAME_LENGTH', 'ERR_USERNAME_INAPPROPRIATE', 'ERR_USERNAME_TAKEN']],
+                                        'code' => ['type' => 'string', 'enum' => ['INVALID_USERNAME', 'ERR_USERNAME_INVALID_TYPE', 'ERR_USERNAME_CONTAINS_SPACES', 'ERR_USERNAME_LENGTH', 'ERR_USERNAME_INAPPROPRIATE', 'ERR_USERNAME_TAKEN', 'ERR_NULL_PROFILE_PICTURE', 'ERR_PROFILE_PICTURE_NOT_FOUND']],
                                         'error' => ['type' => 'string']
                                     ]
                                 ]
@@ -287,10 +291,10 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
 )]
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: "`user`")]
+#[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(["room:read", "invitation:read"])]
+    #[Groups(['room:read', 'invitation:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
@@ -298,7 +302,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private ?string $email = null;
 
-    #[Groups(["user:read", "room:read", "invitation:read"])]
+    #[Groups(['user:read', 'room:read', 'invitation:read'])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private ?string $username = null;
 
@@ -312,9 +316,32 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $totpSecret = null;
 
+    #[ORM\OneToOne(mappedBy: 'player', targetEntity: RoomPlayer::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private ?RoomPlayer $roomPlayer = null;
+
+    #[Groups(['user:read','room:read'])]
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?ProfilePicture $profilePicture = null;
+
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: FriendRequest::class, orphanRemoval: true)]
+    private Collection $sentFriendRequests;
+
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: FriendRequest::class, orphanRemoval: true)]
+    private Collection $receivedFriendRequests;
+
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'friends')]
+    #[ORM\JoinTable(name: 'user_friends')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'friend_user_id', referencedColumnName: 'id')]
+    private Collection $friends;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
+        $this->sentFriendRequests = new ArrayCollection();
+        $this->receivedFriendRequests = new ArrayCollection();
+        $this->friends = new ArrayCollection();
     }
 
     public function getId(): ?UuidV7
@@ -363,7 +390,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = "ROLE_USER";
+        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -396,6 +423,124 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setTotpSecret(?string $totpSecret): self
     {
         $this->totpSecret = $totpSecret;
+        return $this;
+    }
+
+    public function getRoomPlayer(): ?RoomPlayer
+    {
+        return $this->roomPlayer;
+    }
+
+    public function setRoomPlayer(?RoomPlayer $roomPlayer)
+    {
+        $this->roomPlayer = $roomPlayer;
+
+        return $this;
+    }
+
+    public function getProfilePicture(): ?ProfilePicture
+    {
+        return $this->profilePicture;
+    }
+
+    public function setProfilePicture(?ProfilePicture $profilePicture): static
+    {
+        $this->profilePicture = $profilePicture;
+
+        return $this;
+    }
+
+    #[Groups(['user:read'])]
+    public function getProfilePictureUrl(): ?string
+    {
+        if (!$this->profilePicture) {
+            return null;
+        }
+
+        return '/uploads/profile_pictures/' . $this->profilePicture->getFileName();
+    }
+
+    /**
+     * @return Collection<int, FriendRequest>|\App\Entity\FriendRequest[]
+     */
+    public function getSentFriendRequests(): Collection
+    {
+        return $this->sentFriendRequests;
+    }
+
+    public function addSentFriendRequest(FriendRequest $sentFriendRequest): static
+    {
+        if (!$this->sentFriendRequests->contains($sentFriendRequest)) {
+            $this->sentFriendRequests->add($sentFriendRequest);
+            $sentFriendRequest->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSentFriendRequest(FriendRequest $sentFriendRequest): static
+    {
+        if ($this->sentFriendRequests->removeElement($sentFriendRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($sentFriendRequest->getSender() === $this) {
+                $sentFriendRequest->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, FriendRequest>|\App\Entity\FriendRequest[]
+     */
+    public function getReceivedFriendRequests(): Collection
+    {
+        return $this->receivedFriendRequests;
+    }
+
+    public function addReceivedFriendRequest(FriendRequest $receivedFriendRequest): static
+    {
+        if (!$this->receivedFriendRequests->contains($receivedFriendRequest)) {
+            $this->receivedFriendRequests->add($receivedFriendRequest);
+            $receivedFriendRequest->setReceiver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceivedFriendRequest(FriendRequest $receivedFriendRequest): static
+    {
+        if ($this->receivedFriendRequests->removeElement($receivedFriendRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($receivedFriendRequest->getReceiver() === $this) {
+                $receivedFriendRequest->setReceiver(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getFriends(): Collection
+    {
+        return $this->friends;
+    }
+
+    public function addFriend(User $friend): static
+    {
+        if (!$this->friends->contains($friend)) {
+            $this->friends->add($friend);
+        }
+
+        return $this;
+    }
+
+    public function removeFriend(User $friend): static
+    {
+        $this->friends->removeElement($friend);
+
         return $this;
     }
 }

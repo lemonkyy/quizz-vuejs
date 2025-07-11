@@ -13,7 +13,6 @@ use App\Controller\Api\Room\MeShowCurrentController;
 use App\Controller\Api\Room\MeJoinController;
 use App\Controller\Api\Room\MeLeaveController;
 use App\Repository\RoomRepository;
-use DateTime;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -61,28 +60,20 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/room/kick',
+            uriTemplate: '/room/kick/{id}',
             controller: MeKickUserController::class,
             read: false,
             name: 'api_room_kick_user',
             openapiContext: [
                 'summary' => 'Kick another user from the user\'s room',
                 'description' => 'Kicks a user from the current room. Only the room owner can kick other users. Cannot kick yourself.',
-                'requestBody' => [
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'user_id' => [
-                                        'type' => 'string',
-                                        'description' => 'ID of the user to kick from the room'
-                                    ]
-                                ],
-                                'required' => ['user_id']
-                            ]
-                        ]
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [ 'type' => 'string' ],
+                        'description' => 'ID of the user to kick from the room'
                     ]
                 ],
                 'responses' => [
@@ -239,21 +230,21 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/room/{id}/join',
+            uriTemplate: '/room/join/{id}',
             input: false,
             controller: MeJoinController::class,
             read: false,
             name: 'api_room_join',
             openapiContext: [
-                'summary' => 'Join a room by id',
-                'description' => 'Current user joins a room by its id.',
+                'summary' => 'Join a room by code',
+                'description' => 'Current user joins a room by its code.',
                 'parameters' => [
                     [
                         'name' => 'id',
                         'in' => 'path',
                         'required' => true,
                         'schema' => [ 'type' => 'string' ],
-                        'description' => 'ID of the room to join'
+                        'description' => 'Id of the room to join'
                     ]
                 ],
                 'responses' => [
@@ -367,12 +358,7 @@ class Room
     #[Groups(['room:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $owner = null;
-
-    #[Groups(['room:read'])]
-    #[ORM\ManyToMany(targetEntity: User::class)]
-    #[ORM\JoinTable(name: 'room_users')]
-    private Collection $users;
+    private ?User $owner = null;    
 
     #[Groups(['room:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
@@ -386,11 +372,19 @@ class Room
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
+    #[Groups(['room:read'])]
+    #[ORM\Column(type: 'string', length: 20, unique: true)]
+    private ?string $code = null;
+
+    #[Groups(['room:read'])]
+    #[ORM\OneToMany(mappedBy: 'room', targetEntity: RoomPlayer::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
+    private Collection $roomPlayers;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
-        $this->users = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->roomPlayers = new ArrayCollection();
     }
 
     public function getId(): ?UuidV7
@@ -409,24 +403,7 @@ class Room
         return $this;
     }
 
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-        }
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        $this->users->removeElement($user);
-        return $this;
-    }
+    
 
     public function getCreatedAt(): \DateTimeImmutable
     {
@@ -458,6 +435,47 @@ class Room
     public function setDeletedAt(?\DateTimeImmutable $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): self
+    {
+        $this->code = $code;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RoomPlayer>|\RoomPlayer[]
+     */
+    public function getRoomPlayers(): Collection
+    {
+        return $this->roomPlayers;
+    }
+
+    public function addRoomPlayer(RoomPlayer $roomPlayer): self
+    {
+        if (!$this->roomPlayers->contains($roomPlayer)) {
+            $this->roomPlayers->add($roomPlayer);
+            $roomPlayer->setRoom($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoomPlayer(RoomPlayer $roomPlayer): self
+    {
+        if ($this->roomPlayers->removeElement($roomPlayer)) {
+            // set the owning side to null (unless already changed)
+            if ($roomPlayer->getRoom() === $this) {
+                $roomPlayer->setRoom(null);
+            }
+        }
+
         return $this;
     }
 }
