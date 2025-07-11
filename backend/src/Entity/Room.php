@@ -13,7 +13,6 @@ use App\Controller\Api\Room\MeShowCurrentController;
 use App\Controller\Api\Room\MeJoinController;
 use App\Controller\Api\Room\MeLeaveController;
 use App\Repository\RoomRepository;
-use DateTime;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -61,28 +60,20 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/room/kick',
+            uriTemplate: '/room/kick/{id}',
             controller: MeKickUserController::class,
             read: false,
             name: 'api_room_kick_user',
             openapiContext: [
                 'summary' => 'Kick another user from the user\'s room',
                 'description' => 'Kicks a user from the current room. Only the room owner can kick other users. Cannot kick yourself.',
-                'requestBody' => [
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'user_id' => [
-                                        'type' => 'string',
-                                        'description' => 'ID of the user to kick from the room'
-                                    ]
-                                ],
-                                'required' => ['user_id']
-                            ]
-                        ]
+                'parameters' => [
+                    [
+                        'name' => 'id',
+                        'in' => 'path',
+                        'required' => true,
+                        'schema' => [ 'type' => 'string' ],
+                        'description' => 'ID of the user to kick from the room'
                     ]
                 ],
                 'responses' => [
@@ -239,21 +230,21 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/room/{id}/join',
+            uriTemplate: '/room/join/{id}',
             input: false,
             controller: MeJoinController::class,
             read: false,
             name: 'api_room_join',
             openapiContext: [
-                'summary' => 'Join a room by id',
-                'description' => 'Current user joins a room by its id.',
+                'summary' => 'Join a room by code',
+                'description' => 'Current user joins a room by its code.',
                 'parameters' => [
                     [
                         'name' => 'id',
                         'in' => 'path',
                         'required' => true,
                         'schema' => [ 'type' => 'string' ],
-                        'description' => 'ID of the room to join'
+                        'description' => 'Id of the room to join'
                     ]
                 ],
                 'responses' => [
@@ -381,7 +372,7 @@ class Room
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
-    #[Groups(["room:read"])]
+    #[Groups(['room:read'])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private ?string $code = null;
 

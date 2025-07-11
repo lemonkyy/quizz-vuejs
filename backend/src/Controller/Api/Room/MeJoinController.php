@@ -5,7 +5,6 @@ namespace App\Controller\Api\Room;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\RoomRepository;
 use App\Service\RoomMembershipService;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -14,7 +13,7 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 class MeJoinController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] $user, string $id, RoomRepository $roomRepository, EntityManagerInterface $entityManager, RoomMembershipService $roomMembershipService): Response
+    public function __invoke(#[CurrentUser] $user, string $id, RoomRepository $roomRepository, RoomMembershipService $roomMembershipService): Response
     {
         $room = $roomRepository->findOneBy(['id' => $id]);
 
@@ -26,16 +25,11 @@ class MeJoinController extends AbstractController
             return $this->json(['code' => 'ERR_ROOM_DELETED', 'error' => 'Room has been deleted'], 400);
         }
 
-        if ($room->getUsers()->contains($user)) {
+        if ($room->getRoomPlayers()->contains($user->getRoomPlayer())) {
             return $this->json(['code' => 'ERR_USER_ALREADY_IN_ROOM', 'error' => 'User is already in this room'], 400);
         }
 
-        $roomMembershipService->handleUserLeavingRoom($user);
-
-        $room->addUser($user);
-
-        $entityManager->persist($room);
-        $entityManager->flush();
+        $roomMembershipService->handleUserJoiningRoom($user, $room);
 
         return $this->json(['code' => 'SUCCESS', 'room' => $room], 200, [], ['groups' => ['room:read']]);
     }

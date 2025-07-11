@@ -3,25 +3,63 @@
 namespace App\Service;
 
 use App\Entity\Room;
+use App\Entity\RoomPlayer;
 use App\Entity\User;
+use App\Repository\RoomRepository;
 use Doctrine\ORM\EntityManagerInterface;
 
 //service to make sure a user can only be in one room at a time, and to handle room ownership changes and soft deletion
 class RoomMembershipService
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
+    private RoomRepository $roomRepository;
+    private RoomCodeGenerationService $roomCodeGenerationService;
 
-    public function __construct(EntityManagerInterface $entityManager)
+    public function __construct(EntityManagerInterface $entityManager, RoomRepository $roomRepository, RoomCodeGenerationService $roomCodeGenerationService)
     {
         $this->entityManager = $entityManager;
+        $this->roomRepository = $roomRepository;
+        $this->roomCodeGenerationService = $roomCodeGenerationService;
     }
 
-    //this is logic for when a user leaves a room
+    public function handleUserCreatingRoom(User $user, Bool $isPublic = true): Room 
+    {
+        $this->handleUserLeavingRoom($user);
+
+        $room = new Room();
+        $roomPlayer = new RoomPlayer($user, $room);
+        
+        $room->setOwner($user);
+        $room->setIsPublic($isPublic);
+        $room->setCode($this->roomCodeGenerationService->generateUniqueRoomCode());
+
+        $this->entityManager->persist($room);
+        $this->entityManager->persist($roomPlayer);
+        $this->entityManager->flush();
+
+        return $room;
+    }
+
+    public function handleUserJoiningRoom(User $user, Room $room): void
+    {
+        $this->handleUserLeavingRoom($user);
+
+        $roomPlayer = new RoomPlayer($user, $room);
+
+        $this->entityManager->persist($roomPlayer);
+        $this->entityManager->flush();
+    }
+
+    //this is logic for when the logged user leaves his current room
     public function handleUserLeavingRoom(User $user): void
     {
-        $roomRepository = $this->entityManager->getRepository(Room::class);
+        $roomPlayer = $user->getRoomPlayer();
 
-        $currentRoom = $roomRepository->findRoomByUserId($user->getId());
+        if (null === $roomPlayer) {
+            return;
+        }
+
+        $currentRoom = $this->roomRepository->findRoomByRoomPlayerId($roomPlayer->getId());
 
         if (null === $currentRoom) {
             return;
@@ -30,15 +68,37 @@ class RoomMembershipService
         $this->leaveRoom($user, $currentRoom);
     }
 
+    public function handleUserKickedFromRoom(User $user, Room $room): void
+    {
+        $room->removeRoomPlayer($user->getRoomPlayer());
+
+        $this->entityManager->persist($room);
+        $this->entityManager->flush();
+    }
+
+    public function handleUserDeletingRoom(Room $room): void
+    {
+        $room->setDeletedAt(new \DateTimeImmutable());
+
+        //remove all users from the room
+        foreach ($room->getRoomPlayers() as $roomPlayer) {
+            $room->removeRoomPlayer($roomPlayer);
+        }
+
+        $this->entityManager->persist($room);
+        $this->entityManager->flush();
+    }
+
     public function leaveRoom(User $user, Room $room): void
     {
-        $room->removeUser($user);
+        $room->removeRoomPlayer($user->getRoomPlayer());
+        $user->setRoomPlayer(null);
 
         if ($room->getOwner() === $user) {
             $this->handleOwnerLeaving($room);
         }
-
-        if ($room->getUsers()->isEmpty()) {
+        
+        if ($room->getRoomPlayers()->isEmpty()) {
             $this->handleRoomSoftDelete($room);
         }
 
@@ -48,18 +108,18 @@ class RoomMembershipService
     //transfer ownership of room to another user
     private function handleOwnerLeaving(Room $room): void
     {
-        $users = $room->getUsers();
+        $roomPlayers = $room->getRoomPlayers();
 
-        if (count($users) > 0) {
-            $newOwner = $users->first();
+        if (count($roomPlayers) > 0) {
+            $newOwner = $roomPlayers->first()->getPlayer();
             $room->setOwner($newOwner);
         }
     }
 
-    //room with no useres is soft deleted
+    //room with no users is soft deleted
     private function handleRoomSoftDelete(Room $room): void
     {
-        if (count($room->getUsers()) === 0 && $room->getDeletedAt() === null) {
+        if (count($room->getRoomPlayers()) === 0 && $room->getDeletedAt() === null) {
             $room->setDeletedAt(new \DateTimeImmutable());
         }
     }

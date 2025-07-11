@@ -42,12 +42,8 @@ class MeAcceptController extends AbstractController
             return $this->json(['code' => 'ERR_ROOM_DELETED', 'error' => 'Room has been deleted'], 400);
         }
 
-        $roomMembershipService->handleUserLeavingRoom($user);
-
-        $room->addUser($user);
-
-        $entityManager->persist($room);
-        $entityManager->persist($invitation);
+        $roomMembershipService->handleUserJoiningRoom($user, $room);
+        
         $entityManager->flush();
 
         return $this->json(['code' => 'SUCCESS', 'message' => 'Invitation accepted'], 200);

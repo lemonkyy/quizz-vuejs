@@ -26,7 +26,7 @@ class RoomRepository extends ServiceEntityRepository
     {
         $result = $this->createQueryBuilder('r')
             ->join('r.roomPlayers', 'rp')
-            ->join('rp.user', 'u')
+            ->join('rp.player', 'u')
             ->where('u = :user')
             ->andWhere('r.deletedAt IS NULL')
             ->setParameter('user', $user)
@@ -47,7 +47,7 @@ class RoomRepository extends ServiceEntityRepository
             ->leftJoin('r.roomPlayers', 'rp')
             ->where('rp.isPublic = true')
             ->groupBy('rp.id')
-            ->having('COUNT(u) < :max')
+            ->having('COUNT(rp) < :max')
             ->setParameter('max', $maxUsers)
             ->getQuery()
             ->getResult();
@@ -56,13 +56,13 @@ class RoomRepository extends ServiceEntityRepository
     /**
      * @return Room|null
      */
-    public function findRoomByUserId(string $userId): ?Room
+    public function findRoomByRoomPlayerId(string $roomPlayerId): ?Room
     {
         return $this->createQueryBuilder('r')
             ->join('r.roomPlayers', 'rp')
-            ->where('rp.user = :userId')
+            ->where('rp.id = :rpId')
             ->andWhere('r.deletedAt IS NULL')
-            ->setParameter('userId', $userId)
+            ->setParameter('rpId', $roomPlayerId)
             ->getQuery()
             ->getOneOrNullResult();
     }

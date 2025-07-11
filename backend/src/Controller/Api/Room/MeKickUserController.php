@@ -10,21 +10,19 @@ use Symfony\Component\Security\Http\Attribute\CurrentUser;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Repository\RoomRepository;
 use App\Repository\UserRepository;
+use App\Service\RoomMembershipService;
 
 //kick a user from the current room (only by room creator)
 class MeKickUserController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] $user, Request $request, RoomRepository $roomRepository, UserRepository $userRepository, EntityManagerInterface $entityManager): Response
+    public function __invoke(#[CurrentUser] $user, string $id, Request $request, RoomRepository $roomRepository, UserRepository $userRepository, RoomMembershipService $roomMembershipService): Response
     {
-        $data = json_decode($request->getContent(), true);
-        $targetUserId = $data['user_id'] ?? null;
-
-        if (!$targetUserId) {
+        if (!$id) {
             return $this->json(['code' => 'ERR_MISSING_USER_ID', 'error' => 'Missing user_id'], 400);
         }
 
-        if ($targetUserId == $user->getId()) {
+        if ($id == $user->getId()) {
             return $this->json(['code' => 'ERR_CANNOT_KICK_SELF', 'error' => 'You cannot kick yourself'], 400);
         }
 
@@ -37,18 +35,16 @@ class MeKickUserController extends AbstractController
             return $this->json(['code' => 'ERR_NOT_ROOM_OWNER', 'error' => 'Only the room owner can kick users'], 403);
         }
 
-        $targetUser = $userRepository->find($targetUserId);
+        $targetUser = $userRepository->find($id);
         if (!$targetUser) {
             return $this->json(['code' => 'ERR_USER_NOT_FOUND', 'error' => 'User not found'], 404);
         }
 
-        if (!$room->getUsers()->contains($targetUser)) {
+        if (!$room->getRoomPlayers()->contains($targetUser->getRoomPlayer())) {
             return $this->json(['code' => 'ERR_USER_NOT_IN_ROOM', 'error' => 'User is not in your room'], 400);
         }
 
-        $room->removeUser($targetUser);
-
-        $entityManager->flush();
+        $roomMembershipService->handleUserKickedFromRoom($user, $room);
 
         return $this->json(['code' => 'SUCCESS', 'message' => 'User kicked from room'], 200);
     }

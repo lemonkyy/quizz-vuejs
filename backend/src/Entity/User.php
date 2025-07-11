@@ -291,10 +291,10 @@ use SpecShaper\EncryptBundle\Annotations\Encrypted;
 )]
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: "`user`")]
+#[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(["room:read", "invitation:read"])]
+    #[Groups(['room:read', 'invitation:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
@@ -302,7 +302,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private ?string $email = null;
 
-    #[Groups(["user:read", "room:read", "invitation:read"])]
+    #[Groups(['user:read', 'room:read', 'invitation:read'])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private ?string $username = null;
 
@@ -316,10 +316,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', nullable: true)]
     private ?string $totpSecret = null;
 
-    #[ORM\OneToOne(inversedBy: 'player', targetEntity: RoomPlayer::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
-    #[ORM\JoinColumn(nullable: true)]
+    #[ORM\OneToOne(mappedBy: 'player', targetEntity: RoomPlayer::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?RoomPlayer $roomPlayer = null;
 
+    #[Groups(['user:read','room:read'])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?ProfilePicture $profilePicture = null;
@@ -390,7 +390,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = "ROLE_USER";
+        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -431,7 +431,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->roomPlayer;
     }
 
-    public function setRoomPlayer(RoomPlayer $roomPlayer)
+    public function setRoomPlayer(?RoomPlayer $roomPlayer)
     {
         $this->roomPlayer = $roomPlayer;
 

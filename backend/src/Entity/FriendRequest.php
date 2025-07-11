@@ -6,7 +6,6 @@ use ApiPlatform\Metadata\ApiResource;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\UuidV7;
 
-#[ApiResource]
 #[ORM\Entity]
 class FriendRequest
 {

@@ -2,22 +2,24 @@
 
 namespace App\Entity;
 
-use ApiPlatform\Metadata\ApiResource;
 use App\Repository\RoomPlayerRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\UuidV7;
+use Symfony\Component\Serializer\Annotation\Groups;
 
 #[ORM\Entity(repositoryClass: RoomPlayerRepository::class)]
-#[ApiResource]
 class RoomPlayer
 {
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
 
-    #[ORM\OneToOne(mappedBy: 'roomPlayer', targetEntity: User::class)]
+    #[Groups(['room:read'])]
+    #[ORM\OneToOne(inversedBy: 'roomPlayer', targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: true)]
     private ?User $player = null;
 
+    #[Groups(['room:read'])]
     #[ORM\Column()]
     private ?int $score = null;
 
@@ -25,9 +27,12 @@ class RoomPlayer
     #[ORM\JoinColumn(nullable: true)]
     private ?Room $room = null;
 
-    public function __construct()
+    public function __construct(?User $player = null, ?Room $room = null, int $score = 0)
     {
         $this->id = UuidV7::v7();
+        $this->player = $player;
+        $this->room = $room;
+        $this->score = $score;
     }
 
     public function getPlayer(): ?User
