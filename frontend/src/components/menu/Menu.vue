@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import HelpButton from '../ui/buttons/HelpButton.vue';
+import HelpButton from '../ui/molecules/buttons/HelpButton.vue';
 import { useAuthStore } from '@/store/auth';
-import NotificationButton from '../ui/buttons/NotificationButton.vue';
+import NotificationButton from '../ui/molecules/buttons/NotificationButton.vue';
 import UserIcon from '../profile/UserIcon.vue';
 import MenuElement from './MenuElement.vue';
-import ProfileModal from '../ui/modals/ProfileModal.vue';
+import ProfileModal from '../ui/molecules/modals/ProfileModal.vue';
 import { ref } from 'vue';
 
 const auth = useAuthStore();

@@ -53,12 +53,3 @@ export async function updateUser(params: {newUsername?: string, clearTotpSecret?
     throw error;
   }
 }
-
-export async function listFriends(): Promise<{code: string, friends?: any[], error?: string}> {
-  try {
-    const response = await axios.get('/user/friends', {withCredentials: true});
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
-}

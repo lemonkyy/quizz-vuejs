@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import Button from '../atoms/Button.vue';
+import Button from '../../atoms/Button.vue';
 
 defineProps({
     loading: {type: Boolean, default: false},

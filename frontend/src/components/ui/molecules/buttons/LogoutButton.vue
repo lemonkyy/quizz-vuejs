@@ -2,7 +2,7 @@
 import { ref } from 'vue';
 import { useAuthStore } from '@/store/auth';
 import { useRouter } from 'vue-router';
-import Button from '../atoms/Button.vue';
+import Button from '../../atoms/Button.vue';
 
 const auth = useAuthStore();
 const router = useRouter();

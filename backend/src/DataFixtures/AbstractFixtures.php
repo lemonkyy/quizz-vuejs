@@ -32,8 +32,6 @@ abstract class AbstractFixtures extends Fixture
             ++$key;
             if (method_exists($this, 'addReference')) {
                 $this->addReference($r->getShortName().'_'.$key, $entity);
-                echo "Adding reference: {$r->getShortName()}_{$key}\n";
-
             }
         }
 

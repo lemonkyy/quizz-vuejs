@@ -1,20 +1,48 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useToast } from "vue-toastification";
+import type { User } from '@/types';
 import {
   sendFriendRequest as sendFriendRequestService,
   acceptFriendRequest as acceptFriendRequestService,
   refuseFriendRequest as refuseFriendRequestService,
   cancelFriendRequest as cancelFriendRequestService,
   listSentFriendRequests as listSentFriendRequestsService,
-  listReceivedFriendRequests as listReceivedFriendRequestsService
-} from '@/services/friendRequestService';
+  listReceivedFriendRequests as listReceivedFriendRequestsService,
+  listFriends as listFriendsService,
+  searchUsers as searchUsersService
+} from '@/services/friendService';
 
-export const useFriendRequestsStore = defineStore("friendRequests", () => {
+export const useFriendStore = defineStore("friend", () => {
 
+  const friends = ref<User[]>([]);
   const sentRequests = ref<any[]>([]);
   const receivedRequests = ref<any[]>([]);
   const toast = useToast();
+
+  const listFriends = async () => {
+    try {
+      const response = await listFriendsService();
+      if (response.code === 'SUCCESS' && response.friends) {
+        friends.value = response.friends;
+      }
+    } catch (error) {
+      console.error('Error listing friends:', error);
+      throw error;
+    }
+  }
+
+  const searchUsers = async (username: string, page?: number, limit?: number) => {
+    try {
+      const response = await searchUsersService(username, page, limit);
+      if (response.code === 'SUCCESS' && response.users) {
+        return response.users;
+      }
+    } catch (error) {
+      toast.error('Error while fetching users.');
+      throw error;
+    }
+  }
 
   const sendFriendRequest = async (receiverId: string) => {
     try {
@@ -32,6 +60,7 @@ export const useFriendRequestsStore = defineStore("friendRequests", () => {
       await acceptFriendRequestService(id);
       toast.success('Friend request accepted!');
       await listReceivedFriendRequests();
+      await listFriends();
     } catch (error) {
       toast.error('Error accepting friend request.');
       throw error;
@@ -85,8 +114,11 @@ export const useFriendRequestsStore = defineStore("friendRequests", () => {
   };
 
   return {
+    friends,
     sentRequests,
     receivedRequests,
+    listFriends,
+    searchUsers,
     sendFriendRequest,
     acceptFriendRequest,
     refuseFriendRequest,

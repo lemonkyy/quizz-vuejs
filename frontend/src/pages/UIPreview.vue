@@ -5,6 +5,7 @@ import Select from '@/components/ui/atoms/Select.vue';
 import Checkbox from '@/components/ui/atoms/Checkbox.vue';
 import Title from '@/components/ui/atoms/Title.vue';
 import { ref } from 'vue';
+import UserAutoComplete from '@/components/ui/molecules/inputs/UserAutoComplete.vue';
 
 const selectOptions = [
   { value: 'option1', text: 'Option 1' },
@@ -26,11 +27,15 @@ let checkbox2 = ref<boolean>(false);
 let checkbox3 = ref<boolean>(false);
 let checkbox4 = ref<boolean>(false);
 
+let autoCompleteValue = ref('');
+
 </script>
 
 <template>
   <div class="p-6 space-y-12">
     <Title :level="1"> UI Preview </Title>
+    autocomplete 
+    <UserAutoComplete v-model="autoCompleteValue" />
     <div class="flex flex-row gap-8 flex-wrap">
       <Button theme="primary" type="button" rounded="sm"> Primary button </Button>
       <Button theme="primary" type="button" transparent> Primary button </Button>

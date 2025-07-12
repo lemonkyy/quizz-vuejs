@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useAuthStore } from '@/store/auth';
 import Button from '@/components/ui/atoms/Button.vue';
-import TotpShowSecretModal from '@/components/ui/modals/TotpShowSecretModal.vue';
+import TotpShowSecretModal from '@/components/ui/molecules/modals/TotpShowSecretModal.vue';
 
 const auth = useAuthStore();
 

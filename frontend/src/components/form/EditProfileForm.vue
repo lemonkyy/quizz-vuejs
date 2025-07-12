@@ -41,9 +41,7 @@ const handleUpdateAccount = async () => {
   }
 
   try {
-    console.log("test1")
     await auth.updateUsername(newUsername.value);
-    console.log("test2");
     emit('back');
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.code) {

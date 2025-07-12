@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import Title from '@/components/ui/atoms/Title.vue';
 import Input from '@/components/ui/atoms/Input.vue';
-import SendFriendRequestButton from '@/components/ui/buttons/SendFriendRequestButton.vue';
+import SendFriendRequestButton from '@/components/ui/molecules/buttons/SendFriendRequestButton.vue';
 import { ref } from 'vue';
 
 const usernameSearch = ref('');

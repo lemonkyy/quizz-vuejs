@@ -3,7 +3,7 @@ import Image from '@/components/ui/atoms/Image.vue';
 import UserIcon from '@/assets/images/user_icon1.png';
 import { useAuthStore } from '@/store/auth';
 import Title from '@/components/ui/atoms/Title.vue';
-import LogoutButton from '@/components/ui/buttons/LogoutButton.vue';
+import LogoutButton from '@/components/ui/molecules/buttons/LogoutButton.vue';
 import QuizHistoryRow from '@/components/profile/QuizHistoryRow.vue';
 import AddFriendRow from '@/components/profile/AddFriendRow.vue';
 import EditProfileRow from './EditProfileRow.vue';

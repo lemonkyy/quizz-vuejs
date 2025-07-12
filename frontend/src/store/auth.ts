@@ -6,8 +6,7 @@ import {login as loginService,
   logout as logoutService, 
   loginVerify as loginVerifyService, 
   generateTotpSecret as generateTotpSecretService,
-  updateUser as updateUserService,
-  listFriends as listFriendsService} from '@/services/userService';
+  updateUser as updateUserService } from '@/services/userService';
 import { jwtDecode } from 'jwt-decode';
 import router from '@/router';
 import { useToast } from "vue-toastification";
@@ -15,7 +14,6 @@ import { useToast } from "vue-toastification";
 export const useAuthStore = defineStore("auth",  () => {
 
   const user = ref<User |null>(null);
-  const friends = ref<User[]>([]);
   const toast = useToast();
 
   //get the cookie containing user info
@@ -33,6 +31,7 @@ export const useAuthStore = defineStore("auth",  () => {
       try {
         const userData = jwtDecode<JWTUserPayload>(jwtHp);
         user.value = {
+          id: userData.id,
           username: userData.username,
           email: userData.email,
           roles: userData.roles,
@@ -110,6 +109,18 @@ export const useAuthStore = defineStore("auth",  () => {
       throw error;
     }
   }
+
+  const generateTotpSecret = async () => {
+    try {
+      const response = await generateTotpSecretService();
+      initUserFromCookie();
+      toast.success('TOTP configuré! Veuillez récupérer votre code secret.')
+      return response;
+    } catch(error) {
+      toast.error('Erreur lors de la génération du secret OTP.')
+      throw error;
+    }
+  }
   
   const logout = async () => {
     try {
@@ -127,41 +138,15 @@ export const useAuthStore = defineStore("auth",  () => {
     }
   }
 
-  const generateTotpSecret = async () => {
-    try {
-      const response = await generateTotpSecretService();
-      initUserFromCookie();
-      toast.success('TOTP configuré! Veuillez récupérer votre code secret.')
-      return response;
-    } catch(error) {
-      toast.error('Erreur lors de la génération du secret OTP.')
-      throw error;
-    }
-  }
-
-  const listFriends = async () => {
-    try {
-      const response = await listFriendsService();
-      if (response.code === 'SUCCESS' && response.friends) {
-        friends.value = response.friends;
-      }
-    } catch (error) {
-      console.error('Error listing friends:', error);
-      throw error;
-    }
-  }
-
   return {
     user,
-    friends,
     register,
     login,
     loginVerify,
     updateUsername,
     logout,
     generateTotpSecret,
-    clearTotpSecret,
-    listFriends
+    clearTotpSecret
   }
 
 })

@@ -5,6 +5,7 @@ namespace App\DataFixtures;
 use App\Entity\ProfilePicture;
 use App\Entity\User;
 use Doctrine\Common\DataFixtures\DependentFixtureInterface;
+use Faker\Factory;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserFixtures extends AbstractFixtures implements DependentFixtureInterface
@@ -71,6 +72,16 @@ class UserFixtures extends AbstractFixtures implements DependentFixtureInterface
             'password' => 'user6',
             'roles' => ['ROLE_USER'],
         ];
+
+        $faker = Factory::create();
+        for ($i = 0; $i < 50; $i++) {
+            yield [
+                'email' => $faker->unique()->safeEmail(),
+                'username' => $faker->unique()->userName(),
+                'password' => 'password',
+                'roles' => ['ROLE_USER'],
+            ];
+        }
     }
 
     protected function postInstantiate(object $entity, array $data): void

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import Modal from '../atoms/Modal.vue';
-import Input from '../atoms/Input.vue';
+import Modal from '../../atoms/Modal.vue';
+import Input from '../../atoms/Input.vue';
 
 const modelValue = defineModel({required: true, default: false});
 

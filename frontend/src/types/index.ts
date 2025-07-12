@@ -1,4 +1,5 @@
 export interface User {
+  id: string;
   username: string;
   email: string;
   roles: string[];
@@ -7,6 +8,7 @@ export interface User {
 
 export interface JWTUserPayload {
   jti: string;
+  id: string;
   username: string;
   email: string;
   hasTotp: boolean;

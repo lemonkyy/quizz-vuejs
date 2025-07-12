@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
-import Modal from '../atoms/Modal.vue';
+import Modal from '../../atoms/Modal.vue';
 import MenuBody from '@/components/profile/MenuBody.vue';
 import AddFriendBody from '@/components/profile/AddFriendBody.vue';
 import EditProfileBody from '@/components/profile/EditProfileBody.vue';
