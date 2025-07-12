@@ -6,6 +6,7 @@ function createAxiosInstance(baseUrl?: string, token?: string) {
     headers: {
       Authorization: token ? `Bearer ${token}` : '',
     },
+    withCredentials: true,
   })
 }
 

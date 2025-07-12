@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
 import type { User, JWTUserPayload } from '@/types';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import {login as loginService, 
   register as registerService, 
   logout as logoutService, 
   loginVerify as loginVerifyService, 
   generateTotpSecret as generateTotpSecretService,
-  updateUser as updateUserService} from '@/services/userService';
+  updateUser as updateUserService } from '@/services/userService';
 import { jwtDecode } from 'jwt-decode';
 import router from '@/router';
 import { useToast } from "vue-toastification";
@@ -14,6 +14,10 @@ import { useToast } from "vue-toastification";
 export const useAuthStore = defineStore("auth",  () => {
 
   const user = ref<User |null>(null);
+
+  const userProfilePictureUrl = computed(() => {
+    return user.value?.profilePicture ? import.meta.env.VITE_PUBLIC_IMAGES_URL + user.value.profilePicture : "";
+  });
   const toast = useToast();
 
   //get the cookie containing user info
@@ -31,7 +35,9 @@ export const useAuthStore = defineStore("auth",  () => {
       try {
         const userData = jwtDecode<JWTUserPayload>(jwtHp);
         user.value = {
+          id: userData.id,
           username: userData.username,
+          profilePicture: userData.profilePicture,
           email: userData.email,
           roles: userData.roles,
           hasTotp: userData.hasTotp
@@ -108,6 +114,18 @@ export const useAuthStore = defineStore("auth",  () => {
       throw error;
     }
   }
+
+  const generateTotpSecret = async () => {
+    try {
+      const response = await generateTotpSecretService();
+      initUserFromCookie();
+      toast.success('TOTP configuré! Veuillez récupérer votre code secret.')
+      return response;
+    } catch(error) {
+      toast.error('Erreur lors de la génération du secret OTP.')
+      throw error;
+    }
+  }
   
   const logout = async () => {
     try {
@@ -125,20 +143,9 @@ export const useAuthStore = defineStore("auth",  () => {
     }
   }
 
-  const generateTotpSecret = async () => {
-    try {
-      const response = await generateTotpSecretService();
-      initUserFromCookie();
-      toast.success('TOTP configuré! Veuillez récupérer votre code secret.')
-      return response;
-    } catch(error) {
-      toast.error('Erreur lors de la génération du secret OTP.')
-      throw error;
-    }
-  }
-
   return {
     user,
+    userProfilePictureUrl,
     register,
     login,
     loginVerify,

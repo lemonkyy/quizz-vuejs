@@ -8,6 +8,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "api-platform/core": "^3.4.17",
+        "beberlei/doctrineextensions": "*",
         "doctrine/doctrine-migrations-bundle": "4.0.x-dev",
         "doctrine/orm": "^2.20.5",
         "lexik/jwt-authentication-bundle": "^3.1.1",
@@ -28,6 +29,7 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^4.1",
+        "fakerphp/faker": "^1.23",
         "symfony/maker-bundle": "^1.63"
     },
     "config": {

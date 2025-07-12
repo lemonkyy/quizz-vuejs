@@ -6,7 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Attribute\Route;
 
-class CheckAuth extends AbstractController
+class CheckAuthController extends AbstractController
 {
     #[Route('/api/login', name: 'api_check_auth', methods: ['GET'])]
     public function checkAuthAction(): JsonResponse

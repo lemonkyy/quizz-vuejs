@@ -3,14 +3,12 @@
 namespace App\Controller\Api\Room;
 
 use App\Entity\Room;
-use App\Entity\RoomPlayer;
 use App\Service\RoomMembershipService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use Doctrine\ORM\EntityManagerInterface;
 
 //create a new room
 class MeCreateController extends AbstractController

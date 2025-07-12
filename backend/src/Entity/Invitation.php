@@ -20,7 +20,7 @@ use Symfony\Component\Uid\UuidV7;
 #[ApiResource(
     operations: [
         new Post(
-            uriTemplate: '/invitation/send/{id}',
+            uriTemplate: '/invitation/{id}/send',
             controller: MeSendController::class,
             read: false,
             name: 'api_invitation_send',
@@ -152,7 +152,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/invitation/accept/{id}',
+            uriTemplate: '/invitation/{id}/accept',
             input: false,
             controller: MeAcceptController::class,
             read: false,
@@ -216,7 +216,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/invitation/deny/{id}',
+            uriTemplate: '/invitation/{id}/deny',
             input: false,
             controller: MeDenyController::class,
             read: false,
@@ -266,7 +266,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/invitation/cancel/{id}',
+            uriTemplate: '/invitation/{id}/cancel',
             input: false,
             controller: MeCancelController::class,
             read: false,

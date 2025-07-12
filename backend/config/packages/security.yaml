@@ -45,8 +45,7 @@ security:
 
     access_control:
         - { path: ^/api/admin, roles: ROLE_ADMIN }
-        - { path: ^/api/user, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api, roles: PUBLIC_ACCESS  }
+        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY  }
 
 when@test:
     security:
@@ -67,5 +66,4 @@ when@test:
             stateless: true
             provider: app_user_provider
         access_control:
-            - { path: ^/api/user/, roles: IS_AUTHENTICATED_FULLY }
-            - { path: ^/api, roles: PUBLIC_ACCESS  }
+            - { path: ^/api, roles: IS_AUTHENTICATED_FULLY  }

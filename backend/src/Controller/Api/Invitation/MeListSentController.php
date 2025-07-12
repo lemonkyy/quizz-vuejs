@@ -2,8 +2,7 @@
 
 namespace App\Controller\Api\Invitation;
 
-use App\Entity\Invitation;
-use Doctrine\ORM\EntityManagerInterface;
+use App\Repository\InvitationRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -14,7 +13,7 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 class MeListSentController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] $user, Request $request, EntityManagerInterface $entityManager): Response
+    public function __invoke(#[CurrentUser] $user, Request $request, InvitationRepository $invitationRepository): Response
     {
         $targetUserId = $request->query->get('user_id');
 
@@ -29,7 +28,7 @@ class MeListSentController extends AbstractController
             $criteria['invitedUser'] = $targetUserId;
         }
 
-        $invitations = $entityManager->getRepository(Invitation::class)->findBy($criteria);
+        $invitations = $invitationRepository->findBy($criteria);
 
         return $this->json(['code' => 'SUCCESS', 'invitations' => $invitations], 200, [], ['groups' => ['invitation:read']]);
     }

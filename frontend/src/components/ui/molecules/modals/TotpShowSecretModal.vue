@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { defineProps, defineEmits, computed } from 'vue';
-import Modal from '../atoms/Modal.vue';
+import Modal from '../../atoms/Modal.vue';
 import QrCode from 'qrcode.vue';
 import { useAuthStore } from '@/store/auth';
 

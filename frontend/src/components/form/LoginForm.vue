@@ -5,7 +5,7 @@ import Button from '@/components/ui/atoms/Button.vue';
 import Title from '@/components/ui/atoms/Title.vue';
 import Error from '@/components/ui/atoms/Error.vue';
 import { useAuthStore } from '@/store/auth';
-import TotpLoginModal from '../ui/modals/TotpLoginModal.vue';
+import TotpLoginModal from '../ui/molecules/modals/TotpLoginModal.vue';
 import type { AxiosError } from 'axios';
 
 const email = ref<string>('');

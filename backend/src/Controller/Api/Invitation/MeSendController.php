@@ -5,7 +5,6 @@ namespace App\Controller\Api\Invitation;
 use App\Entity\Invitation;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
@@ -18,13 +17,16 @@ use App\Repository\InvitationRepository;
 class MeSendController extends AbstractController
 {
     private int $maxRoomUsers;
+    private int $maxSentInvitations;
+
     public function __construct(ParameterBagInterface $params)
     {
         $this->maxRoomUsers = $params->get('app.max_room_users');
+        $this->maxSentInvitations = $params->get('app.max_sent_invitations');
     }
 
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] $user, string $id, Request $request, UserRepository $userRepository, RoomRepository $roomRepository, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager): Response
+    public function __invoke(#[CurrentUser] $user, string $id, UserRepository $userRepository, RoomRepository $roomRepository, InvitationRepository $invitationRepository, EntityManagerInterface $entityManager): Response
     {
         if (!$id) {
             return $this->json(['code' => 'ERR_MISSING_USER_ID', 'error' => 'Missing user_id'], 400);
@@ -63,6 +65,10 @@ class MeSendController extends AbstractController
 
         if ($existing) {
             return $this->json(['code' => 'ERR_INVITATION_ALREADY_SENT', 'error' => 'Invitation already sent'], 400);
+        }
+
+        if (count($user->getSentInvitations()) >= $this->maxSentInvitations) {
+            return $this->json(['code' => 'ERR_MAX_SENT_INVITATIONS_REACHED', 'error' => 'You have reached the maximum number of sent invitations'], 400);
         }
 
         $invitation = new Invitation();

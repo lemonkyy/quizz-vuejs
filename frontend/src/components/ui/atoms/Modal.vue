@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import Title from './Title.vue';
-import CrossButton from '../buttons/CrossButton.vue';
+import CrossButton from '../molecules/buttons/CrossButton.vue';
+import BackButton from '../molecules/buttons/BackButton.vue';
 
 const modelValue = defineModel({required: true, default: false});
-
-import BackButton from '../buttons/BackButton.vue';
 
 const props = defineProps({
   staticBackdrop: {type: Boolean, default: false},

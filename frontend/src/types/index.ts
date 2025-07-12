@@ -1,5 +1,7 @@
 export interface User {
+  id: string;
   username: string;
+  profilePicture: string;
   email: string;
   roles: string[];
   hasTotp: boolean;
@@ -7,7 +9,9 @@ export interface User {
 
 export interface JWTUserPayload {
   jti: string;
+  id: string;
   username: string;
+  profilePicture: string;
   email: string;
   hasTotp: boolean;
   roles: string[];

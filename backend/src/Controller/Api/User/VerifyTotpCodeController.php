@@ -13,7 +13,7 @@ use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 
 //handles TOTP code check
-class VerifyTotpCode extends AbstractController
+class VerifyTotpCodeController extends AbstractController
 {
     public function __invoke(Request $request, TotpService $totpService, JWTTokenManagerInterface $jwtManager, CacheInterface $cache, UserRepository $userRepository, JWTCookieService $cookieService): JsonResponse
     {

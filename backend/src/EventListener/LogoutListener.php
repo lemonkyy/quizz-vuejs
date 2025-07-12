@@ -3,7 +3,6 @@
 namespace App\EventListener;
 
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Security\Http\Event\LogoutEvent;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
