@@ -1,8 +1,9 @@
 import axios from '@/plugins/axios';
+import type { User } from '@/types';
 
 export async function login(params: {email: string, password: string}): Promise<{code: string, message?: string, tempToken?: string, error?: string}> {
   try {
-    const response = await axios.post('/login', params, {withCredentials: true});
+    const response = await axios.post('/login', params);
     return response.data;
   } catch (error) {
     throw error;
@@ -29,7 +30,7 @@ export async function register(params: {email: string, password: string, tosAgre
 
 export async function loginVerify(params: {totpCode: string, tempToken: string}): Promise<{code: string, tempToken?: string, error?: string}> {
   try {
-    const response = await axios.post('/login-verify', params, {withCredentials: true});
+    const response = await axios.post('/login-verify', params);
     return response.data;
   } catch (error) {
     throw error;
@@ -38,7 +39,7 @@ export async function loginVerify(params: {totpCode: string, tempToken: string})
 
 export async function generateTotpSecret(): Promise<{code: string, totpSecret?: string, error?: string}> {
   try {
-    const response = await axios.get('/user/totp/secret', {withCredentials: true});
+    const response = await axios.get('/user/totp/secret');
     return response.data;
   } catch (error) {
     throw error;
@@ -47,7 +48,34 @@ export async function generateTotpSecret(): Promise<{code: string, totpSecret?: 
 
 export async function updateUser(params: {newUsername?: string, clearTotpSecret?: boolean}): Promise<{code: string, message?: string, error?: string}> {
   try {
-    const response = await axios.put('/user', params, {withCredentials: true});
+    const response = await axios.put('/user', params);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getUserByUsername(params: {username: string}): Promise<{code: string, user?: User, error?: string}> {
+  try {
+    const response = await axios.get('/user/get-by-username', { params: params });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function searchUsers(username: string, page?: number, limit?: number): Promise<{code: string, users?: User[], error?: string}> {
+  try {
+    const response = await axios.get('/user/search', { params: { username, page, limit } });
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function getMe(): Promise<{code: string, user?: User, error?: string}> {
+  try {
+    const response = await axios.get('/user/me');
     return response.data;
   } catch (error) {
     throw error;

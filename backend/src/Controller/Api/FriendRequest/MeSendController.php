@@ -31,9 +31,6 @@ class MeSendController extends AbstractController
         $receiverId = $id;
 
         if ($receiverId === $user->getId()->__toString()) {
-        }
-
-        if ($receiverId === $user->getId()->__toString()) {
             return $this->json(['code' => 'ERR_CANNOT_SEND_TO_SELF', 'error' => 'Cannot send friend request to yourself'], 400);
         }
 

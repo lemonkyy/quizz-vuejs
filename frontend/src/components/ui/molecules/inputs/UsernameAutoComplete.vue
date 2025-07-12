@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
-import { searchUsers as searchUsersService } from '@/services/friendService';
+import { searchUsers } from '@/services/userService';
 import type { User } from '@/types';
 import AutoComplete from '@/components/ui/atoms/AutoComplete.vue';
 
@@ -19,7 +19,7 @@ const search = async (query: string, page: number = 1, limit: number = 10) => {
   isLoading.value = true;
 
   try {
-    const response = await searchUsersService(query, page, limit);
+    const response = await searchUsers(query, page, limit);
     
     if (response.code === 'SUCCESS' && response.users) {
       searchedUsers.value.push(...response.users);

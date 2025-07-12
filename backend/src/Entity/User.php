@@ -24,11 +24,83 @@ use App\Controller\Api\User\VerifyTotpCodeController;
 use App\Repository\UserRepository;
 use SpecShaper\EncryptBundle\Annotations\Encrypted;
 use App\Controller\Api\User\SearchController;
+use App\Controller\Api\User\GetByUsernameController;
 
 #[ApiResource(
     operations: [
         new Get(
-            uriTemplate: '/user',
+            uriTemplate: '/user/get-by-username',
+            controller: GetByUsernameController::class,
+            read: false,
+            name: 'api_get_user_by_username',
+            openapiContext: [
+                'summary' => 'Get user by username',
+                'description' => 'Returns a user based on their username.',
+                'parameters' => [
+                    [
+                        'name' => 'username',
+                        'in' => 'query',
+                        'required' => true,
+                        'schema' => ['type' => 'string'],
+                        'description' => 'The username of the user to retrieve.'
+                    ]
+                ],
+                'responses' => [
+                    '200' => [
+                        'description' => 'User info',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'user' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'string'],
+                                                'username' => ['type' => 'string'],
+                                                'email' => ['type' => 'string'],
+                                                'profilePictureURL' => ['type' => 'string'],
+                                            ]
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '400' => [
+                        'description' => 'Missing username',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['ERR_MISSING_USERNAME']],
+                                        'error' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    '404' => [
+                        'description' => 'User not found',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['ERR_USER_NOT_FOUND']],
+                                        'error' => ['type' => 'string']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]
+            ]
+        ),
+        new Get(
+            uriTemplate: '/user/me',
             input: false,
             controller: MeReadController::class,
             read: false,
@@ -64,7 +136,7 @@ use App\Controller\Api\User\SearchController;
                 ]
             ]
         ),
-        new Post(
+        new Get(
             uriTemplate: '/user/search',
             controller: SearchController::class,
             read: false,
@@ -72,19 +144,27 @@ use App\Controller\Api\User\SearchController;
             openapiContext: [
                 'summary' => 'Search for users by username',
                 'description' => 'Returns a list of users matching the provided username, with pagination.',
-                'requestBody' => [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'username' => ['type' => 'string', 'description' => 'The username to search for', 'example' => 'testuser'],
-                                    'page' => ['type' => 'integer', 'default' => 1, 'description' => 'The page number for pagination'],
-                                    'limit' => ['type' => 'integer', 'default' => 10, 'description' => 'The number of results per page']
-                                ],
-                                'required' => ['username']
-                            ]
-                        ]
+                'parameters' => [
+                    [
+                        'name' => 'username',
+                        'in' => 'query',
+                        'required' => true,
+                        'schema' => ['type' => 'string'],
+                        'description' => 'The username to search for'
+                    ],
+                    [
+                        'name' => 'page',
+                        'in' => 'query',
+                        'required' => false,
+                        'schema' => ['type' => 'integer', 'default' => 1],
+                        'description' => 'The page number for pagination'
+                    ],
+                    [
+                        'name' => 'limit',
+                        'in' => 'query',
+                        'required' => false,
+                        'schema' => ['type' => 'integer', 'default' => 10],
+                        'description' => 'The number of results per page'
                     ]
                 ],
                 'responses' => [
@@ -376,9 +456,55 @@ use App\Controller\Api\User\SearchController;
             name: 'api_user_list_friends',
             openapiContext: [
                 'summary' => 'List current user\'s friends',
-                'description' => 'Lists all friends of the current authenticated user.',
+                'description' => 'Lists all friends of the current authenticated user with pagination and filtering.',
+                'parameters' => [
+                    [
+                        'name' => 'page',
+                        'in' => 'query',
+                        'required' => false,
+                        'schema' => ['type' => 'integer', 'default' => 1],
+                        'description' => 'The page number for pagination'
+                    ],
+                    [
+                        'name' => 'limit',
+                        'in' => 'query',
+                        'required' => false,
+                        'schema' => ['type' => 'integer', 'default' => 10],
+                        'description' => 'The number of results per page'
+                    ],
+                    [
+                        'name' => 'username',
+                        'in' => 'query',
+                        'required' => false,
+                        'schema' => ['type' => 'string'],
+                        'description' => 'Filter friends by username'
+                    ]
+                ],
                 'responses' => [
-                    '200' => ['description' => 'List of friends'],
+                    '200' => [
+                        'description' => 'List of friends',
+                        'content' => [
+                            'application/json' => [
+                                'schema' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
+                                        'friends' => ['type' => 'array',
+                                            'items' => [
+                                                'type' => 'object',
+                                                'properties' => [
+                                                    'id' => ['type' => 'string'],
+                                                    'username' => ['type' => 'string'],
+                                                    'profilePictureUrl' => ['type' => 'string']
+                                                ]
+                                            ]
+                                        ],
+                                        'hasMore' => ['type' => 'boolean']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
                     '401' => ['description' => 'Unauthorized']
                 ]
             ]
@@ -391,7 +517,7 @@ use App\Controller\Api\User\SearchController;
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['room:read', 'invitation:read', 'friendRequest:read'])]
+    #[Groups(['room:read', 'invitation:read', 'friendRequest:read', 'user:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
@@ -547,13 +673,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     }
 
     #[Groups(['user:read', 'room:read', 'user:read', 'invitation:read', 'friendRequest:read'])]
-    public function getProfilePictureUrl(): ?string
+    public function getProfilePicturePath(): ?string
     {
         if (!$this->profilePicture) {
             return null;
         }
 
-        return '/uploads/profile_pictures/' . $this->profilePicture->getFileName();
+        //frontend is already gonna have /images/, no need to return it here
+        return '/profile_pictures/' . $this->profilePicture->getFileName();
     }
 
     /**

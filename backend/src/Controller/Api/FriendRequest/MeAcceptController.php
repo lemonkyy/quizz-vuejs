@@ -20,13 +20,16 @@ class MeAcceptController extends AbstractController
     {
         $this->maxFriends = $params->get('app.max_friends');
     }
-
+    
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function __invoke(#[CurrentUser] $user, string $id, FriendRequestRepository $friendRequestRepository, EntityManagerInterface $entityManager): Response
     {
         $friendRequest = $friendRequestRepository->find($id);
 
-        if (!$friendRequest || $friendRequest->getReceiver() !== $user) {
+        $sender = $friendRequest->getSender();
+        $receiver = $friendRequest->getReceiver();
+        
+        if (!$friendRequest || $receiver !== $user) {
             return $this->json(['code' => 'ERR_FRIEND_REQUEST_NOT_FOUND', 'error' => 'Friend request not found'], 404);
         }
 
@@ -43,19 +46,15 @@ class MeAcceptController extends AbstractController
         }
 
         $friendRequest->setAcceptedAt(new \DateTimeImmutable());
-
-        // Add each other to friends list
-        $sender = $friendRequest->getSender();
-        $receiver = $friendRequest->getReceiver();
-
+        
         if (count($sender->getFriends()) >= $this->maxFriends) {
             return $this->json(['code' => 'ERR_SENDER_MAX_FRIENDS_REACHED', 'error' => 'Sender has reached the maximum number of friends'], 400);
         }
-
+        
         if (count($receiver->getFriends()) >= $this->maxFriends) {
             return $this->json(['code' => 'ERR_RECEIVER_MAX_FRIENDS_REACHED', 'error' => 'Receiver has reached the maximum number of friends'], 400);
         }
-
+        
         $sender->addFriend($receiver);
         $receiver->addFriend($sender);
 

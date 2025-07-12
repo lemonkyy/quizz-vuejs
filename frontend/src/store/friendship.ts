@@ -10,21 +10,46 @@ import {
   listSentFriendRequests as listSentFriendRequestsService,
   listReceivedFriendRequests as listReceivedFriendRequestsService,
   listFriends as listFriendsService,
-  searchUsers as searchUsersService
+  removeFriend as removeFriendService
 } from '@/services/friendService';
+import { getUserByUsername as getUserByUsernameService } from '@/services/userService';
 
 export const useFriendStore = defineStore("friend", () => {
 
   const friends = ref<User[]>([]);
+
   const sentRequests = ref<any[]>([]);
   const receivedRequests = ref<any[]>([]);
+
   const toast = useToast();
 
-  const listFriends = async () => {
+  const currentPage = ref(1);
+  const hasMoreFriends = ref(true);
+
+  const currentUsernameFilter = ref<string | undefined>(undefined);
+
+  const listFriends = async (username?: string, page: number = 1, limit: number = 10) => {
     try {
-      const response = await listFriendsService();
+      if (username !== undefined && username !== currentUsernameFilter.value) {
+        friends.value = [];
+        currentPage.value = 1;
+        hasMoreFriends.value = true;
+      }
+      currentUsernameFilter.value = username;
+
+      if (!hasMoreFriends.value && page > 1) {
+        return;
+      }
+
+      const response = await listFriendsService(username, page, limit);
       if (response.code === 'SUCCESS' && response.friends) {
-        friends.value = response.friends;
+        if (page === 1) {
+          friends.value = response.friends;
+        } else {
+          friends.value = [...friends.value, ...response.friends];
+        }
+        hasMoreFriends.value = response.hasMore || false;
+        currentPage.value = page;
       }
     } catch (error) {
       console.error('Error listing friends:', error);
@@ -32,21 +57,26 @@ export const useFriendStore = defineStore("friend", () => {
     }
   }
 
-  const searchUsers = async (username: string, page?: number, limit?: number) => {
+  const loadMoreFriends = async () => {
+    if (hasMoreFriends.value) {
+      await listFriends(currentUsernameFilter.value, currentPage.value + 1);
+    }
+  };
+
+  const removeFriend = async (id: string) => {
     try {
-      const response = await searchUsersService(username, page, limit);
-      if (response.code === 'SUCCESS' && response.users) {
-        return response.users;
-      }
+      await removeFriendService(id);
+      toast.success('Friend removed!');
+      await listFriends(currentUsernameFilter.value, 1);
     } catch (error) {
-      toast.error('Error while fetching users.');
+      toast.error('Error removing friend.');
       throw error;
     }
-  }
+  };
 
-  const sendFriendRequest = async (receiverId: string) => {
+  const sendFriendRequest = async (id: string) => {
     try {
-      await sendFriendRequestService(receiverId);
+      await sendFriendRequestService(id);
       toast.success('Friend request sent!');
       await listSentFriendRequests();
     } catch (error) {
@@ -55,10 +85,23 @@ export const useFriendStore = defineStore("friend", () => {
     }
   };
 
+  const sendFriendRequestByUsername = async (username: string) => {
+    try {
+      const response = await getUserByUsernameService({ username });
+      if (!response.user) {
+        toast.error('No user matching the username found.');
+        return;
+      }
+      await sendFriendRequest(response.user.id);
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const acceptFriendRequest = async (id: string) => {
     try {
       await acceptFriendRequestService(id);
-      toast.success('Friend request accepted!');
+      toast.success('Friend added!');
       await listReceivedFriendRequests();
       await listFriends();
     } catch (error) {
@@ -70,7 +113,7 @@ export const useFriendStore = defineStore("friend", () => {
   const refuseFriendRequest = async (id: string) => {
     try {
       await refuseFriendRequestService(id);
-      toast.success('Friend request refused!');
+      toast.success('Friend request refused.');
       await listReceivedFriendRequests();
     } catch (error) {
       toast.error('Error refusing friend request.');
@@ -81,7 +124,7 @@ export const useFriendStore = defineStore("friend", () => {
   const cancelFriendRequest = async (id: string) => {
     try {
       await cancelFriendRequestService(id);
-      toast.success('Friend request cancelled!');
+      toast.success('Friend request cancelled.');
       await listSentFriendRequests();
     } catch (error) {
       toast.error('Error cancelling friend request.');
@@ -113,17 +156,28 @@ export const useFriendStore = defineStore("friend", () => {
     }
   };
 
+  const clearFriends = () => {
+    friends.value = [];
+    currentPage.value = 1;
+    hasMoreFriends.value = true;
+    currentUsernameFilter.value = undefined;
+  };
+
   return {
     friends,
     sentRequests,
     receivedRequests,
+    hasMoreFriends,
     listFriends,
-    searchUsers,
+    loadMoreFriends,
     sendFriendRequest,
     acceptFriendRequest,
     refuseFriendRequest,
     cancelFriendRequest,
     listSentFriendRequests,
-    listReceivedFriendRequests
+    listReceivedFriendRequests,
+    sendFriendRequestByUsername,
+    removeFriend,
+    clearFriends
   };
 });

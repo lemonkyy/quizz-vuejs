@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import type { User, JWTUserPayload } from '@/types';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import {login as loginService, 
   register as registerService, 
   logout as logoutService, 
@@ -14,6 +14,10 @@ import { useToast } from "vue-toastification";
 export const useAuthStore = defineStore("auth",  () => {
 
   const user = ref<User |null>(null);
+
+  const userProfilePictureUrl = computed(() => {
+    return user.value?.profilePicture ? import.meta.env.VITE_PUBLIC_IMAGES_URL + user.value.profilePicture : "";
+  });
   const toast = useToast();
 
   //get the cookie containing user info
@@ -33,6 +37,7 @@ export const useAuthStore = defineStore("auth",  () => {
         user.value = {
           id: userData.id,
           username: userData.username,
+          profilePicture: userData.profilePicture,
           email: userData.email,
           roles: userData.roles,
           hasTotp: userData.hasTotp
@@ -140,6 +145,7 @@ export const useAuthStore = defineStore("auth",  () => {
 
   return {
     user,
+    userProfilePictureUrl,
     register,
     login,
     loginVerify,

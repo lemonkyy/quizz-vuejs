@@ -9,10 +9,6 @@ const props = defineProps({
   bgColor: { type: String, default: '#ffffff' },
   fgColor: { type: String, default: '#000000' },
 });
-
-onMounted(() => {
-  console.log('QR Code Text:', props.value);
-});
 </script>
 
 <template>

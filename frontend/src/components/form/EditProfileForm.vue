@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import Image from '@/components/ui/atoms/Image.vue';
-import UserIcon from '@/assets/images/user_icon1.png';
 import { useAuthStore } from '@/store/auth';
 import { computed, ref } from 'vue';
 import { AxiosError } from 'axios';
@@ -58,7 +57,7 @@ const handleUpdateAccount = async () => {
 
 <template>
   <form @submit.prevent="handleUpdateAccount" class="flex flex-col items-center gap-4 p-4 w-full">
-    <Image :src="UserIcon" alt="user icon" rounded="sm" :size="16" />
+    <Image :src="auth.userProfilePictureUrl" alt="user icon" rounded="sm" :size="16" />
     
     <Input
         id="username-edit"

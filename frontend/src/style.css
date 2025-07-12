@@ -76,6 +76,12 @@
     --color-select-secondary-outline-focus: var(--color-yellow-2);
     --color-select-secondary-text: var(--color-brown-2);
 
+    --color-autocomplete-background: var(--color-white);
+    --color-autocomplete-border: var(--color-grey-3);
+    --color-autocomplete-item-hover-background: var(--color-grey-1);
+    --color-autocomplete-item-highlight-background: var(--color-light-yellow-2);
+    --color-autocomplete-loading-text: var(--color-grey-2);
+
     --color-modal-backdrop: rgba(0, 0, 0, 0.4);
     --color-modal-background: var(--color-white);
     --color-modal-border: var(--color-grey-1);

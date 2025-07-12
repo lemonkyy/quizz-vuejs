@@ -1,9 +1,9 @@
 import axios from '@/plugins/axios';
 import type { User } from '@/types';
 
-export async function sendFriendRequest(receiverId: string): Promise<{code: string, message?: string, error?: string}> {
+export async function sendFriendRequest(id: string): Promise<{code: string, message?: string, error?: string}> {
   try {
-    const response = await axios.post(`/friend-requests/${receiverId}`);
+    const response = await axios.post(`/friend-request/${id}/send`);
     return response.data;
   } catch (error) {
     throw error;
@@ -12,7 +12,7 @@ export async function sendFriendRequest(receiverId: string): Promise<{code: stri
 
 export async function acceptFriendRequest(id: string): Promise<{code: string, message?: string, error?: string}> {
   try {
-    const response = await axios.post(`/friend-requests/${id}/accept`);
+    const response = await axios.post(`/friend-request/${id}/accept`);
     return response.data;
   } catch (error) {
     throw error;
@@ -21,7 +21,7 @@ export async function acceptFriendRequest(id: string): Promise<{code: string, me
 
 export async function refuseFriendRequest(id: string): Promise<{code: string, message?: string, error?: string}> {
   try {
-    const response = await axios.post(`/friend-requests/${id}/refuse`);
+    const response = await axios.post(`/friend-request/${id}/refuse`);
     return response.data;
   } catch (error) {
     throw error;
@@ -30,7 +30,7 @@ export async function refuseFriendRequest(id: string): Promise<{code: string, me
 
 export async function cancelFriendRequest(id: string): Promise<{code: string, message?: string, error?: string}> {
   try {
-    const response = await axios.post(`/friend-requests/${id}/cancel`);
+    const response = await axios.post(`/friend-request/${id}/cancel`);
     return response.data;
   } catch (error) {
     throw error;
@@ -39,7 +39,7 @@ export async function cancelFriendRequest(id: string): Promise<{code: string, me
 
 export async function listSentFriendRequests(): Promise<{code: string, friendRequests?: any[], error?: string}> {
   try {
-    const response = await axios.get('/friend-requests/sent');
+    const response = await axios.get('/friend-request/sent');
     return response.data;
   } catch (error) {
     throw error;
@@ -48,27 +48,28 @@ export async function listSentFriendRequests(): Promise<{code: string, friendReq
 
 export async function listReceivedFriendRequests(): Promise<{code: string, friendRequests?: any[], error?: string}> {
   try {
-    const response = await axios.get('/friend-requests/received');
+    const response = await axios.get('/friend-request/received');
     return response.data;
   } catch (error) {
     throw error;
   }
 }
 
-export async function listFriends(): Promise<{code: string, friends?: User[], error?: string}> {
+export async function listFriends(username?: string, page?: number, limit?: number): Promise<{code: string, friends?: User[], hasMore?: boolean, error?: string}> {
   try {
-    const response = await axios.get('/user/friends', {withCredentials: true});
+    const response = await axios.get('/user/friends', { params: { username, page, limit } });
     return response.data;
   } catch (error) {
     throw error;
   }
 }
 
-export async function searchUsers(username: string, page?: number, limit?: number): Promise<{code: string, users?: User[], error?: string}> {
+export async function removeFriend(id: string): Promise<{code: string, message?: string, error?: string}> {
   try {
-    const response = await axios.post('/user/search', { username, page, limit }, {withCredentials: true});
+    const response = await axios.delete(`/user/friends/${id}`);
     return response.data;
   } catch (error) {
     throw error;
   }
 }
+

@@ -9,6 +9,6 @@ import Image from '../ui/atoms/Image.vue';
     <Button theme="monochrome" class="p-2">
       <Image :src="User" alt="user-icon" :width="1.4" />
     </Button>
-    <span class="font-semibold">Add Friend</span>
+    <span class="font-semibold">Friends</span>
   </div>
 </template>

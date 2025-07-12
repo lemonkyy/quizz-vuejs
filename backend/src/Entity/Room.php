@@ -60,7 +60,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/room/kick/{id}',
+            uriTemplate: '/room/{id}/kick',
             controller: MeKickUserController::class,
             read: false,
             name: 'api_room_kick_user',
@@ -230,7 +230,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/room/join/{id}',
+            uriTemplate: '/room/{id}/join',
             input: false,
             controller: MeJoinController::class,
             read: false,

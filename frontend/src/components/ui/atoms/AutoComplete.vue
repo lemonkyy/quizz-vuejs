@@ -1,6 +1,8 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick, defineProps, defineEmits, watch, type PropType } from 'vue'
+import { ref, defineProps, defineEmits, watch, type PropType } from 'vue'
+import { useIntersectionObserver } from '@/composables/useIntersectionObserver';
 import Input from '@/components/ui/atoms/Input.vue';
+import LoadingSpinner from '@/components/ui/atoms/LoadingSpinner.vue';
 
 //component for autocomplete
 //displays list of string provided by parent component. Emits a load-more event when the user scrolls to the bottom.
@@ -16,86 +18,94 @@ const props = defineProps({
 const emit = defineEmits<{ (e: 'load-more'): void }>()
 
 const showDropdown = ref(false)
-const loadMoreTrigger = ref<HTMLElement | null>(null) // Element that triggers loading more items
+const highlightedIndex = ref(-1)
+const loadMoreTrigger = ref<HTMLElement | null>(null) //element that triggers loading more items
+const justSelectedItem = ref(false) // to prevent showing on focus after selection
+const ignoreNextModelValueWatch = ref(false) //to ignore programmatic modelValue changes
 
-let observer: IntersectionObserver | null = null
+watch(modelValue, (newValue) => {
+  if (ignoreNextModelValueWatch.value) {
+    ignoreNextModelValueWatch.value = false
+    return
+  }
 
-//watch for changes in the input value to show/hide the dropdown
-//watch(modelValue, (newValue) => {
-//  if (newValue.trim() && props.items.length > 0) {
-//    showDropdown.value = true
-//  } else {
-//    showDropdown.value = false
-//  }
-//})
-
-//watch the items prop to show the dropdown when results arrive
-watch(() => props.items, (newItems) => {
-  if (modelValue.value.trim() && newItems.length > 0) {
+  if (newValue.trim()) {
     showDropdown.value = true
   } else {
     showDropdown.value = false
   }
 })
 
+//watch the items prop to show the dropdown when results arrive
+watch(() => props.items, (newItems) => {
+  if (justSelectedItem.value) {
+    return;
+  }
+
+  if (modelValue.value.trim() && (newItems.length > 0 || props.isLoading)) {
+    showDropdown.value = true
+  } else {
+    showDropdown.value = false
+  }
+  highlightedIndex.value = -1
+})
+
 //show dropdown on focus if there are items
 function onFocus() {
-  if (props.items.length > 0 && modelValue.value.trim()) {
+  if (justSelectedItem.value) {
+    justSelectedItem.value = false
+    return
+  }
+  if (modelValue.value.trim() || props.isLoading) {
     showDropdown.value = true
   }
+  highlightedIndex.value = -1
 }
 
-//hide dropdown when the component loses focus
 function hideDropdown() {
   setTimeout(() => {
-    showDropdown.value = false
+    if (!props.isLoading) {
+      showDropdown.value = false
+    }
   }, 150)
 }
 
 function selectItem(item: string) {
   modelValue.value = item
   showDropdown.value = false
+  justSelectedItem.value = true
+  ignoreNextModelValueWatch.value = true
 }
 
-//sets up observer to watch the 'loadMoreTrigger' element
-function setupObserver() {
-  observer = new IntersectionObserver(
-    (entries) => {
-      // When the trigger element is in view and the component isn't already loading, emit load-more
-      if (entries[0].isIntersecting && props.hasMore && !props.isLoading) {
-        emit('load-more')
+function handleKeyDown(event: KeyboardEvent) {
+  if (!showDropdown.value) return
+
+  switch (event.key) {
+    case 'ArrowDown':
+      event.preventDefault()
+      highlightedIndex.value = (highlightedIndex.value + 1) % props.items.length
+      break
+    case 'ArrowUp':
+      event.preventDefault()
+      highlightedIndex.value = (highlightedIndex.value - 1 + props.items.length) % props.items.length
+      break
+    case 'Enter':
+      event.preventDefault()
+      if (highlightedIndex.value >= 0 && highlightedIndex.value < props.items.length) {
+        selectItem(props.items[highlightedIndex.value])
       }
-    },
-    { threshold: 0.1 }
-  )
-
-  //re-observe correft dom element if it is deleted
-  watch(() => loadMoreTrigger.value, (newEl, oldEl) => {
-    if (oldEl) {
-      observer?.unobserve(oldEl);
-    }
-    if (newEl) {
-      observer?.observe(newEl);
-    }
-  });
-
-  //make sure the element is present in the dom before observing it
-  nextTick(() => {
-    if (loadMoreTrigger.value) {
-      observer?.observe(loadMoreTrigger.value)
-    }
-  })
+      break
+    case 'Escape':
+      showDropdown.value = false
+      break
+  }
 }
 
-onMounted(() => {
-  setupObserver()
-})
-
-onBeforeUnmount(() => {
-  if (observer && loadMoreTrigger.value) {
-    observer.unobserve(loadMoreTrigger.value)
+useIntersectionObserver(loadMoreTrigger, (entries) => {
+  if (entries[0].isIntersecting && props.hasMore && !props.isLoading) {
+    emit('load-more')
   }
-})
+}, { threshold: 0.1 });
 </script>
 
 <template>
@@ -105,19 +115,23 @@ onBeforeUnmount(() => {
       type="text"
       v-model="modelValue"
       @focus="onFocus"
+      @keydown="handleKeyDown"
       placeholder="Type to search..."
       autocomplete="off"
     />
 
     <ul
       v-if="showDropdown"
-      class="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto"
+      class="absolute z-10 w-full mt-1 bg-autocomplete-background border-autocomplete-border rounded-lg shadow-lg max-h-60 overflow-y-auto"
     >
       <li
         v-for="(item, index) in items"
         :key="index"
         @click="selectItem(item)"
-        class="px-4 py-2 cursor-pointer hover:bg-gray-100"
+        :class="[
+          'px-4 py-2 cursor-pointer hover:bg-autocomplete-item-hover-background',
+          {'bg-autocomplete-item-highlight-background': index === highlightedIndex}
+        ]"
       >
         {{ item }}
       </li>
@@ -126,9 +140,9 @@ onBeforeUnmount(() => {
       <li
         v-if="hasMore"
         ref="loadMoreTrigger"
-        class="px-4 py-2 text-center text-sm text-gray-500"
+        class="px-4 py-2 text-center text-sm text-autocomplete-loading-text"
       >
-        <span v-if="isLoading">Loading...</span>
+        <span v-if="isLoading"><LoadingSpinner color="text-autocomplete-loading-text" /></span>
       </li>
     </ul>
   </div>

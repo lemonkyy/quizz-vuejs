@@ -19,7 +19,7 @@ use Symfony\Component\Uid\UuidV7;
 #[ApiResource(
     operations: [
         new Post(
-            uriTemplate: '/friend-request/send/{id}',
+            uriTemplate: '/friend-request/{id}/send',
             controller: MeSendController::class,
             input: false,
             read: false,
@@ -45,7 +45,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/friend-request/accept/{id}',
+            uriTemplate: '/friend-request/{id}/accept',
             controller: MeAcceptController::class,
             read: false,
             input: false,
@@ -62,7 +62,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/friend-request/deny/{id}',
+            uriTemplate: '/friend-request/{id}/deny',
             controller: MeDenyController::class,
             read: false,
             input: false,
@@ -79,7 +79,7 @@ use Symfony\Component\Uid\UuidV7;
             ]
         ),
         new Post(
-            uriTemplate: '/friend-request/cancel/{id}',
+            uriTemplate: '/friend-request/{id}/cancel',
             controller: MeCancelController::class,
             read: false,
             name: 'api_friend_requests_cancel',

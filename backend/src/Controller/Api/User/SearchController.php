@@ -15,16 +15,15 @@ class SearchController extends AbstractController
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
     public function __invoke(UserRepository $userRepository, Request $request): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-        $username = $data['username'] ?? null;
-        $page = $data['page'] ?? 1;
-        $limit = $data['limit'] ?? 10;
+        $username = $request->query->get('username');
+        $page = $request->query->getInt('page', 1);
+        $limit = $request->query->getInt('limit', 10);
 
         if (!$username) {
             return $this->json(['code' => 'ERROR', 'message' => 'Username is required'], 400);
         }
 
-        $users = $userRepository->findByUsername($username, $page, $limit);
+        $users = $userRepository->findByUsernamePaginated($username, $page, $limit);
         return $this->json(['code' => 'SUCCESS', 'users' => $users], 200, [], ['groups' => ['user:read']]);
     }
 }
