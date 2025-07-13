@@ -1,12 +1,14 @@
 <script setup lang="ts">
 import Button from '@/components/ui/atoms/Button.vue';
 import UserIcon from '@/components/profile/UserIcon.vue';
-import type { User } from '@/types';
+import type { PublicUser } from '@/types';
 import { ref, type PropType } from 'vue';
 
 const props = defineProps({
-  friend: { type: Object as PropType<User>, required: true },
+  friend: { type: Object as PropType<PublicUser>, required: true },
 });
+
+const profilePictureUrl = import.meta.env.VITE_PUBLIC_PFP_URL + '/' + props.friend.profilePicture.fileName;
 
 const emit = defineEmits(['remove-friend']);
 
@@ -26,12 +28,12 @@ const handleRemoveFriend = () => {
     class="flex items-center justify-between p-3 bg-background-alt rounded-lg shadow"
   >
     <div class="flex items-center gap-3">
-      <UserIcon :src="friend.profilePicture" />
-      <span class="font-semibold text-text-primary">{{ friend.username }}</span>
+      <UserIcon :src="profilePictureUrl" />
+      <span class="font-semibold">{{ friend.username }}</span>
     </div>
     <Button
       @click="handleRemoveFriend()"
-      :theme="removeConfirmed ? 'secondary' : 'monochrome'"
+      theme="monochrome"
       rounded="md"
     >
       {{ removeConfirmed ? 'Are you sure?' : 'Remove' }}

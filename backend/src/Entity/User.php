@@ -60,7 +60,7 @@ use App\Controller\Api\User\GetByUsernameController;
                                                 'id' => ['type' => 'string'],
                                                 'username' => ['type' => 'string'],
                                                 'email' => ['type' => 'string'],
-                                                'profilePictureURL' => ['type' => 'string'],
+                                                'profilePicture' => ['type' => 'string'],
                                             ]
                                         ]
                                     ]
@@ -122,7 +122,7 @@ use App\Controller\Api\User\GetByUsernameController;
                                             'properties' => [
                                                 'username' => ['type' => 'string'],
                                                 'email' => ['type' => 'string'],
-                                                'profilePictureURL' => ['type' => 'string'],
+                                                'profilePicture' => ['type' => 'string'],
                                             ]
                                         ]
                                     ]
@@ -182,7 +182,7 @@ use App\Controller\Api\User\GetByUsernameController;
                                                 'properties' => [
                                                     'id' => ['type' => 'string'],
                                                     'username' => ['type' => 'string'],
-                                                    'profilePictureUrl' => ['type' => 'string']
+                                                    'profilePicture' => ['type' => 'string']
                                                 ]
                                             ]
                                         ]
@@ -271,7 +271,7 @@ use App\Controller\Api\User\GetByUsernameController;
                                 'properties' => [
                                     'newUsername' => ['type' => 'string'],
                                     'newProfilePictureId' => ['type' => 'string'],
-                                    'clearTotpSecret' => ['type' => 'boolean']
+                                    'clearTotpSecret' => ['type' => 'boolean', 'default' => 'false']
                                 ]
                             ]
                         ]
@@ -287,7 +287,14 @@ use App\Controller\Api\User\GetByUsernameController;
                                     'properties' => [
                                         'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
                                         'message' => ['type' => 'string'],
-                                        'username' => ['type' => 'string']
+                                        'username' => ['type' => 'string'],
+                                        'profilePicture' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'string', 'format' => 'uuid'],
+                                                'fileName' => ['type' => 'string']
+                                            ]
+                                        ]
                                     ]
                                 ]
                             ]
@@ -495,7 +502,7 @@ use App\Controller\Api\User\GetByUsernameController;
                                                 'properties' => [
                                                     'id' => ['type' => 'string'],
                                                     'username' => ['type' => 'string'],
-                                                    'profilePictureUrl' => ['type' => 'string']
+                                                    'profilePicture' => ['type' => 'string']
                                                 ]
                                             ]
                                         ],
@@ -542,6 +549,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'player', targetEntity: RoomPlayer::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?RoomPlayer $roomPlayer = null;
 
+    #[Groups(['user:read'])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?ProfilePicture $profilePicture = null;
@@ -670,17 +678,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->profilePicture = $profilePicture;
 
         return $this;
-    }
-
-    #[Groups(['user:read', 'room:read', 'user:read', 'invitation:read', 'friendRequest:read'])]
-    public function getProfilePicturePath(): ?string
-    {
-        if (!$this->profilePicture) {
-            return null;
-        }
-
-        //frontend is already gonna have /images/, no need to return it here
-        return '/profile_pictures/' . $this->profilePicture->getFileName();
     }
 
     /**

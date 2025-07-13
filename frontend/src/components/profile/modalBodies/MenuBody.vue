@@ -1,15 +1,15 @@
 <script setup lang="ts">
 import Image from '@/components/ui/atoms/Image.vue';
-import UserIcon from '@/assets/images/user_icon1.png';
 import { useAuthStore } from '@/store/auth';
 import Title from '@/components/ui/atoms/Title.vue';
 import LogoutButton from '@/components/ui/molecules/buttons/LogoutButton.vue';
-import QuizHistoryRow from '@/components/profile/QuizHistoryRow.vue';
-import FriendRow from '@/components/profile/FriendRow.vue';
-import EditProfileRow from './EditProfileRow.vue';
+import QuizHistoryRow from '@/components/profile/menuRows/QuizHistoryRow.vue';
+import FriendRow from '@/components/profile/menuRows/FriendRow.vue';
+import EditProfileRow from '@/components/profile/menuRows/EditProfileRow.vue';
+import ToggleTotpRow from '@/components/profile/menuRows/ToggleTotpRow.vue';
 
 const auth = useAuthStore();
-const emit = defineEmits(['show-friend', 'close-modal', 'show-profile-editor']);
+const emit = defineEmits(['show-friend', 'close-modal', 'show-profile-editor', 'toggle-2fa']);
 </script>
 
 <template>
@@ -20,6 +20,7 @@ const emit = defineEmits(['show-friend', 'close-modal', 'show-profile-editor']);
       <QuizHistoryRow @click="$emit('close-modal')" />
       <FriendRow @click="$emit('show-friend')" />
       <EditProfileRow @click="$emit('show-profile-editor')" />
+      <ToggleTotpRow @click="$emit('toggle-2fa')"/>
     </div>
     <LogoutButton @click="$emit('close-modal')" class="mt-6 w-full" />
   </div>

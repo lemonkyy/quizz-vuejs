@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Button from '../ui/atoms/Button.vue';
+import Button from '../../ui/atoms/Button.vue';
 import User from '@/assets/images/icons/user.svg'
-import Image from '../ui/atoms/Image.vue';
+import Image from '../../ui/atoms/Image.vue';
 </script>
 
 <template>

@@ -2,7 +2,7 @@
 import Title from '@/components/ui/atoms/Title.vue';
 import SendFriendRequestButton from '@/components/ui/molecules/buttons/SendFriendRequestButton.vue';
 import { ref } from 'vue';
-import UsernameAutoComplete from '../ui/molecules/inputs/UsernameAutoComplete.vue';
+import UsernameAutoComplete from '../../ui/molecules/inputs/UsernameAutoComplete.vue';
 import { useFriendStore } from '@/store/friendship';
 import Error from '@/components/ui/atoms/Error.vue';
 import type { AxiosError } from 'axios';
@@ -35,7 +35,6 @@ const handleSendRequest = async () => {
   try {
     await friendStore.sendFriendRequestByUsername(usernameSearch.value);
   } catch (error) {
-    console.log(error);
     const axiosError = error as AxiosError<{ code: string; error: string }>;
     const errorCode = axiosError.response?.data?.code;
     formError.value = errorCode ? errorMessages[errorCode] || defaultErrorMessage : defaultErrorMessage;

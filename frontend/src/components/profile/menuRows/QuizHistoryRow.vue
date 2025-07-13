@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import QuizHistoryButton from '../ui/molecules/buttons/QuizHistoryButton.vue';
+import QuizHistoryButton from '../../ui/molecules/buttons/QuizHistoryButton.vue';
 </script>
 
 <template>
