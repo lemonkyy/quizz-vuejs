@@ -10,5 +10,5 @@ defineEmits(['click']);
 </script>
 
 <template>
-  <Image :src="props.src" alt="user" rounded="full" :width="4" @click="$emit('click')" />
+  <Image :src="props.src" alt="user" rounded="full" :width="4" :height="4" @click="$emit('click')" />
 </template>

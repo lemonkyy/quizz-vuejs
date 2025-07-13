@@ -16,7 +16,7 @@ export const useAuthStore = defineStore("auth",  () => {
   const user = ref<User |null>(null);
 
   const userProfilePictureUrl = computed(() => {
-    return user.value?.profilePicture ? import.meta.env.VITE_PUBLIC_IMAGES_URL + user.value.profilePicture : "";
+    return user.value?.profilePicture ? import.meta.env.VITE_PUBLIC_PFP_URL + '/' + user.value.profilePicture.fileName : "";
   });
   const toast = useToast();
 
@@ -37,7 +37,10 @@ export const useAuthStore = defineStore("auth",  () => {
         user.value = {
           id: userData.id,
           username: userData.username,
-          profilePicture: userData.profilePicture,
+          profilePicture: {
+            id: userData.profilePictureId,
+            fileName: userData.profilePictureFileName
+          },
           email: userData.email,
           roles: userData.roles,
           hasTotp: userData.hasTotp
@@ -52,7 +55,7 @@ export const useAuthStore = defineStore("auth",  () => {
   const register = async (email: string, password: string, tosAgreedTo: boolean, username?: string) => {
     try {
         await registerService({ email, password, tosAgreedTo, username });
-        toast.success('Compte enregistré !');
+        toast.success('Account registered!');
         router.push('/');
         return { code: 'SUCCESS' };
       } catch (error) {
@@ -72,7 +75,7 @@ export const useAuthStore = defineStore("auth",  () => {
         
       } else {
         initUserFromCookie();
-        toast.success('Connexion réussie !');
+        toast.success('Login successful!');
         router.push('/');
         return { code: 'SUCCESS' };
       }
@@ -86,20 +89,20 @@ export const useAuthStore = defineStore("auth",  () => {
     try {
       await loginVerifyService({ totpCode, tempToken });
       initUserFromCookie();
-      toast.success('Connexion réussie !');
+      toast.success('Login successful!');
       router.push('/');
     } catch (error) {
       throw error;
     }
   }
 
-  const updateUsername = async (newUsername: string) => {
+  const updateUser = async (newUsername?: string, newProfilePictureId?: string) => {
     try {
-      await updateUserService({ newUsername });
+      await updateUserService({ newUsername, newProfilePictureId });
       initUserFromCookie();
-      toast.success('pseudonyme modifié.');
+      toast.success('Your account has been updated.');
     } catch (error) {
-      toast.error('Erreur lors de la  modification du pseudonyme.')
+      toast.error('Error while updating account.')
       throw error;
     }
   }
@@ -108,9 +111,9 @@ export const useAuthStore = defineStore("auth",  () => {
     try {
       await updateUserService({  clearTotpSecret: true });
       initUserFromCookie();
-      toast.success('Le TOTP a été désactivé sur votre compte.');
+      toast.success('2FA has been disabled on your account.');
     } catch (error) {
-      toast.error('Erreur lors de la désactivation du TOTP.')
+      toast.error('Error while disabling 2FA.')
       throw error;
     }
   }
@@ -119,10 +122,10 @@ export const useAuthStore = defineStore("auth",  () => {
     try {
       const response = await generateTotpSecretService();
       initUserFromCookie();
-      toast.success('TOTP configuré! Veuillez récupérer votre code secret.')
+      toast.success('TOTP configured! Please retrieve your secret code.')
       return response;
     } catch(error) {
-      toast.error('Erreur lors de la génération du secret OTP.')
+      toast.error('Error while generating OTP secret.')
       throw error;
     }
   }
@@ -136,9 +139,9 @@ export const useAuthStore = defineStore("auth",  () => {
 
       user.value = null;
       router.push('/');
-      toast.success('Vous êtes déconnecté. ');
+      toast.success('You are logged out.');
     } catch (error) {
-      toast.error('Erreur lors de la déconnexion.')
+      toast.error('Error during logout.')
       throw error;
     }
   }
@@ -149,7 +152,7 @@ export const useAuthStore = defineStore("auth",  () => {
     register,
     login,
     loginVerify,
-    updateUsername,
+    updateUser,
     logout,
     generateTotpSecret,
     clearTotpSecret

@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 import Modal from '../../atoms/Modal.vue';
-import MenuBody from '@/components/profile/MenuBody.vue';
-import FriendsBody from '@/components/profile/FriendsBody.vue';
-import AddFriendBody from '@/components/profile/AddFriendBody.vue';
-import EditProfileBody from '@/components/profile/EditProfileBody.vue';
+import MenuBody from '@/components/profile/modalBodies/MenuBody.vue';
+import FriendsBody from '@/components/profile/modalBodies/FriendsBody.vue';
+import AddFriendBody from '@/components/profile/modalBodies/AddFriendBody.vue';
+import EditProfileBody from '@/components/profile/modalBodies/EditProfileBody.vue';
+import EnableTotpBody from '@/components/profile/modalBodies/EnableTotpBody.vue';
+import { useAuthStore } from '@/store/auth';
+
+const auth = useAuthStore();
 
 const modelValue = defineModel({required: true, default: false});
 defineEmits(['update:modelValue', 'valid']);
@@ -34,6 +38,15 @@ function goBack() {
 function showEditProfile() {
   currentView.value = 'editProfile';
 }
+
+function toggle2FA() {
+  if (!auth.user?.hasTotp) {
+    currentView.value = 'show2FA'
+  } else {
+    auth.clearTotpSecret();
+  }
+}
+
 </script>
 
 <template>
@@ -45,6 +58,7 @@ function showEditProfile() {
           class="col-start-1 row-start-1 self-top justify-self-center"
           @show-friend="showFriends"
           @show-profile-editor="showEditProfile"
+          @toggle-2fa="toggle2FA"
           @close-modal="modelValue = false"
         />
         <FriendsBody
@@ -58,6 +72,11 @@ function showEditProfile() {
         />
         <EditProfileBody 
           v-if="currentView === 'editProfile'"
+          class="col-start-1 row-start-1 self-top justify-self-center w-full"
+          @back="goBack"
+        />
+        <EnableTotpBody 
+          v-if="currentView === 'show2FA'"
           class="col-start-1 row-start-1 self-top justify-self-center w-full"
         />
       </div>

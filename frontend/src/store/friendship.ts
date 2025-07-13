@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { useToast } from "vue-toastification";
-import type { User } from '@/types';
+import type { PublicUser } from '@/types';
 import {
   sendFriendRequest as sendFriendRequestService,
   acceptFriendRequest as acceptFriendRequestService,
@@ -16,7 +16,7 @@ import { getUserByUsername as getUserByUsernameService } from '@/services/userSe
 
 export const useFriendStore = defineStore("friend", () => {
 
-  const friends = ref<User[]>([]);
+  const friends = ref<PublicUser[]>([]);
 
   const sentRequests = ref<any[]>([]);
   const receivedRequests = ref<any[]>([]);
@@ -42,6 +42,7 @@ export const useFriendStore = defineStore("friend", () => {
       }
 
       const response = await listFriendsService(username, page, limit);
+      
       if (response.code === 'SUCCESS' && response.friends) {
         if (page === 1) {
           friends.value = response.friends;
@@ -80,7 +81,6 @@ export const useFriendStore = defineStore("friend", () => {
       toast.success('Friend request sent!');
       await listSentFriendRequests();
     } catch (error) {
-      toast.error('Error sending friend request.');
       throw error;
     }
   };

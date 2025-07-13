@@ -45,7 +45,7 @@ security:
 
     access_control:
         - { path: ^/api/admin, roles: ROLE_ADMIN }
-        - { path: ^/api, roles: IS_AUTHENTICATED_FULLY  }
+        - { path: ^/api/user, roles: IS_AUTHENTICATED_FULLY  }
 
 when@test:
     security:

@@ -71,6 +71,7 @@ services:
       NODE_ENV: development
       VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL}
       VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL}
+      VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL}
       PATH: /app/node_modules/.bin:$PATH
 
       WATCHPACK_POLLING: true

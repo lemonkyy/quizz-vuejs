@@ -39,6 +39,7 @@
     --color-button-primary: var(--color-yellow-2);
     --color-button-primary-hover: var(--color-yellow-3);
     --color-button-primary-text: var(--color-black);
+    --color-button-primary-active: var(--color-light-yellow-2);
 
     --color-button-secondary: var(--color-light-yellow-3);
     --color-button-secondary-hover: var(--color-yellow-1);

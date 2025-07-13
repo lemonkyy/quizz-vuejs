@@ -23,6 +23,7 @@ class ValidateUsernameService
     //excludeUserId is to prevent the user's new username from being rejected if it matches their current username
     public function validate(?string $username, ?string $excludeUserId = null): ?array
     {
+
         if (!is_string($username)) {
             return ['code' => 'ERR_USERNAME_INVALID_TYPE', 'message' => 'Username must be a string'];
         }
@@ -43,7 +44,7 @@ class ValidateUsernameService
 
         $existing = $this->userRepository->findOneBy(['username' => $username]);
 
-        if ($existing && (!$excludeUserId || $existing->getId() !== $excludeUserId)) {
+        if ($existing && (!$excludeUserId || $existing->getId()->toString() !== $excludeUserId)) {
             return ['code' => 'ERR_USERNAME_TAKEN', 'message' => 'Username already in use'];
         }
 

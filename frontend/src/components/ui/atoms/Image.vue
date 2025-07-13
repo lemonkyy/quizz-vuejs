@@ -8,10 +8,11 @@ const props = defineProps({
   alt: {type: String, required: true},
   rounded: {type: String as PropType<ImageRadius>, default: 'none'},
   width: {type: [Number] as PropType<number | null>, default: null},
+  height: {type: [Number] as PropType<number | null>, default: null},
 });
 
 const imageClasses = computed(() => {
-  let classes: string[] = ['max-w-full block h-auto'];
+  const classes: string[] = ['max-w-full', 'block'];
 
   switch (props.rounded) {
     case 'sm':
@@ -34,10 +35,25 @@ const imageClasses = computed(() => {
     classes.push('w-auto');
   }
 
+  if (!props.height) {
+    classes.push('h-auto');
+  }
+
   return classes;
+});
+
+const imageStyles = computed(() => {
+    const style: { width?: string; height?: string } = {};
+    if (props.width) {
+        style.width = `${props.width}rem`;
+    }
+    if (props.height) {
+        style.height = `${props.height}rem`;
+    }
+    return style;
 });
 </script>
 
 <template>
-  <img :src="src" :alt="alt" :class="imageClasses" :style="width ? { width: `${width}rem` } : {}"/>
+  <img :src="src" :alt="alt" :class="imageClasses" :style="imageStyles"/>
 </template>

@@ -18,42 +18,36 @@ class UserRepository extends ServiceEntityRepository
 
     public function findByUsernamePaginated(string $username, ?int $page = 1, ?int $limit = 50): array
     {
-        $offset = ($page - 1) * $limit;
-        $conn = $this->getEntityManager()->getConnection();
-        $sql = '
-            SELECT DISTINCT u.id, u.username, pp.file_name as "profilePictureUrl"
-            FROM "user" u
-            LEFT JOIN profile_picture pp ON u.profile_picture_id = pp.id
-            WHERE LOWER(public.unaccent(u.username)) LIKE LOWER(public.unaccent(:username))
-            LIMIT :limit OFFSET :offset
-            ';
-        $resultSet = $conn->executeQuery($sql, ['username' => '%' . $username . '%', 'limit' => $limit, 'offset' => $offset]);
-        return $resultSet->fetchAllAssociative();
+        $qb = $this->createQueryBuilder('u')
+            ->select('PARTIAL u.{id, username}', 'pp')
+            ->leftJoin('u.profilePicture', 'pp')
+            ->where('LOWER(unaccent(u.username)) LIKE LOWER(unaccent(:username))')
+            ->setParameter('username', '%' . $username . '%')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        return $qb->getQuery()->getArrayResult();
     }
 
     public function findFriendsByUserIdPaginated(string $userId, ?int $page = 1, ?int $limit = 50, ?string $username = null): array
     {
-        $offset = ($page - 1) * $limit;
-        $conn = $this->getEntityManager()->getConnection();
-
-        $sql = '
-            SELECT DISTINCT u.id, u.username, pp.file_name as "profilePictureUrl"
-            FROM "user" u
-            JOIN user_friends uf ON (u.id = uf.friend_user_id AND uf.user_id = :userId) OR (u.id = uf.user_id AND uf.friend_user_id = :userId)
-            LEFT JOIN profile_picture pp ON u.profile_picture_id = pp.id
-        ';
-
-        $params = ['userId' => $userId];
+        $qb = $this->createQueryBuilder('u')
+            ->select('PARTIAL u.{id, username}', 'pp')
+            ->leftJoin('u.profilePicture', 'pp')
+            ->innerJoin('u.friends', 'f')
+            ->where('f.id = :userId')
+            ->setParameter('userId', $userId);
 
         if ($username) {
-            $sql .= ' WHERE LOWER(public.unaccent(u.username)) LIKE LOWER(public.unaccent(:username))';
-            $params['username'] = '%' . $username . '%';
+            $qb->andWhere('LOWER(unaccent(u.username)) LIKE LOWER(unaccent(:username))')
+                ->setParameter('username', '%' . $username . '%');
         }
 
-        $sql .= ' ORDER BY u.username ASC LIMIT :limit OFFSET :offset';
+        $qb->orderBy('u.username', 'ASC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit + 1);
 
-        $resultSet = $conn->executeQuery($sql, array_merge($params, ['limit' => $limit + 1, 'offset' => $offset]));
-        $friends = $resultSet->fetchAllAssociative();
+        $friends = $qb->getQuery()->getArrayResult();
 
         $hasMore = count($friends) > $limit;
         if ($hasMore) {

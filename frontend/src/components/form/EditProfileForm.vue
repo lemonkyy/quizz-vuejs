@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import Image from '@/components/ui/atoms/Image.vue';
 import { useAuthStore } from '@/store/auth';
-import { computed, ref } from 'vue';
+import { ref } from 'vue';
+import ProfilePictureSelector from '@/components/profile/ProfilePictureSelector.vue';
 import { AxiosError } from 'axios';
 import Button from '../ui/atoms/Button.vue';
 import Error from '../ui/atoms/Error.vue';
@@ -12,6 +12,7 @@ const emit = defineEmits(['back']);
 const auth = useAuthStore();
 
 const newUsername = ref<string>(auth.user?.username || '');
+const newProfilePictureId = ref<string | undefined>(auth.user?.profilePicture.id);
 const formError = ref<string | null>(null);
 const isLoading = ref(false);
 
@@ -25,13 +26,14 @@ const errorMessages: { [key: string]: string } = {
   'ERR_USERNAME_TAKEN': 'This username is already taken.',
 };
 
-const isFormDisabled = computed(() => {
-  return isLoading.value || newUsername.value === auth.user?.username;
-});
-
 const handleUpdateAccount = async () => {
   formError.value = null;
   isLoading.value = true;
+
+  if (newUsername.value === auth.user?.username && newProfilePictureId.value === auth.user?.profilePicture.id) {
+    emit('back');
+    return;
+  }
 
   if (!newUsername.value) {
     formError.value = 'Please enter a username.';
@@ -40,7 +42,7 @@ const handleUpdateAccount = async () => {
   }
 
   try {
-    await auth.updateUsername(newUsername.value);
+    await auth.updateUser(newUsername.value, newProfilePictureId.value);
     emit('back');
   } catch (error) {
     if (error instanceof AxiosError && error.response?.data?.code) {
@@ -57,7 +59,7 @@ const handleUpdateAccount = async () => {
 
 <template>
   <form @submit.prevent="handleUpdateAccount" class="flex flex-col items-center gap-4 p-4 w-full">
-    <Image :src="auth.userProfilePictureUrl" alt="user icon" rounded="sm" :size="16" />
+    <ProfilePictureSelector v-model="newProfilePictureId" />
     
     <Input
         id="username-edit"
@@ -73,16 +75,26 @@ const handleUpdateAccount = async () => {
       <p>{{ formError }}</p>
     </Error>
         
-    <div class="w-full mt-20 absolute bottom-8 sm:bottom-9 px-8 sm:px-9">
+    <div class="w-full mt-20 absolute bottom-8 sm:bottom-9 px-8 sm:px-9 flex flex-row gap-3">
+      <Button
+      theme="monochrome"
+      type="button"
+      class="w-full"
+      rounded="md"
+      :disabled="isLoading"
+      @click="emit('back')">
+        Cancel
+      </Button>
+
       <Button
       theme="primary"
       type="submit"
       class="w-full"
       rounded="md"
       :loading="isLoading"
-      :disabled="isFormDisabled"
+      :disabled="isLoading"
       >
-          Update Profile
+        Update Profile
       </Button>
     </div>
   </form>

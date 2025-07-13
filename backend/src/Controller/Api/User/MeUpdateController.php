@@ -4,6 +4,7 @@ namespace App\Controller\Api\User;
 
 use App\Entity\User;
 use App\Entity\ProfilePicture;
+use App\Repository\ProfilePictureRepository;
 use App\Service\JWTCookieService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -18,7 +19,7 @@ use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 class MeUpdateController extends AbstractController
 {
     #[IsGranted('IS_AUTHENTICATED_FULLY')]
-    public function __invoke(#[CurrentUser] ?User $user, Request $request, EntityManagerInterface $entityManager, ValidateUsernameService $validateUsernameService, JWTCookieService $cookieService, JWTTokenManagerInterface $jwtManager): JsonResponse
+    public function __invoke(#[CurrentUser] ?User $user, Request $request, EntityManagerInterface $entityManager, ValidateUsernameService $validateUsernameService, JWTCookieService $cookieService, JWTTokenManagerInterface $jwtManager, ProfilePictureRepository $profilePictureRepository): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -38,7 +39,6 @@ class MeUpdateController extends AbstractController
                 return new JsonResponse(['code' => "ERR_NULL_PROFILE_PICTURE", 'error' => "User's profile picture cannot be set to null."], 400);
             }
 
-            $profilePictureRepository = $entityManager->getRepository(ProfilePicture::class);
             $profilePicture = $profilePictureRepository->find($data['newProfilePictureId']);
 
             if (!$profilePicture) {
@@ -56,7 +56,15 @@ class MeUpdateController extends AbstractController
         
         $jwtToken = $jwtManager->create($user);
         
-        $response = new JsonResponse(['code' => 'SUCCESS', 'message' => 'User updated', 'username' => $user->getUsername()]);
+        $response = new JsonResponse([
+            'code' => 'SUCCESS', 
+            'message' => 'User updated', 
+            'username' => $user->getUsername(),
+            'profilePicture' => [
+                'id' => $user->getProfilePicture()->getId(),
+                'fileName' => $user->getProfilePicture()->getFileName()
+            ]
+        ]);
 
         [$cookieHp, $cookieS] = $cookieService->createCookies($jwtToken);
         $response->headers->setCookie($cookieHp);

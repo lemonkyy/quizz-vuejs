@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import EditButton from '../ui/molecules/buttons/EditButton.vue';
+import EditButton from '../../ui/molecules/buttons/EditButton.vue';
 </script>
 
 <template>

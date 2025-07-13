@@ -1,5 +1,5 @@
 import axios from '@/plugins/axios';
-import type { User } from '@/types';
+import type { User, PublicUser } from '@/types';
 
 export async function login(params: {email: string, password: string}): Promise<{code: string, message?: string, tempToken?: string, error?: string}> {
   try {
@@ -46,7 +46,7 @@ export async function generateTotpSecret(): Promise<{code: string, totpSecret?: 
   }
 }
 
-export async function updateUser(params: {newUsername?: string, clearTotpSecret?: boolean}): Promise<{code: string, message?: string, error?: string}> {
+export async function updateUser(params: {newUsername?: string, newProfilePictureId?: string, clearTotpSecret?: boolean}): Promise<{code: string, message?: string, error?: string}> {
   try {
     const response = await axios.put('/user', params);
     return response.data;
@@ -55,7 +55,7 @@ export async function updateUser(params: {newUsername?: string, clearTotpSecret?
   }
 }
 
-export async function getUserByUsername(params: {username: string}): Promise<{code: string, user?: User, error?: string}> {
+export async function getUserByUsername(params: {username: string}): Promise<{code: string, user?: PublicUser, error?: string}> {
   try {
     const response = await axios.get('/user/get-by-username', { params: params });
     return response.data;
@@ -64,7 +64,7 @@ export async function getUserByUsername(params: {username: string}): Promise<{co
   }
 }
 
-export async function searchUsers(username: string, page?: number, limit?: number): Promise<{code: string, users?: User[], error?: string}> {
+export async function searchUsers(username: string, page?: number, limit?: number): Promise<{code: string, users?: PublicUser[], error?: string}> {
   try {
     const response = await axios.get('/user/search', { params: { username, page, limit } });
     return response.data;

@@ -1,5 +1,5 @@
 import axios from '@/plugins/axios';
-import type { User } from '@/types';
+import type { PublicUser } from '@/types';
 
 export async function sendFriendRequest(id: string): Promise<{code: string, message?: string, error?: string}> {
   try {
@@ -55,7 +55,7 @@ export async function listReceivedFriendRequests(): Promise<{code: string, frien
   }
 }
 
-export async function listFriends(username?: string, page?: number, limit?: number): Promise<{code: string, friends?: User[], hasMore?: boolean, error?: string}> {
+export async function listFriends(username?: string, page?: number, limit?: number): Promise<{code: string, friends?: PublicUser[], hasMore?: boolean, error?: string}> {
   try {
     const response = await axios.get('/user/friends', { params: { username, page, limit } });
     return response.data;

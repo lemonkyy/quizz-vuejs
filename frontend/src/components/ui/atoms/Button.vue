@@ -25,7 +25,7 @@ const buttonClasses = computed(() => {
   }else if (props.theme === 'monochrome'){
     classes.push('bg-button-monochrome text-button-monochrome-text hover:bg-button-monochrome-hover p-3');
   } else {
-    classes.push('bg-button-primary text-button-primary-text hover:bg-button-primary-hover px-7 py-3');
+    classes.push('bg-button-primary text-button-primary-text hover:bg-button-primary-hover px-7 py-3 active:bg-button-primary-active');
   }
 
   if (props.transparent) {
