@@ -6,6 +6,15 @@ networks:
   ollama-backend-bridge:
     driver: bridge
 
+volumes:
+  postgres-data-dev:
+  uploads-data-dev:
+  ollama-data-dev:
+  matomo-data-dev:
+  node-modules-dev:
+  mercure-data-dev:
+  mercure-config-dev:
+
 services:
   #postgres database
   database:
@@ -63,7 +72,7 @@ services:
       - "5173:80"
     volumes:
       - ./frontend:/app:delegated
-      - node-modules:/app/node_modules
+      - node-modules-dev:/app/node_modules
     container_name: frontend_quiz
     depends_on:
       - backend
@@ -112,10 +121,20 @@ services:
       - backend-frontend-bridge
       - database-backend-bridge
 
-
-volumes:
-  postgres-data-dev:
-  uploads-data-dev:
-  ollama-data-dev:
-  matomo-data-dev:
-  node-modules:
+  mercure:
+    image: dunglas/mercure
+    container_name: mercure_quiz
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ':80'
+    healthcheck:
+      test: ["CMD", "curl", "-f", "https://localhost/healthz"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - mercure-data-dev:/data
+      - mercure-config-dev:/config
+    ports: ['80']
+    networks: 
+      - backend-frontend-bridge

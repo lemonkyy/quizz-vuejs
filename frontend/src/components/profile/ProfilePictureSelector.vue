@@ -43,7 +43,6 @@ const currentProfilePictureUrl = computed(() => {
 //get id of the current pfp
 watch(currentProfilePictureIndex, (newIndex) => {
   modelValue.value = profilePictureStore.profilePictures[newIndex].id;
-  console.log(modelValue.value);
 });
 
 watch(modelValue, (newId) => {

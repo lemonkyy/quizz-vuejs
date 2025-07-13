@@ -8,11 +8,12 @@ use Symfony\Component\Uid\UuidV7;
 use Symfony\Component\Serializer\Annotation\Groups;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\GetCollection;
+use App\Api\Provider\ProfilePicture\ListProvider;
 
 #[ORM\Entity(repositoryClass: ProfilePictureRepository::class)]
 #[ApiResource(
     operations: [
-        new GetCollection(uriTemplate: '/profile-pictures', controller: \App\Controller\Api\ProfilePicture\ListController::class),
+        new GetCollection(uriTemplate: '/profile-pictures', provider: ListProvider::class, name: 'get_profile_pictures'),
     ],
     normalizationContext: ['groups' => ['profilePicture:read']]
 )]
