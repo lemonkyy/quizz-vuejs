@@ -87,13 +87,7 @@ services:
       - ollama-data-dev:/root/.ollama
     networks:
       - ollama-backend-bridge
-    deploy:
-      resources:
-        reservations:
-          devices:
-            - driver: nvidia
-              count: all
-              capabilities: ["gpu"]
+
 
   #matomo - analytics
   matomo:
