@@ -11,6 +11,7 @@
         "doctrine/doctrine-migrations-bundle": "4.0.x-dev",
         "doctrine/orm": "^2.20.5",
         "lexik/jwt-authentication-bundle": "^3.1.1",
+        "nelmio/cors-bundle": "^2.5",
         "specshaper/encrypt-bundle": "dev-master",
         "symfony/asset": "^7.2",
         "symfony/console": "7.2.*",

@@ -30,7 +30,7 @@ class GenerateQuizzHandler
 
         $response = $this->client->request('POST', 'http://ollama:11434/api/generate', [
             'json' => [
-                'model' => 'mistral',
+                'model' => 'llama3',
                 'prompt' => "Ignore le contexte précédent. Génére-moi un quizz au format JSON sur le thème : \"$prompt\" avec exactement $count questions. Vérifie que les réponses soit factuellement correctes.
                 Le JSON doit avoir :
                 - \"questions\": tableau contenant
@@ -137,8 +137,8 @@ class GenerateQuizzHandler
         );
         return $buffer;
     }
-} */
-
+} 
+ */
 #[AsMessageHandler]
 class GenerateQuizzHandler
 {
