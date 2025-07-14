@@ -30,9 +30,9 @@ export async function refuseFriendRequest(id: string): Promise<{code: string, me
 
 export async function cancelFriendRequest(id: string): Promise<{code: string, message?: string, error?: string}> {
   try {
-    const response = await axios.post(`/friend-request/${id}/cancel`);
+    await axios.post(`/friend-request/${id}/cancel`);
     return {
-      code: 'SUCCESS',
+      code: 'SUCCESS'
     };
   } catch (error) {
     throw error;
