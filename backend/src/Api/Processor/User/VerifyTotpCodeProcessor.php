@@ -15,6 +15,7 @@ use Symfony\Contracts\Cache\ItemInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\User;
 use App\Api\Dto\User\VerifyTotpCodeDto;
+use App\Exception\ValidationException;
 
 class VerifyTotpCodeProcessor implements ProcessorInterface
 {
@@ -31,7 +32,7 @@ class VerifyTotpCodeProcessor implements ProcessorInterface
         $totpCode = $data->totpCode;
 
         if (!$tempToken || !$totpCode) {
-            return new JsonResponse(['code' => 'ERR_MISSING_TOTP_CREDENTIALS', 'error' => 'Temporary token and TOTP code are required.'], 400);
+            throw new ValidationException('ERR_MISSING_TOTP_CREDENTIALS', 'Temporary token and TOTP code are required.', 400);
         }
 
         $cacheKey = 'temp_token_' . $tempToken;
@@ -41,18 +42,18 @@ class VerifyTotpCodeProcessor implements ProcessorInterface
                 throw new \Exception('Cache miss');
             });
         } catch (\Exception $e) {
-            return new JsonResponse(['code' => 'ERR_INVALID_TEMP_TOKEN', 'error' => 'Invalid temporary token.'], 401);
+            throw new ValidationException('ERR_INVALID_TEMP_TOKEN', 'Invalid temporary token.', 401);
         }
 
         $user = $this->userRepository->find($userId);
 
         if (!$user) {
-            return new JsonResponse(['code' => 'ERR_USER_NOT_FOUND', 'error' => 'User not found.'], 404);
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not found.', 404);
         }
 
         $isValid = $this->totpService->verifyTotp($user->getTotpSecret(), $totpCode);
         if (!$isValid) {
-            return new JsonResponse(['code' => 'ERR_INVALID_TOTP_CODE', 'error' => 'Invalid TOTP code.'], 401);
+            throw new ValidationException('ERR_INVALID_TOTP_CODE', 'Invalid TOTP code.', 401);
         }
 
         $jwtToken = $this->jwtManager->create($user);

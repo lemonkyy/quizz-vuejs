@@ -115,15 +115,6 @@ class InvitationContext
         return [
             'summary' => 'Accept an invitation',
             'description' => 'Accepts an invitation, checks for expiration and revocation, and joins the new room.',
-            'parameters' => [
-                [
-                    'name' => 'id',
-                    'in' => 'path',
-                    'required' => true,
-                    'schema' => [ 'type' => 'string' ],
-                    'description' => 'ID of the invitation to accept'
-                ]
-            ],
             'responses' => [
                 '200' => [
                     'description' => 'Invitation accepted',

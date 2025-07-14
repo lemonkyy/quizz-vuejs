@@ -7,17 +7,18 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use App\Api\Dto\User\GetByUsernameDto;
+use App\Api\Dto\User\RegisterDto;
+use App\Api\Dto\User\SearchDto;
 use App\Api\Processor\User\MeGenerateTotpSecretProcessor;
 use App\Api\Processor\User\MeUpdateProcessor;
 use App\Api\Processor\User\RegisterProcessor;
 use App\Api\Processor\User\RemoveFriendProcessor;
 use App\Api\Processor\User\VerifyTotpCodeProcessor;
-use App\Api\Provider\User\CheckAuthProvider;
 use App\Api\Provider\User\GetByUsernameProvider;
 use App\Api\Provider\User\MeListFriendsProvider;
 use App\Api\Provider\User\MeReadProvider;
 use App\Api\Provider\User\SearchProvider;
-use App\Controller\Api\User\MeReadController;
 use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -28,24 +29,20 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
 
+use App\Api\Dto\User\UpdateDto;
+use App\Api\Dto\User\VerifyTotpCodeDto;
+
 #[ApiResource(
     operations: [
         new Get(
-            uriTemplate: '/authenticated',
-            provider: CheckAuthProvider::class,
-            read: false,
-            name: 'api_user_check_auth',
-            
-        ),
-        new Get(
             uriTemplate: '/user/get-by-username',
             provider: GetByUsernameProvider::class,
-            read: false,
+            input: GetByUsernameDto::class,
             name: 'api_user_get_by_username',  
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Get(
             uriTemplate: '/user/me',
-            #controller: MeReadController::class,
             provider: MeReadProvider::class,
             name: 'api_user_info',
             normalizationContext: ['groups' => ['user:read']],
@@ -53,47 +50,48 @@ use Symfony\Component\Uid\UuidV7;
         new Get(
             uriTemplate: '/user/search',
             provider: SearchProvider::class,
-            read: false,
+            input: SearchDto::class,
             name: 'api_user_search',
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Post(
             uriTemplate: '/register',
             processor: RegisterProcessor::class,
-            read: false,
-            name: 'api_user_register'
+            input: RegisterDto::class,
+            name: 'api_user_register',
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Put(
             uriTemplate: '/user',
-            input: false,
             processor: MeUpdateProcessor::class,
-            read: false,
+            input: UpdateDto::class,
             name: 'api_user_update',
         ),
-        new Get(
+        new Post(
             uriTemplate: '/user/totp/secret',
             processor: MeGenerateTotpSecretProcessor::class,
-            read: false,
+            input: false,
             name: 'api_user_totp_secret_generate',
         ),
         new Post(
             uriTemplate: '/login-verify',
             processor: VerifyTotpCodeProcessor::class,
-            read: false,
+            input: VerifyTotpCodeDto::class,
             name: 'api_user_totp_verify',
         ),
         new Delete(
             uriTemplate: '/user/friends/{id}',
             processor: RemoveFriendProcessor::class,
-            read: false,
+            input: false,
             name: 'api_user_remove_friend',
         ),
         new Get(
             uriTemplate: '/user/friends',
             provider: MeListFriendsProvider::class,
-            read: false,
+            input: false,
+            normalizationContext: ['groups' => ['user:read']],
             name: 'api_user_list_friends',
-        ),
-        
+        ),   
     ]
 )]
 
@@ -143,12 +141,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\InverseJoinColumn(name: 'friend_user_id', referencedColumnName: 'id')]
     private Collection $friends;
 
+    #[ORM\OneToMany(mappedBy: 'invitedBy', targetEntity: Invitation::class, orphanRemoval: true)]
+    private Collection $sentInvitations;
+
+    #[ORM\OneToMany(mappedBy: 'invitedUser', targetEntity: Invitation::class, orphanRemoval: true)]
+    private Collection $receivedInvitations;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
         $this->sentFriendRequests = new ArrayCollection();
         $this->receivedFriendRequests = new ArrayCollection();
         $this->friends = new ArrayCollection();
+        $this->sentInvitations = new ArrayCollection();
+        $this->receivedInvitations = new ArrayCollection();
     }
 
     public function getId(): ?UuidV7
@@ -339,5 +345,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->friends->removeElement($friend);
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitation>|Invitation[]
+     */
+    public function getSentInvitations(): Collection
+    {
+        return $this->sentInvitations;
+    }
+
+    /**
+     * @return Collection<int, Invitation>|Invitation[]
+     */
+    public function getReceivedInvitations(): Collection
+    {
+        return $this->receivedInvitations;
     }
 }

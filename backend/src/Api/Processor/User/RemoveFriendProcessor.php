@@ -10,10 +10,11 @@ use App\Repository\UserRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\User;
 use App\Api\Dto\User\RemoveFriendDto;
+use App\Exception\ValidationException;
 
 class RemoveFriendProcessor implements ProcessorInterface
 {
-    public function __construct(private UserRepository $userRepository, private EntityManagerInterface $entityManager)
+    public function __construct(private UserRepository $userRepository, private EntityManagerInterface $entityManager, private Security $security)
     {
     }
 
@@ -22,17 +23,22 @@ class RemoveFriendProcessor implements ProcessorInterface
      */
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
     {
-        $user = $context['request']->attributes->get('user');
+        $user = $this->security->getUser();
+
+        if (!$user instanceof User) {
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
+        }
+        
         $friendToRemoveId = $data->friendId;
 
         $friendToRemove = $this->userRepository->find($friendToRemoveId);
 
         if (!$friendToRemove) {
-            return new JsonResponse(['code' => 'ERR_USER_NOT_FOUND', 'error' => 'User not found'], 404);
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not found', 404);
         }
 
         if (!$user->getFriends()->contains($friendToRemove)) {
-            return new JsonResponse(['code' => 'ERR_NOT_FRIENDS', 'error' => 'You are not friends with this user'], 400);
+            throw new ValidationException('ERR_NOT_FRIENDS', 'You are not friends with this user', 400);
         }
 
         $user->removeFriend($friendToRemove);

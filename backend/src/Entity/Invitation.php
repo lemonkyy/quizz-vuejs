@@ -21,44 +21,43 @@ use Symfony\Component\Uid\UuidV7;
     operations: [
         new Post(
             uriTemplate: '/invitation/{id}/send',
+            input: false,
             processor: MeSendProcessor::class,
-            read: false,
             name: 'api_invitation_send'
         ),
         new Get(
             uriTemplate: '/invitation/sent',
             input: false,
             provider: InvitationMeListSentProvider::class,
-            read: false,
+            normalizationContext: ['groups' => ['invitation:read']],
             name: 'api_invitation_sent'
         ),
         new Get(
             uriTemplate: '/invitation/pending',
             input: false,
             provider: MeListPendingProvider::class,
-            read: false,
+            normalizationContext: ['groups' => ['invitation:read']],
             name: 'api_invitation_pending'
         ),
-
         new Post(
             uriTemplate: '/invitation/{id}/accept',
             input: false,
             processor: MeAcceptProcessor::class,
-            read: false,
+            normalizationContext: ['groups' => ['invitation:read']],
             name: 'api_invitation_accept'
         ),
         new Post(
             uriTemplate: '/invitation/{id}/deny',
             input: false,
             processor: MeDenyProcessor::class,
-            read: false,
+            normalizationContext: ['groups' => ['invitation:read']],
             name: 'api_invitation_deny'
         ),
         new Post(
             uriTemplate: '/invitation/{id}/cancel',
             input: false,
             processor: MeCancelProcessor::class,
-            read: false,
+            normalizationContext: ['groups' => ['invitation:read']],
             name: 'api_invitation_cancel'
         ),
     ]

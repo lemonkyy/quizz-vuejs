@@ -4,18 +4,6 @@ namespace App\Api\OpenApi\Context;
 
 class UserContext
 {
-    public static function getUserCheckAuthContext(): array
-    {
-        return [
-            'summary' => 'Check authentication status',
-            'description' => 'Checks if the current user is authenticated.',
-            'responses' => [
-                '200' => ['description' => 'Authorized'],
-                '401' => ['description' => 'Unauthorized']
-            ]
-        ];
-    }
-
     public static function getUserGetByUsernameContext(): array
     {
         return [
@@ -402,15 +390,6 @@ class UserContext
         return [
             'summary' => 'Remove a friend',
             'description' => 'Removes a friend from the current user\'s friend list.',
-            'parameters' => [
-                [
-                    'name' => 'id',
-                    'in' => 'path',
-                    'required' => true,
-                    'schema' => ['type' => 'string'],
-                    'description' => 'The ID of the friend to remove.'
-                ]
-            ],
             'responses' => [
                 '200' => ['description' => 'Friend removed successfully'],
                 '400' => ['description' => 'Invalid request'],

@@ -15,7 +15,6 @@ use App\Api\Provider\FriendRequest\MeListReceivedProvider;
 use App\Repository\FriendRequestRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Uid\UuidV7;
-use App\Api\OpenApi\Context\FriendRequestContext;
 
 #[ApiResource(
     operations: [
@@ -23,40 +22,42 @@ use App\Api\OpenApi\Context\FriendRequestContext;
             uriTemplate: '/friend-request/{id}/send',
             processor: MeSendProcessor::class,
             input: false,
-            read: false,
+            normalizationContext: ['groups' => ['friendRequest:read']],
             name: 'api_friend_requests_send',
         ),
         new Post(
             uriTemplate: '/friend-request/{id}/accept',
             processor: MeAcceptProcessor::class,
-            read: false,
             input: false,
+            normalizationContext: ['groups' => ['friendRequest:read']],
             name: 'api_friend_requests_accept'
         ),
         new Post(
             uriTemplate: '/friend-request/{id}/deny',
             processor: MeDenyProcessor::class,
-            read: false,
             input: false,
+            normalizationContext: ['groups' => ['friendRequest:read']],
             name: 'api_friend_requests_deny'
         ),
         new Post(
             uriTemplate: '/friend-request/{id}/cancel',
             processor: MeCancelProcessor::class,
-            read: false,
+            input: false,
+            normalizationContext: ['groups' => ['friendRequest:read']],
             name: 'api_friend_requests_cancel'
         ),
         new Get(
             uriTemplate: '/friend-request/sent',
             provider: MeListSentProvider::class,
-            read: false,
             input: false,
+            normalizationContext: ['groups' => ['friendRequest:read']],
             name: 'api_friend_requests_sent'
         ),
         new Get(
             uriTemplate: '/friend-request/received',
             provider: MeListReceivedProvider::class,
-            read: false,
+            input: false,
+            normalizationContext: ['groups' => ['friendRequest:read']],
             name: 'api_friend_requests_received'
         )
     ]

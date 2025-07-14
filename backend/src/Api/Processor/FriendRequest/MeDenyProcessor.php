@@ -4,47 +4,52 @@ namespace App\Api\Processor\FriendRequest;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\FriendRequestRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\FriendRequest;
 use App\Entity\User;
 use App\Api\Dto\FriendRequest\MeDenyDto;
+use App\Exception\ValidationException;
 
 class MeDenyProcessor implements ProcessorInterface
 {
-    public function __construct(private FriendRequestRepository $friendRequestRepository, private EntityManagerInterface $entityManager)
+    public function __construct(private FriendRequestRepository $friendRequestRepository, private EntityManagerInterface $entityManager, private Security $security)
     {
     }
 
     /**
      * @param MeDenyDto $data
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): FriendRequest
     {
-        $user = $context['request']->attributes->get('user');
-        $friendRequest = $this->friendRequestRepository->find($data->id);
+        $user = $this->security->getUser();
+
+        if (!$user instanceof User) {
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
+        }
+        
+        $friendRequest = $this->friendRequestRepository->find($uriVariables['id']);
 
         if (!$friendRequest || $friendRequest->getReceiver() !== $user) {
-            return new JsonResponse(['code' => 'ERR_FRIEND_REQUEST_NOT_FOUND', 'error' => 'Friend request not found'], 404);
+            throw new ValidationException('ERR_FRIEND_REQUEST_NOT_FOUND', 'Friend request not found', 404);
         }
 
         if ($friendRequest->getAcceptedAt() !== null) {
-            return new JsonResponse(['code' => 'ERR_FRIEND_REQUEST_ALREADY_ACCEPTED', 'error' => 'Friend request already accepted'], 400);
+            throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_ACCEPTED', 'Friend request already accepted', 400);
         }
 
         if ($friendRequest->getDeniedAt() !== null) {
-            return new JsonResponse(['code' => 'ERR_FRIEND_REQUEST_ALREADY_DENIED', 'error' => 'Friend request already denied'], 400);
+            throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_DENIED', 'Friend request already denied', 400);
         }
 
         if ($friendRequest->getRevokedAt() !== null) {
-            return new JsonResponse(['code' => 'ERR_FRIEND_REQUEST_REVOKED', 'error' => 'Friend request has been revoked by sender'], 400);
+            throw new ValidationException('ERR_FRIEND_REQUEST_REVOKED', 'Friend request has been revoked by sender', 400);
         }
 
         $friendRequest->setDeniedAt(new \DateTimeImmutable());
         $this->entityManager->flush();
 
-        return new JsonResponse(['code' => 'SUCCESS', 'message' => 'Friend request denied'], 200);
+        return $friendRequest;
     }
 }

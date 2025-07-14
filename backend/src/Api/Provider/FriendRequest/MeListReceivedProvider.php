@@ -7,6 +7,8 @@ use ApiPlatform\State\ProviderInterface;
 use App\Repository\FriendRequestRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\FriendRequest;
+use App\Entity\User;
+use App\Exception\ValidationException;
 
 class MeListReceivedProvider implements ProviderInterface
 {
@@ -22,6 +24,14 @@ class MeListReceivedProvider implements ProviderInterface
     public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $user = $this->security->getUser();
+        
+        if (!$user instanceof User) {
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
+        }
+
+        if (!$user instanceof User) {
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
+        }
 
         $criteria = [
             'receiver' => $user,

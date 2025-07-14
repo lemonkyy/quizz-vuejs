@@ -39,7 +39,7 @@ export async function loginVerify(params: {totpCode: string, tempToken: string})
 
 export async function generateTotpSecret(): Promise<{code: string, totpSecret?: string, error?: string}> {
   try {
-    const response = await axios.get('/user/totp/secret');
+    const response = await axios.post('/user/totp/secret');
     return response.data;
   } catch (error) {
     throw error;

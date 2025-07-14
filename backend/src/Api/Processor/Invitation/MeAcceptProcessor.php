@@ -4,7 +4,6 @@ namespace App\Api\Processor\Invitation;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\InvitationRepository;
 use App\Service\RoomMembershipService;
@@ -13,23 +12,29 @@ use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\Invitation;
 use App\Entity\User;
 use App\Api\Dto\Invitation\MeAcceptDto;
+use App\Exception\ValidationException;
 
 class MeAcceptProcessor implements ProcessorInterface
 {
-    public function __construct(private InvitationRepository $invitationRepository, private EntityManagerInterface $entityManager, private ParameterBagInterface $params, private RoomMembershipService $roomMembershipService)
+    public function __construct(private InvitationRepository $invitationRepository, private EntityManagerInterface $entityManager, private ParameterBagInterface $params, private RoomMembershipService $roomMembershipService, private Security $security)
     {
     }
 
     /**
      * @param MeAcceptDto $data
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): Invitation
     {
-        $user = $context['request']->attributes->get('user');
-        $invitation = $this->invitationRepository->find($data->id);
+        $user = $this->security->getUser();
+
+        if (!$user instanceof User) {
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
+        }
+        
+        $invitation = $this->invitationRepository->find($uriVariables['id']);
 
         if (!$invitation || $invitation->getInvitedUser() !== $user) {
-            return new JsonResponse(['code' => 'ERR_INVITATION_NOT_FOUND', 'error' => 'Invitation not found'], 404);
+            throw new ValidationException('ERR_INVITATION_NOT_FOUND', 'Invitation not found', 404);
         }
 
         $expirationThreshold = $this->params->get('app.invite_expiration_threshold');
@@ -37,24 +42,24 @@ class MeAcceptProcessor implements ProcessorInterface
         $now = new \DateTimeImmutable();
 
         if ($now > $expirationDate) {
-            return new JsonResponse(['code' => 'ERR_INVITATION_EXPIRED', 'error' => 'Invitation has expired'], 400);
+            throw new ValidationException('ERR_INVITATION_EXPIRED', 'Invitation has expired', 400);
         }
 
         if ($invitation->getRevokedAt() !== null) {
-            return new JsonResponse(['code' => 'ERR_INVITATION_REVOKED', 'error' => 'Invitation has been revoked'], 400);
+            throw new ValidationException('ERR_INVITATION_REVOKED', 'Invitation has been revoked', 400);
         }
 
         $invitation->setAcceptedAt($now);
         $room = $invitation->getRoom();
 
         if ($room->getDeletedAt() !== null) {
-            return new JsonResponse(['code' => 'ERR_ROOM_DELETED', 'error' => 'Room has been deleted'], 400);
+            throw new ValidationException('ERR_ROOM_DELETED', 'Room has been deleted', 400);
         }
 
         $this->roomMembershipService->handleUserJoiningRoom($user, $room);
         
         $this->entityManager->flush();
 
-        return new JsonResponse(['code' => 'SUCCESS', 'message' => 'Invitation accepted'], 200);
+        return $invitation;
     }
 }

@@ -5,7 +5,6 @@ namespace App\Api\Provider\User;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Repository\UserRepository;
-use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\User;
 use App\Api\Dto\User\SearchDto;
 

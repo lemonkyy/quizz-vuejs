@@ -11,10 +11,11 @@ use App\Service\TotpService;
 use Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\User;
+use App\Exception\ValidationException;
 
 class MeGenerateTotpSecretProcessor implements ProcessorInterface
 {
-    public function __construct(private TotpService $totpService, private EntityManagerInterface $entityManager, private JWTCookieService $cookieService, private JWTTokenManagerInterface $jwtManager)
+    public function __construct(private TotpService $totpService, private EntityManagerInterface $entityManager, private JWTCookieService $cookieService, private JWTTokenManagerInterface $jwtManager, private Security $security)
     {
     }
 
@@ -23,7 +24,11 @@ class MeGenerateTotpSecretProcessor implements ProcessorInterface
      */
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
     {
-        $user = $context['request']->attributes->get('user');
+        $user = $this->security->getUser();
+
+        if (!$user instanceof User) {
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
+        }
 
         $totpSecret = $this->totpService->generateSecretKey();
         $user->setTotpSecret($totpSecret);

@@ -7,6 +7,7 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Delete;
 use ApiPlatform\Metadata\GetCollection;
+use App\Api\Dto\Room\CreateDto;
 use App\Api\Processor\Room\MeCreateProcessor;
 use App\Api\Processor\Room\MeJoinProcessor;
 use App\Api\Processor\Room\MeLeaveProcessor;
@@ -27,28 +28,30 @@ use Symfony\Component\Uid\UuidV7;
     operations: [
         new Get(
             uriTemplate: '/room/current',
-            input: false,
             provider: MeShowCurrentProvider::class,
-            read: false,
+            input: false,
+            normalizationContext: ['groups' => ['room:read']],
             name: 'api_user_room',
             
         ),
         new GetCollection(
             uriTemplate: '/room/public',
             provider: ListPublicProvider::class,
-            read: false,
+            input: false,
+            normalizationContext: ['groups' => ['room:read']],
             name: 'api_room_list_public',
         ),
         new Post(
             uriTemplate: '/room/{id}/kick',
             processor: MeKickUserProcessor::class,
-            read: false,
+            input: false,
             name: 'api_room_kick',
         ),
         new Post(
             uriTemplate: '/room/create',
             processor: MeCreateProcessor::class,
-            read: false,
+            input: CreateDto::class,
+            normalizationContext: ['groups' => ['room:read']],
             name: 'api_room_create',
             
         ),
@@ -56,7 +59,6 @@ use Symfony\Component\Uid\UuidV7;
             uriTemplate: '/room/delete',
             input: false,
             processor: MeDeleteProcessor::class,
-            read: false,
             name: 'api_room_delete',
             
         ),
@@ -64,7 +66,6 @@ use Symfony\Component\Uid\UuidV7;
             uriTemplate: '/room/{id}/join',
             input: false,
             processor: MeJoinProcessor::class,
-            read: false,
             name: 'api_room_join',
             
         ),
@@ -72,7 +73,6 @@ use Symfony\Component\Uid\UuidV7;
             uriTemplate: '/room/leave',
             input: false,
             processor: MeLeaveProcessor::class,
-            read: false,
             name: 'api_room_leave',
             
         )

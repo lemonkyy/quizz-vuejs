@@ -70,15 +70,6 @@ class RoomContext
         return [
             'summary' => 'Kick another user from the user\'s room',
             'description' => 'Kicks a user from the current room. Only the room owner can kick other users. Cannot kick yourself.',
-            'parameters' => [
-                [
-                    'name' => 'id',
-                    'in' => 'path',
-                    'required' => true,
-                    'schema' => [ 'type' => 'string' ],
-                    'description' => 'ID of the user to kick from the room'
-                ]
-            ],
             'responses' => [
                 '200' => [
                     'description' => 'User kicked from room',
@@ -233,15 +224,6 @@ class RoomContext
         return [
             'summary' => 'Join a room by code',
             'description' => 'Current user joins a room by its code.',
-            'parameters' => [
-                [
-                    'name' => 'id',
-                    'in' => 'path',
-                    'required' => true,
-                    'schema' => [ 'type' => 'string' ],
-                    'description' => 'Id of the room to join'
-                ]
-            ],
             'responses' => [
                 '200' => [
                     'description' => 'Joined room',

@@ -13,6 +13,7 @@ use App\Service\ValidateUsernameService;
 use App\Service\ValidatePasswordService;
 use App\Entity\User;
 use App\Api\Dto\User\RegisterDto;
+use App\Exception\ValidationException;
 
 class RegisterProcessor implements ProcessorInterface
 {
@@ -26,24 +27,24 @@ class RegisterProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
     {
         if (!isset($data->email, $data->password)) {
-            return new JsonResponse(['code' => 'ERR_MISSING_CREDENTIALS', 'error' => 'Missing email or password'], 400);
+            throw new ValidationException('ERR_MISSING_CREDENTIALS', 'Missing email or password', 400);
         }
 
         if (!$data->tosAgreedTo) {
-            return new JsonResponse(['code' => 'ERR_TOS_REFUSED', 'error' => 'TOS not agreed to'], 400);
+            throw new ValidationException('ERR_TOS_REFUSED', 'TOS not agreed to', 400);
         }
 
         $passwordValidation = $this->validatePasswordService->validate($data->password);
         if ($passwordValidation) {
-            return new JsonResponse($passwordValidation, 400);
+            throw new ValidationException($passwordValidation['code'], $passwordValidation['error'], 400);
         }
 
         if (!filter_var($data->email, FILTER_VALIDATE_EMAIL)) {
-            return new JsonResponse(['code' => 'ERR_INVALID_EMAIL', 'error' => 'Invalid email address'], 400);
+            throw new ValidationException('ERR_INVALID_EMAIL', 'Invalid email address', 400);
         }
 
         if ($this->userRepository->findOneBy(['email' => $data->email])) {
-            return new JsonResponse(['code' => 'ERR_EMAIL_ALREADY_IN_USE', 'error' => 'Email already in use'], 400);
+            throw new ValidationException('ERR_EMAIL_ALREADY_IN_USE', 'Email already in use', 400);
         }
 
         if (isset($data->username) && is_string($data->username)) {
@@ -52,7 +53,7 @@ class RegisterProcessor implements ProcessorInterface
             $error = $this->validateUsernameService->validate($username);
 
             if ($error) {
-                return new JsonResponse($error, 400);
+                throw new ValidationException($error['code'], $error['error'], 400);
             }
 
         } else {
@@ -66,7 +67,7 @@ class RegisterProcessor implements ProcessorInterface
                 $attempts++;
                 $error = $this->validateUsernameService->validate($username);
                 if ($attempts > $maxAttempts) {
-                    return new JsonResponse(['code' => 'ERR_USERNAME_GENERATION_FAILED', 'error' => 'Could not generate unique username.'], 500);
+                    throw new ValidationException('ERR_USERNAME_GENERATION_FAILED', 'Could not generate unique username.', 500);
                 }
 
             } while ($error);

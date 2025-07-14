@@ -9,6 +9,7 @@ use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\User;
 use App\Api\Dto\User\MeListFriendsDto;
+use App\Exception\ValidationException;
 
 class MeListFriendsProvider implements ProviderInterface
 {
@@ -29,7 +30,7 @@ class MeListFriendsProvider implements ProviderInterface
         $user = $this->security->getUser();
 
         if (!$user instanceof User) {
-            throw new \Exception("User not found");
+            throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
         }
 
         $page = $context['request']->query->getInt('page', 1);
