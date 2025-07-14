@@ -7,516 +7,91 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use App\Api\Dto\User\GetByUsernameDto;
+use App\Api\Dto\User\RegisterDto;
+use App\Api\Dto\User\SearchDto;
+use App\Api\Processor\User\MeGenerateTotpSecretProcessor;
+use App\Api\Processor\User\MeUpdateProcessor;
+use App\Api\Processor\User\RegisterProcessor;
+use App\Api\Processor\User\RemoveFriendProcessor;
+use App\Api\Processor\User\VerifyTotpCodeProcessor;
+use App\Api\Provider\User\GetByUsernameProvider;
+use App\Api\Provider\User\MeListFriendsProvider;
+use App\Api\Provider\User\MeReadProvider;
+use App\Api\Provider\User\SearchProvider;
+use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use SpecShaper\EncryptBundle\Annotations\Encrypted;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
-use App\Controller\Api\User\MeReadController;
-use App\Controller\Api\User\MeUpdateController;
-use App\Controller\Api\User\RegisterController;
-use App\Controller\Api\User\MeGenerateTotpSecretController;
-use App\Controller\Api\User\MeListFriendsController;
-use App\Controller\Api\User\RemoveFriendController;
-use App\Controller\Api\User\VerifyTotpCodeController;
-use App\Repository\UserRepository;
-use SpecShaper\EncryptBundle\Annotations\Encrypted;
-use App\Controller\Api\User\SearchController;
-use App\Controller\Api\User\GetByUsernameController;
+
+use App\Api\Dto\User\UpdateDto;
+use App\Api\Dto\User\VerifyTotpCodeDto;
 
 #[ApiResource(
     operations: [
         new Get(
             uriTemplate: '/user/get-by-username',
-            controller: GetByUsernameController::class,
-            read: false,
-            name: 'api_get_user_by_username',
-            openapiContext: [
-                'summary' => 'Get user by username',
-                'description' => 'Returns a user based on their username.',
-                'parameters' => [
-                    [
-                        'name' => 'username',
-                        'in' => 'query',
-                        'required' => true,
-                        'schema' => ['type' => 'string'],
-                        'description' => 'The username of the user to retrieve.'
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'User info',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'user' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'id' => ['type' => 'string'],
-                                                'username' => ['type' => 'string'],
-                                                'email' => ['type' => 'string'],
-                                                'profilePicture' => ['type' => 'string'],
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Missing username',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['ERR_MISSING_USERNAME']],
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '404' => [
-                        'description' => 'User not found',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['ERR_USER_NOT_FOUND']],
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            provider: GetByUsernameProvider::class,
+            input: GetByUsernameDto::class,
+            name: 'api_user_get_by_username',  
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Get(
             uriTemplate: '/user/me',
-            input: false,
-            controller: MeReadController::class,
-            read: false,
+            provider: MeReadProvider::class,
             name: 'api_user_info',
-            openapiContext: [
-                'summary' => 'Get current user info',
-                'description' => 'Returns the username and email of the current authenticated user.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'User info',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'user' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'username' => ['type' => 'string'],
-                                                'email' => ['type' => 'string'],
-                                                'profilePicture' => ['type' => 'string'],
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized'
-                    ]
-                ]
-            ]
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Get(
             uriTemplate: '/user/search',
-            controller: SearchController::class,
-            read: false,
+            provider: SearchProvider::class,
+            input: SearchDto::class,
             name: 'api_user_search',
-            openapiContext: [
-                'summary' => 'Search for users by username',
-                'description' => 'Returns a list of users matching the provided username, with pagination.',
-                'parameters' => [
-                    [
-                        'name' => 'username',
-                        'in' => 'query',
-                        'required' => true,
-                        'schema' => ['type' => 'string'],
-                        'description' => 'The username to search for'
-                    ],
-                    [
-                        'name' => 'page',
-                        'in' => 'query',
-                        'required' => false,
-                        'schema' => ['type' => 'integer', 'default' => 1],
-                        'description' => 'The page number for pagination'
-                    ],
-                    [
-                        'name' => 'limit',
-                        'in' => 'query',
-                        'required' => false,
-                        'schema' => ['type' => 'integer', 'default' => 10],
-                        'description' => 'The number of results per page'
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'List of users',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'users' => ['type' => 'array',
-                                            'items' => [
-                                                'type' => 'object',
-                                                'properties' => [
-                                                    'id' => ['type' => 'string'],
-                                                    'username' => ['type' => 'string'],
-                                                    'profilePicture' => ['type' => 'string']
-                                                ]
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized'
-                    ]
-                ]
-            ]
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Post(
             uriTemplate: '/register',
-            controller: RegisterController::class,
-            read: false,
-            name: 'api_register',
-            openapiContext: [
-                'summary' => 'Register a new user',
-                'description' => 'Registers a new user with email and password.',
-                'requestBody' => [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'email' => ['type' => 'string'],
-                                    'username' => ['type' => 'string'],
-                                    'password' => ['type' => 'string'],
-                                    'passwordConfirmation' => ['type' => 'string'],
-                                    'tosAgreedTo' => ['type' => 'boolean']
-                                ],
-                                'required' => ['email', 'password', 'tosAgreedTo']
-                            ]
-                        ]
-                    ]
-                ],
-                'responses' => [
-                    '201' => [
-                        'description' => 'User created.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'message' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Invalid input or email already in use.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['MISSING_CREDENTIALS', 'INVALID_EMAIL', 'EMAIL_ALREADY_IN_USE', 'USERNAME_VALIDATION_FAILED', 'USERNAME_GENERATION_FAILED', 'ERR_PASSWORD_WEAK', 'ERR_TOS_REFUSED']],
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            processor: RegisterProcessor::class,
+            input: RegisterDto::class,
+            name: 'api_user_register',
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Put(
             uriTemplate: '/user',
-            input: false,
-            controller: MeUpdateController::class,
-            read: false,
-            name: 'api_update_user',
-            openapiContext: [
-                'summary' => 'Update current user',
-                'description' => 'Updates the authenticated user and refreshes his cookies.',
-                'requestBody' => [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'newUsername' => ['type' => 'string'],
-                                    'newProfilePictureId' => ['type' => 'string'],
-                                    'clearTotpSecret' => ['type' => 'boolean', 'default' => 'false']
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'Username updated.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'message' => ['type' => 'string'],
-                                        'username' => ['type' => 'string'],
-                                        'profilePicture' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'id' => ['type' => 'string', 'format' => 'uuid'],
-                                                'fileName' => ['type' => 'string']
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Invalid username or already in use.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['INVALID_USERNAME', 'ERR_USERNAME_INVALID_TYPE', 'ERR_USERNAME_CONTAINS_SPACES', 'ERR_USERNAME_LENGTH', 'ERR_USERNAME_INAPPROPRIATE', 'ERR_USERNAME_TAKEN', 'ERR_NULL_PROFILE_PICTURE', 'ERR_PROFILE_PICTURE_NOT_FOUND']],
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized.'
-                    ]
-                ]
-            ]
+            processor: MeUpdateProcessor::class,
+            input: UpdateDto::class,
+            name: 'api_user_update',
         ),
-        new Get(
+        new Post(
             uriTemplate: '/user/totp/secret',
-            controller: MeGenerateTotpSecretController::class,
-            read: false,
+            processor: MeGenerateTotpSecretProcessor::class,
+            input: false,
             name: 'api_user_totp_secret_generate',
-            openapiContext: [
-                'summary' => 'Generate TOTP secret for the current user and refreshes his cookies',
-                'description' => 'Generates a TOTP secret for the current authenticated user.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'TOTP secret generated successfully.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'totpSecret' => ['type' => 'string'],
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Failed to generate TOTP key.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['TOTP_GENERATION_FAILED']],
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized'
-                    ]
-                ]
-            ]
         ),
         new Post(
             uriTemplate: '/login-verify',
-            controller: VerifyTotpCodeController::class,
-            read: false,
+            processor: VerifyTotpCodeProcessor::class,
+            input: VerifyTotpCodeDto::class,
             name: 'api_user_totp_verify',
-            openapiContext: [
-                'summary' => 'Verify TOTP code for the current user',
-                'description' => 'Verifies the TOTP code submitted by the user.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'TOTP code verified and JWT returned.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'token' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Invalid input.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['MISSING_TOTP_CREDENTIALS']],
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized or invalid TOTP code.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['INVALID_TEMP_TOKEN', 'INVALID_TOTP_CODE']],
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-                'requestBody' => [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'totpCode' => ['type' => 'string'],
-                                    'tempToken' => ['type' => 'string']
-                                ],
-                                'required' => ['totpCode', 'tempToken']
-                            ]
-                        ]
-                    ]
-                ]
-            ]
         ),
         new Delete(
             uriTemplate: '/user/friends/{id}',
-            controller: RemoveFriendController::class,
-            read: false,
+            processor: RemoveFriendProcessor::class,
+            input: false,
             name: 'api_user_remove_friend',
-            openapiContext: [
-                'summary' => 'Remove a friend',
-                'description' => 'Removes a friend from the current user\'s friend list.',
-                'parameters' => [
-                    [
-                        'name' => 'id',
-                        'in' => 'path',
-                        'required' => true,
-                        'schema' => ['type' => 'string'],
-                        'description' => 'The ID of the friend to remove.'
-                    ]
-                ],
-                'responses' => [
-                    '200' => ['description' => 'Friend removed successfully'],
-                    '400' => ['description' => 'Invalid request'],
-                    '404' => ['description' => 'User not found or not a friend'],
-                    '401' => ['description' => 'Unauthorized']
-                ]
-            ]
         ),
         new Get(
             uriTemplate: '/user/friends',
-            controller: MeListFriendsController::class,
-            read: false,
+            provider: MeListFriendsProvider::class,
+            input: false,
+            normalizationContext: ['groups' => ['user:read']],
             name: 'api_user_list_friends',
-            openapiContext: [
-                'summary' => 'List current user\'s friends',
-                'description' => 'Lists all friends of the current authenticated user with pagination and filtering.',
-                'parameters' => [
-                    [
-                        'name' => 'page',
-                        'in' => 'query',
-                        'required' => false,
-                        'schema' => ['type' => 'integer', 'default' => 1],
-                        'description' => 'The page number for pagination'
-                    ],
-                    [
-                        'name' => 'limit',
-                        'in' => 'query',
-                        'required' => false,
-                        'schema' => ['type' => 'integer', 'default' => 10],
-                        'description' => 'The number of results per page'
-                    ],
-                    [
-                        'name' => 'username',
-                        'in' => 'query',
-                        'required' => false,
-                        'schema' => ['type' => 'string'],
-                        'description' => 'Filter friends by username'
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'List of friends',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'friends' => ['type' => 'array',
-                                            'items' => [
-                                                'type' => 'object',
-                                                'properties' => [
-                                                    'id' => ['type' => 'string'],
-                                                    'username' => ['type' => 'string'],
-                                                    'profilePicture' => ['type' => 'string']
-                                                ]
-                                            ]
-                                        ],
-                                        'hasMore' => ['type' => 'boolean']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '401' => ['description' => 'Unauthorized']
-                ]
-            ]
-        ),
-        
+        ),   
     ]
 )]
 
@@ -566,12 +141,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\InverseJoinColumn(name: 'friend_user_id', referencedColumnName: 'id')]
     private Collection $friends;
 
+    #[ORM\OneToMany(mappedBy: 'invitedBy', targetEntity: Invitation::class, orphanRemoval: true)]
+    private Collection $sentInvitations;
+
+    #[ORM\OneToMany(mappedBy: 'invitedUser', targetEntity: Invitation::class, orphanRemoval: true)]
+    private Collection $receivedInvitations;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
         $this->sentFriendRequests = new ArrayCollection();
         $this->receivedFriendRequests = new ArrayCollection();
         $this->friends = new ArrayCollection();
+        $this->sentInvitations = new ArrayCollection();
+        $this->receivedInvitations = new ArrayCollection();
     }
 
     public function getId(): ?UuidV7
@@ -762,5 +345,21 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->friends->removeElement($friend);
 
         return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitation>|Invitation[]
+     */
+    public function getSentInvitations(): Collection
+    {
+        return $this->sentInvitations;
+    }
+
+    /**
+     * @return Collection<int, Invitation>|Invitation[]
+     */
+    public function getReceivedInvitations(): Collection
+    {
+        return $this->receivedInvitations;
     }
 }

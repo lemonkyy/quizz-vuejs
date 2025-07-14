@@ -12,6 +12,7 @@ const code = ref('');
 watch(code, (newCode) => {
   if (newCode.length === 6) {
     validateCode(newCode);
+    code.value="";
   }
 });
 

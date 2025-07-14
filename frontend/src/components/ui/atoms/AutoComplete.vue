@@ -42,6 +42,8 @@ watch(() => props.items, (newItems) => {
     return;
   }
 
+  console.log(props.items);
+
   if (modelValue.value.trim() && (newItems.length > 0 || props.isLoading)) {
     showDropdown.value = true
   } else {

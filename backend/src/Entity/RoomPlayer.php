@@ -23,6 +23,7 @@ class RoomPlayer
     #[ORM\Column()]
     private ?int $score = null;
 
+    #[Groups(['room:read'])]
     #[ORM\ManyToOne(inversedBy: 'roomPlayers')]
     #[ORM\JoinColumn(nullable: true)]
     private ?Room $room = null;

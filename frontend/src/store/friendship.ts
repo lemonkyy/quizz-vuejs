@@ -42,6 +42,7 @@ export const useFriendStore = defineStore("friend", () => {
       }
 
       const response = await listFriendsService(username, page, limit);
+      console.log(response);
       
       if (response.code === 'SUCCESS' && response.friends) {
         if (page === 1) {

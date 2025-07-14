@@ -39,7 +39,7 @@ export async function loginVerify(params: {totpCode: string, tempToken: string})
 
 export async function generateTotpSecret(): Promise<{code: string, totpSecret?: string, error?: string}> {
   try {
-    const response = await axios.get('/user/totp/secret');
+    const response = await axios.post('/user/totp/secret');
     return response.data;
   } catch (error) {
     throw error;
@@ -58,7 +58,10 @@ export async function updateUser(params: {newUsername?: string, newProfilePictur
 export async function getUserByUsername(params: {username: string}): Promise<{code: string, user?: PublicUser, error?: string}> {
   try {
     const response = await axios.get('/user/get-by-username', { params: params });
-    return response.data;
+    return {
+      code: 'SUCCESS',
+      user: response.data
+    };
   } catch (error) {
     throw error;
   }
@@ -67,7 +70,10 @@ export async function getUserByUsername(params: {username: string}): Promise<{co
 export async function searchUsers(username: string, page?: number, limit?: number): Promise<{code: string, users?: PublicUser[], error?: string}> {
   try {
     const response = await axios.get('/user/search', { params: { username, page, limit } });
-    return response.data;
+    return {
+      code: 'SUCCESS',
+      users: response.data.member
+    };
   } catch (error) {
     throw error;
   }
@@ -76,7 +82,10 @@ export async function searchUsers(username: string, page?: number, limit?: numbe
 export async function getMe(): Promise<{code: string, user?: User, error?: string}> {
   try {
     const response = await axios.get('/user/me');
-    return response.data;
+    return {
+      code: 'SUCCESS',
+      user: response.data
+    };
   } catch (error) {
     throw error;
   }
