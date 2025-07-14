@@ -166,7 +166,7 @@ class GenerateQuizzHandler
                     - \"question\": string
                     - \"options\": tableau de strings
                     - \"correct_answer\": string
-                Pas d'autres texte que le JSON.",
+                Pas d'autres texte que le JSON. et assure toi que la bonne réponse fasse partie des options",
             ],
             'headers' => [
                 'Accept' => 'application/json'

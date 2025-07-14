@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '/src/api/axios.ts'
+
+const router = useRouter()
 
 const prompt = ref('')
 const count = ref(10)
@@ -8,22 +11,54 @@ const timePerQuestion = ref(30)
 const isLoading = ref(false)
 
 const createQuiz = async () => {
+  const cleanPrompt = prompt.value.trim()
   isLoading.value = true
+
   try {
+    console.log("Checking if quiz already exists...")
+    const initialResponse = await api.get(`/quizzess?title=${encodeURIComponent(cleanPrompt)}`)
+    const existingQuizzes = initialResponse.data['hydra:member'].filter(q => q.title === cleanPrompt)
+
+    if (existingQuizzes.length > 0) {
+      const lastQuiz = existingQuizzes.reduce((max, q) => q.id > max.id ? q : max, existingQuizzes[0])
+      console.log("Existing quiz found:", lastQuiz)
+      router.push({ name: 'Question', params: { id: lastQuiz.id } })
+    }
+
+
     const payload = {
-      prompt: prompt.value,
+      prompt: cleanPrompt,
       count: count.value,
       timePerQuestion: timePerQuestion.value
     }
-    console.log("Sending payload:", payload)
+    console.log("Sending payload to create quiz:", payload)
+    await api.post('/quizz', payload)
 
-    const response = await api.post('/quizz', payload)
+    let tries = 0
+    const maxTries = 10
+    const delay = 1000
 
-    console.log("Quiz created:", response.data)
-    // TODO: rediriger vers la page de quiz, ou charger les questions
+    const waitForQuiz = async () => {
+      tries++
+      const response = await api.get(`/quizzess?title=${encodeURIComponent(cleanPrompt)}`)
+      const quizzes = response.data['hydra:member'].filter(q => q.title === cleanPrompt)
+
+      if (quizzes.length > 0) {
+        const lastQuiz = quizzes.reduce((max, q) => q.id > max.id ? q : max, quizzes[0])
+        console.log("Quiz created and found:", lastQuiz)
+        router.push({ name: 'Question', params: { id: lastQuiz.id } })
+      } else if (tries < maxTries) {
+        console.log(`Waiting for quiz creation... try ${tries}`)
+        setTimeout(waitForQuiz, delay)
+      } else {
+        console.error("Timeout: quiz creation took too long.")
+      }
+    }
+
+    setTimeout(waitForQuiz, delay)
 
   } catch (error) {
-    console.error("Erreur lors de la création du quizz:", error)
+    console.error("Erreur lors de la création ou vérification du quizz:", error)
   } finally {
     isLoading.value = false
   }
@@ -36,7 +71,7 @@ const createQuiz = async () => {
     <form @submit.prevent="createQuiz">
       <div class="mb-4">
         <label class="block mb-1 font-semibold">Topic (Prompt)</label>
-        <input v-model="prompt" type="text" class="w-full border rounded px-3 py-2" placeholder="Ex: Star Wars" />
+        <input v-model="prompt" type="text" class="w-full border rounded px-3 py-2" placeholder="Ex: Vue.js" />
       </div>
       <div class="mb-4">
         <label class="block mb-1 font-semibold">Nombre de questions</label>

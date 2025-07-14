@@ -44,7 +44,7 @@
   
   onMounted(async () => {
     try {
-        const response = await axios.get(`/quizzes/25/questions`)
+        const response = await axios.get(`/quizzes/${quizId}/questions`)
         console.log(response.data)
         questions.value = response.data.map(q => ({
         id: q.id,

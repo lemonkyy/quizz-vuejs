@@ -12,14 +12,13 @@ class QuizQuestionController extends AbstractController
     #[Route('/api/quizzes/{id}/questions', name: 'api_quizz_questions', methods: ['GET'])]
     public function getQuizQuestions(int $id, QuizzQuestionsRepository $repository): JsonResponse
     {
-        // bien utiliser le mapping Doctrine
         $questions = $repository->findBy(['quizz' => $id]);
 
         $data = array_map(function ($question) {
             return [
                 'id' => $question->getId(),
                 'questionText' => $question->getQuestionText(),
-                'options' => $question->getOptions(),  // déjà tableau PHP
+                'options' => $question->getOptions(),
                 'correctAnswer' => $question->getCorrectAnswer()
             ];
         }, $questions);

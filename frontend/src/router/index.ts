@@ -7,7 +7,7 @@ import Create from '../pages/Create.vue'
 const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/login', name: 'Login', component: Login },
-  { path: '/question', name: 'Question', component: Question },
+  { path: '/question/:id?', name: 'Question', component: Question },
   { path : '/create', name: 'Create', component: Create }
 ]
 
