@@ -12,6 +12,7 @@
     --color-grey-3: #6b7281;
     --color-grey-4: #11182c;
     --color-grey-5: #E5E8EB;
+    --color-grey-6: #fafafa;
 
     --color-yellow-1: #e7d4a0;
     --color-yellow-2: #F2C247;
@@ -99,6 +100,18 @@
     --color-menu-background: var(--color-white);
     --color-menu-border: var(--color-grey-5);
     --color-menu-text: var(--color-black);
+
+    --color-notification-background: var(--color-grey-6);
+    --color-notification-border: var(--color-grey-2);
+    --color-notification-text: var(--color-black);
+    --color-notification-item-border: var(--color-grey-1);
+
+    --color-notification-badge-background: #dc2626; /* red-600 */
+    --color-notification-badge-text: #fef2f2; /* red-100 */
+
+    --color-error-background: #fef2f2; /* red-50 */
+    --color-error-text: #b91c1c; /* red-700 */
+    --color-error-icon: #ef4444; /* red-400 */
 
     --radius-custom-sm: 8px;
     --radius-custom-md: 12px;

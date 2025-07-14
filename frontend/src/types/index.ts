@@ -31,3 +31,16 @@ export interface JWTUserPayload {
   iat: number;
   exp: number;
 }
+
+export interface Notification {
+  id: string;
+  type: "friend_request" | "game_invite" | "other";
+  timestamp: string; // Added timestamp
+  data: {
+    senderId?: string;
+    senderUsername?: string;
+    senderProfilePicture?: string;
+    roomId?: string;
+    message?: string;
+  };
+}
