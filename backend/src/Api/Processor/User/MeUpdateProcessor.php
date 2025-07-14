@@ -14,6 +14,7 @@ use App\Entity\User;
 use App\Api\Dto\User\UpdateDto;
 
 use App\Exception\ValidationException;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class MeUpdateProcessor implements ProcessorInterface
@@ -23,7 +24,8 @@ class MeUpdateProcessor implements ProcessorInterface
         private ProfilePictureRepository $profilePictureRepository,
         private Security $security,
         private JWTTokenManagerInterface $jwtManager,
-        private JWTCookieService $cookieService
+        private JWTCookieService $cookieService,
+        private EntityManagerInterface $entityManager
     )
     {
     }
@@ -68,6 +70,8 @@ class MeUpdateProcessor implements ProcessorInterface
         if (!empty($data->clearTotpSecret)) {
             $user->setTotpSecret(null);
         }
+
+        $this->entityManager->flush();
 
         $jwtToken = $this->jwtManager->create($user);
         

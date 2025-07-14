@@ -4,7 +4,6 @@ namespace App\Api\Processor\User;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use App\Repository\ProfilePictureRepository;
@@ -24,7 +23,7 @@ class RegisterProcessor implements ProcessorInterface
     /**
      * @param RegisterDto $data
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): User
     {
         if (!isset($data->email, $data->password)) {
             throw new ValidationException('ERR_MISSING_CREDENTIALS', 'Missing email or password', 400);
@@ -86,6 +85,6 @@ class RegisterProcessor implements ProcessorInterface
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
-        return new JsonResponse(['code' => 'SUCCESS', 'message' => 'User created.'], 201);
+        return $user;
     }
 }

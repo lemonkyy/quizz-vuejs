@@ -35,11 +35,10 @@ class MeSendProcessor implements ProcessorInterface
         if (!$user instanceof User) {
             throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
         }
-        
         $receiverId = $uriVariables['id'];
-
-
-        if ($receiverId === $user->getId()->__toString()) {
+        
+        
+        if ($receiverId == $user->getId()->__toString()) {
             throw new ValidationException('ERR_CANNOT_SEND_TO_SELF', 'Cannot send friend request to yourself', 400);
         }
 
@@ -49,21 +48,17 @@ class MeSendProcessor implements ProcessorInterface
         }
 
         $existingRequest = $this->friendRequestRepository->findOneBy(['sender' => $user, 'receiver' => $receiver]);
-        if ($existingRequest) {
-            if ($existingRequest->getAcceptedAt() === null && $existingRequest->getDeniedAt() === null && $existingRequest->getRevokedAt() === null) {
-                throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_SENT', 'Friend request already sent', 400);
-            } else if ($existingRequest->getAcceptedAt() !== null) {
-                throw new ValidationException('ERR_ALREADY_FRIENDS', 'You are already friends with this user', 400);
-            }
+        if ($existingRequest && $existingRequest->getAcceptedAt() === null && $existingRequest->getDeniedAt() === null && $existingRequest->getRevokedAt() === null) {
+            throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_SENT', 'Friend request already sent', 400);
         }
 
         $existingRequest = $this->friendRequestRepository->findOneBy(['sender' => $receiver, 'receiver' => $user]);
-        if ($existingRequest) {
-            if ($existingRequest->getAcceptedAt() === null && $existingRequest->getDeniedAt() === null && $existingRequest->getRevokedAt() === null) {
-                throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_RECEIVED', 'You have a pending friend request from this user', 400);
-            } else if ($existingRequest->getAcceptedAt() !== null) {
-                throw new ValidationException('ERR_ALREADY_FRIENDS', 'You are already friends with this user', 400);
-            }
+        if ($existingRequest && $existingRequest->getAcceptedAt() === null && $existingRequest->getDeniedAt() === null && $existingRequest->getRevokedAt() === null) {
+            throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_RECEIVED', 'You have a pending friend request from this user', 400);
+        }
+
+        if ($user->getFriends()->contains($receiver)) {
+            throw new ValidationException('ERR_ALREADY_FRIENDS', 'You are already friends with this user', 400);
         }
 
         if (count($user->getSentFriendRequests()) >= $this->maxSentFriendRequests) {

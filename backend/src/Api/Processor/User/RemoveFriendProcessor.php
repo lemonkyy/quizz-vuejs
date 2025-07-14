@@ -4,7 +4,6 @@ namespace App\Api\Processor\User;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProcessorInterface;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Repository\UserRepository;
 use Symfony\Bundle\SecurityBundle\Security;
@@ -21,7 +20,7 @@ class RemoveFriendProcessor implements ProcessorInterface
     /**
      * @param RemoveFriendDto $data
      */
-    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): JsonResponse
+    public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): void
     {
         $user = $this->security->getUser();
 
@@ -29,7 +28,7 @@ class RemoveFriendProcessor implements ProcessorInterface
             throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
         }
         
-        $friendToRemoveId = $data->friendId;
+        $friendToRemoveId = $uriVariables['id'];
 
         $friendToRemove = $this->userRepository->find($friendToRemoveId);
 
@@ -46,6 +45,6 @@ class RemoveFriendProcessor implements ProcessorInterface
 
         $this->entityManager->flush();
 
-        return new JsonResponse(['code' => 'SUCCESS', 'message' => 'Friend removed successfully'], 200);
+        return;
     }
 }

@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue';
 import { searchUsers } from '@/services/userService';
-import type { User } from '@/types';
+import type { PublicUser } from '@/types';
 import AutoComplete from '@/components/ui/atoms/AutoComplete.vue';
 
 const modelValue = defineModel<string>({ default: '' });
 
-const searchedUsers = ref<User[]>([]);
+const searchedUsers = ref<PublicUser[]>([]);
 const hasMore = ref(false);
 const isLoading = ref(false);
 const currentPage = ref(1);

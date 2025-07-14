@@ -4,6 +4,7 @@ namespace App\Api\Provider\User;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
+use App\Api\Dto\User\MeListFriendsOutputDto;
 use App\Repository\UserRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
@@ -25,7 +26,7 @@ class MeListFriendsProvider implements ProviderInterface
     /**
      * @param MeListFriendsDto $data
      */
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): MeListFriendsOutputDto
     {
         $user = $this->security->getUser();
 
@@ -44,6 +45,6 @@ class MeListFriendsProvider implements ProviderInterface
             $username
         );
 
-        return $friendsData;
+        return new MeListFriendsOutputDto($friendsData['friends'], $friendsData['hasMore']);
     }
 }
