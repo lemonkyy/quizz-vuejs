@@ -9,15 +9,6 @@ class FriendRequestContext
         return [
             'summary' => 'Send a friend request',
             'description' => 'Sends a friend request to another user.',
-            'parameters' => [
-                [
-                    'name' => 'id',
-                    'in' => 'path',
-                    'required' => true,
-                    'schema' => ['type' => 'string'],
-                    'description' => 'The ID of the user to send the friend request to.'
-                ]
-            ],
             'responses' => [
                 '201' => ['description' => 'Friend request sent'],
                 '400' => ['description' => 'Invalid request'],

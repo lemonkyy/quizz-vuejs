@@ -4,7 +4,7 @@ namespace App\Api\OpenApi\Context;
 
 class ProfilePictureContext
 {
-    public static function getApiProfilePictureUploadContext(): array
+    public static function getGetProfilePicturesContext(): array
     {
         return [
             'summary' => 'Upload a profile picture',

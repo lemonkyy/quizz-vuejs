@@ -5,11 +5,10 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Get;
-use App\Api\Processor\FriendRequest\MeAcceptProcessor;
-use App\Api\Processor\FriendRequest\MeCancelProcessor;
-use App\Api\Processor\FriendRequest\MeDenyProcessor;
-use App\Api\Processor\FriendRequest\MeSendProcessor;
-use App\Api\Provider\FriendRequest\MeListSentProvider;
+use App\Api\Processor\Invitation\MeAcceptProcessor;
+use App\Api\Processor\Invitation\MeCancelProcessor;
+use App\Api\Processor\Invitation\MeDenyProcessor;
+use App\Api\Processor\Invitation\MeSendProcessor;
 use App\Api\Provider\Invitation\MeListPendingProvider;
 use App\Api\Provider\Invitation\MeListSentProvider as InvitationMeListSentProvider;
 use App\Repository\InvitationRepository;
@@ -40,13 +39,7 @@ use Symfony\Component\Uid\UuidV7;
             read: false,
             name: 'api_invitation_pending'
         ),
-        new Get(
-            uriTemplate: 'invitation/sent',
-            input: false,
-            provider: MeListSentProvider::class,
-            read: false,
-            name: 'api_invitation_sent'
-        ),
+
         new Post(
             uriTemplate: '/invitation/{id}/accept',
             input: false,

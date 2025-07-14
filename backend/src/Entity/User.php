@@ -34,51 +34,21 @@ use Symfony\Component\Uid\UuidV7;
             uriTemplate: '/authenticated',
             provider: CheckAuthProvider::class,
             read: false,
-            name: 'api_check_auth',
+            name: 'api_user_check_auth',
             
         ),
         new Get(
             uriTemplate: '/user/get-by-username',
             provider: GetByUsernameProvider::class,
             read: false,
-            name: 'api_get_user_by_username',
-            
+            name: 'api_user_get_by_username',  
         ),
-        
         new Get(
             uriTemplate: '/user/me',
+            #controller: MeReadController::class,
             provider: MeReadProvider::class,
             name: 'api_user_info',
-            openapiContext: [
-                'summary' => 'Get current user info',
-                'description' => 'Returns the username and email of the current authenticated user.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'User info',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'code' => ['type' => 'string', 'enum' => ['SUCCESS']],
-                                        'user' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'username' => ['type' => 'string'],
-                                                'email' => ['type' => 'string'],
-                                                'profilePicture' => ['type' => 'string'],
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized'
-                    ]
-                ]
-            ]
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Get(
             uriTemplate: '/user/search',
@@ -90,14 +60,14 @@ use Symfony\Component\Uid\UuidV7;
             uriTemplate: '/register',
             processor: RegisterProcessor::class,
             read: false,
-            name: 'api_register'
+            name: 'api_user_register'
         ),
         new Put(
             uriTemplate: '/user',
             input: false,
             processor: MeUpdateProcessor::class,
             read: false,
-            name: 'api_update_user',
+            name: 'api_user_update',
         ),
         new Get(
             uriTemplate: '/user/totp/secret',

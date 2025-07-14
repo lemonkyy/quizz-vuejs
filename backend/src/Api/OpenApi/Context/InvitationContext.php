@@ -9,15 +9,6 @@ class InvitationContext
         return [
             'summary' => 'Send a room invitation',
             'description' => 'Send an invitation to another user to join your current room. Only possible if you are in a room, the user is not already in the room, and the room is not full.',
-            'parameters' => [
-                [
-                    'name' => 'id',
-                    'in' => 'path',
-                    'required' => true,
-                    'schema' => [ 'type' => 'string' ],
-                    'description' => 'ID of the user to invite'
-                ]
-            ],
             'responses' => [
                 '201' => [
                     'description' => 'Invitation sent',
@@ -70,15 +61,6 @@ class InvitationContext
         return [
             'summary' => 'List invitations sent by the current user',
             'description' => 'Returns invitations sent by the current user that are still pending (not accepted, denied, or revoked). Optionally filter by user_id as a query parameter.',
-            'parameters' => [
-                [
-                    'name' => 'user_id',
-                    'in' => 'query',
-                    'required' => false,
-                    'schema' => [ 'type' => 'string' ],
-                    'description' => 'Filter to invitations sent to this user (optional)'
-                ]
-            ],
             'responses' => [
                 '200' => [
                     'description' => 'List of pending invitations sent by the user',
@@ -194,15 +176,6 @@ class InvitationContext
         return [
             'summary' => 'Deny an invitation',
             'description' => 'Denies an invitation by its id. Only the invited user can deny.',
-            'parameters' => [
-                [
-                    'name' => 'id',
-                    'in' => 'path',
-                    'required' => true,
-                    'schema' => [ 'type' => 'string' ],
-                    'description' => 'ID of the invitation to deny'
-                ]
-            ],
             'responses' => [
                 '200' => [
                     'description' => 'Invitation denied',
@@ -241,15 +214,6 @@ class InvitationContext
         return [
             'summary' => 'Cancel an invitation the user sent',
             'description' => 'Revokes an invitation by its id. Only the user who sent the invitation can revoke it.',
-            'parameters' => [
-                [
-                    'name' => 'id',
-                    'in' => 'path',
-                    'required' => true,
-                    'schema' => [ 'type' => 'string' ],
-                    'description' => 'ID of the invitation to cancel'
-                ]
-            ],
             'responses' => [
                 '200' => [
                     'description' => 'Invitation revoked',

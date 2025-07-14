@@ -4,7 +4,7 @@ namespace App\Api\OpenApi\Context;
 
 class UserContext
 {
-    public static function getCheckAuthContext(): array
+    public static function getUserCheckAuthContext(): array
     {
         return [
             'summary' => 'Check authentication status',
@@ -16,7 +16,7 @@ class UserContext
         ];
     }
 
-    public static function getGetUserByUsernameContext(): array
+    public static function getUserGetByUsernameContext(): array
     {
         return [
             'summary' => 'Get user by username',
@@ -172,7 +172,7 @@ class UserContext
         ];
     }
 
-    public static function getRegisterContext(): array
+    public static function getUserRegisterContext(): array
     {
         return [
             'summary' => 'Register a new user',
@@ -227,7 +227,7 @@ class UserContext
         ];
     }
 
-    public static function getUpdateUserContext(): array
+    public static function getUserUpdateContext(): array
     {
         return [
             'summary' => 'Update current user',

@@ -23,6 +23,7 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
 
 #[ApiResource(
+    normalizationContext: ['groups' => ['room:read']],
     operations: [
         new Get(
             uriTemplate: '/room/current',
@@ -37,12 +38,12 @@ use Symfony\Component\Uid\UuidV7;
             provider: ListPublicProvider::class,
             read: false,
             name: 'api_room_list_public',
-            
         ),
         new Post(
             uriTemplate: '/room/{id}/kick',
             processor: MeKickUserProcessor::class,
-            
+            read: false,
+            name: 'api_room_kick',
         ),
         new Post(
             uriTemplate: '/room/create',

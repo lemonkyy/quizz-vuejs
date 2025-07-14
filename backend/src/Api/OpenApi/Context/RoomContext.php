@@ -4,7 +4,7 @@ namespace App\Api\OpenApi\Context;
 
 class RoomContext
 {
-    public static function getRoomShowCurrentContext(): array
+    public static function getUserRoomContext(): array
     {
         return [
             'summary' => 'Get the current room of the user',
@@ -65,7 +65,7 @@ class RoomContext
         ];
     }
 
-    public static function getRoomKickUserContext(): array
+    public static function getRoomKickContext(): array
     {
         return [
             'summary' => 'Kick another user from the user\'s room',
