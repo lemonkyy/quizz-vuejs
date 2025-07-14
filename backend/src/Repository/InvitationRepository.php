@@ -18,27 +18,20 @@ class InvitationRepository extends ServiceEntityRepository
         $this->inviteExpirationThreshold = $params->get('app.invite_expiration_threshold');
     }
 
-    /**
-     * @return Invitation[]
-     * find pending invites for user, may also be filtered by sender user
-     */
-    public function findActiveForUser(User $invitedUser, ?int $limit = null): array
+    public function countActiveForUser(User $invitedUser): int
     {
-        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold);
+        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold . '');
 
-        $qb = $this->createQueryBuilder('i')
+        return $this->createQueryBuilder('i')
+            ->select('count(i.id)')
             ->where('i.invitedUser = :user')
             ->andWhere('i.revokedAt IS NULL')
             ->andWhere('i.deniedAt IS NULL')
             ->andWhere('i.acceptedAt IS NULL')
             ->andWhere('i.invitedAt >= :minDate')
             ->setParameter('user', $invitedUser)
-            ->setParameter('minDate', $expiredThreshold);
-
-        if ($limit !== null) {
-            $qb->setMaxResults($limit);
-        }
-
-        return $qb->getQuery()->getResult();
+            ->setParameter('minDate', $expiredThreshold)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

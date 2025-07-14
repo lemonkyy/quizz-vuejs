@@ -31,6 +31,8 @@ use Symfony\Component\Uid\UuidV7;
 
 use App\Api\Dto\User\UpdateDto;
 use App\Api\Dto\User\VerifyTotpCodeDto;
+use App\Api\Provider\User\MeListNotificationsProvider;
+use App\Api\Provider\User\MeNotificationCountProvider;
 
 #[ApiResource(
     operations: [
@@ -91,6 +93,19 @@ use App\Api\Dto\User\VerifyTotpCodeDto;
             input: false,
             normalizationContext: ['groups' => ['user:read']],
             name: 'api_user_list_friends',
+        ),
+        new Get(
+            uriTemplate: '/user/notifications/count',
+            provider: MeNotificationCountProvider::class,
+            input: false,
+            name: 'api_user_notifications_count',
+        ),
+        new Get(
+            uriTemplate: '/user/notifications',
+            provider: MeListNotificationsProvider::class,
+            input: false,
+            name: 'api_user_notifications_list',
+            normalizationContext: ['groups' => ['notification:read']],
         ),   
     ]
 )]
@@ -99,7 +114,7 @@ use App\Api\Dto\User\VerifyTotpCodeDto;
 #[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(['room:read', 'invitation:read', 'friendRequest:read', 'user:read'])]
+    #[Groups(['room:read', 'invitation:read', 'friendRequest:read', 'user:read', 'user:notification_count', 'notification:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
@@ -107,7 +122,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private ?string $email = null;
 
-    #[Groups(['user:read', 'room:read', 'invitation:read', 'friendRequest:read'])]
+    #[Groups(['user:read', 'room:read', 'invitation:read', 'friendRequest:read', 'notification:read'])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private ?string $username = null;
 
@@ -362,4 +377,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->receivedInvitations;
     }
+
 }

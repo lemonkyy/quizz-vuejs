@@ -45,6 +45,10 @@ services:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
 
+    App\EventListener\FriendRequestMercureSubscriber:
+        tags:
+            - { name: doctrine.event_subscriber }
+
 
     App\Api\OpenApi\OpenApiFactory:
         decorates: 'api_platform.openapi.factory'

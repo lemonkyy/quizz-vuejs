@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\FriendRequest;
+use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -19,5 +20,17 @@ class FriendRequestRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, FriendRequest::class);
+    }
+
+    public function findAllActiveForUser(User $user): array
+    {
+        return $this->createQueryBuilder('fr')
+            ->where('fr.receiver = :user')
+            ->andWhere('fr.revokedAt IS NULL')
+            ->andWhere('fr.deniedAt IS NULL')
+            ->andWhere('fr.acceptedAt IS NULL')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
     }
 }

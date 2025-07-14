@@ -456,4 +456,85 @@ class UserContext
             ]
         ];
     }
+
+    public static function getUserNotificationCountContext(): array
+    {
+        return [
+            'summary' => 'Get notification count for the current user',
+            'description' => 'Returns the total number of unread friend requests and invitations for the authenticated user.',
+            'responses' => [
+                '200' => [
+                    'description' => 'Notification count',
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'object',
+                                'properties' => [
+                                    'notificationCount' => ['type' => 'integer'],
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                '401' => [
+                    'description' => 'Unauthorized'
+                ]
+            ]
+        ];
+    }
+
+    public static function getUserListNotificationsContext(): array
+    {
+        return [
+            'summary' => 'List all active notifications for the current user',
+            'description' => 'Returns a list of active friend requests and invitations, ordered by creation date.',
+            'responses' => [
+                '200' => [
+                    'description' => 'List of notifications',
+                    'content' => [
+                        'application/json' => [
+                            'schema' => [
+                                'type' => 'array',
+                                'items' => [
+                                    'type' => 'object',
+                                    'properties' => [
+                                        'type' => ['type' => 'string', 'enum' => ['friend_request', 'invitation']],
+                                        'id' => ['type' => 'string', 'format' => 'uuid'],
+                                        'createdAt' => ['type' => 'string', 'format' => 'date-time'],
+                                        'sender' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'string', 'format' => 'uuid'],
+                                                'username' => ['type' => 'string'],
+                                            ],
+                                            'nullable' => true,
+                                        ],
+                                        'invitedBy' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'string', 'format' => 'uuid'],
+                                                'username' => ['type' => 'string'],
+                                            ],
+                                            'nullable' => true,
+                                        ],
+                                        'room' => [
+                                            'type' => 'object',
+                                            'properties' => [
+                                                'id' => ['type' => 'string', 'format' => 'uuid'],
+                                                'name' => ['type' => 'string'],
+                                            ],
+                                            'nullable' => true,
+                                        ],
+                                    ],
+                                ],
+                            ],
+                        ],
+                    ],
+                ],
+                '401' => [
+                    'description' => 'Unauthorized'
+                ],
+            ],
+        ];
+    }
 }

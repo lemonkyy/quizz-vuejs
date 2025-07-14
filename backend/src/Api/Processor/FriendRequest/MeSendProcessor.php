@@ -13,7 +13,6 @@ use App\Entity\FriendRequest;
 use App\Api\Dto\FriendRequest\SendDto;
 use App\Entity\User;
 use App\Exception\ValidationException;
-
 class MeSendProcessor implements ProcessorInterface
 {
     private int $maxSentFriendRequests;

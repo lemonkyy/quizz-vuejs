@@ -49,10 +49,12 @@ services:
       APP_DEBUG: 1
       SHELL_VERBOSITY: 3
       APP_SECRET: ${APP_SECRET_DEV}
-      CORS_ALLOW_ORIGIN: '${CORS_ALLOW_ORIGIN}'
+      CORS_ALLOW_ORIGIN: '${SYMFONY_CORS_ALLOW_ORIGIN}'
       DATABASE_URL: ${DATABASE_URL_DEV}
-      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+      JWT_PASSPHRASE: ${SYMFONY_JWT_PASSPHRASE}
       SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY}
+      MERCURE_URL: ${MERCURE_URL}
+      MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY}
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images
@@ -81,6 +83,7 @@ services:
       VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL}
       VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL}
       VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL}
+      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL}
       PATH: /app/node_modules/.bin:$PATH
 
       WATCHPACK_POLLING: true
@@ -127,14 +130,21 @@ services:
     restart: unless-stopped
     environment:
       SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_KEY}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_KEY}
+      MERCURE_EXTRA_DIRECTIVES: |
+        cors_origins ${MERCURE_CORS_ALLOW_ORIGIN}
+    #for dev mode
+    command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost/healthz"]
+      test: ["CMD", "curl", "-f", "http://localhost/healthz"]
       timeout: 5s
       retries: 5
       start_period: 60s
     volumes:
       - mercure-data-dev:/data
       - mercure-config-dev:/config
-    ports: ['80']
+    ports: 
+      - '3000:80'
     networks: 
       - backend-frontend-bridge

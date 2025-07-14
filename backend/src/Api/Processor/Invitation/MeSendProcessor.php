@@ -58,10 +58,6 @@ class MeSendProcessor implements ProcessorInterface
             throw new ValidationException('ERR_NOT_IN_A_ROOM', 'You are not in a room', 400);
         }
 
-        if ($room->getRoomPlayers()->contains($targetUser->getRoomPlayer())) {
-            throw new ValidationException('ERR_USER_ALREADY_IN_ROOM', 'User is already in the room', 400);
-        }
-
         if (count($room->getRoomPlayers()) >= $this->maxRoomUsers) {
             throw new ValidationException('ERR_ROOM_FULL', 'Room is at max capacity', 400);
         }

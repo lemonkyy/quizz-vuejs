@@ -66,17 +66,17 @@ use Symfony\Component\Uid\UuidV7;
 #[ORM\Entity(repositoryClass: InvitationRepository::class)]
 class Invitation
 {
-    #[Groups(['invitation:read'])]
+    #[Groups(['invitation:read', 'notification:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
 
-    #[Groups(['invitation:read'])]
+    #[Groups(['invitation:read', 'notification:read'])]
     #[ORM\ManyToOne(targetEntity: Room::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Room $room = null;
 
-    #[Groups(['invitation:read'])]
+    #[Groups(['invitation:read', 'notification:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $invitedBy = null;
@@ -86,7 +86,7 @@ class Invitation
     #[ORM\JoinColumn(nullable: false)]
     private ?User $invitedUser = null;
 
-    #[Groups(['invitation:read'])]
+    #[Groups(['invitation:read', 'notification:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
     private ?DateTimeImmutable $invitedAt = null;
 

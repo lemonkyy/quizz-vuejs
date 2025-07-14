@@ -7,7 +7,6 @@ use ApiPlatform\State\ProviderInterface;
 use App\Api\Dto\User\MeListFriendsOutputDto;
 use App\Repository\UserRepository;
 use Symfony\Bundle\SecurityBundle\Security;
-use Symfony\Component\HttpFoundation\RequestStack;
 use App\Entity\User;
 use App\Api\Dto\User\MeListFriendsDto;
 use App\Exception\ValidationException;
