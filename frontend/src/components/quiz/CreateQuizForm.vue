@@ -17,14 +17,13 @@ const createQuiz = async () => {
   try {
     console.log("Checking if quiz already exists...")
     const initialResponse = await api.get(`/quizzess?title=${encodeURIComponent(cleanPrompt)}`)
-    const existingQuizzes = initialResponse.data['hydra:member'].filter(q => q.title === cleanPrompt)
+    const existingQuizzes = initialResponse.data['hydra:member'].filter(q => q.title === cleanPrompt && q.ready)
 
     if (existingQuizzes.length > 0) {
       const lastQuiz = existingQuizzes.reduce((max, q) => q.id > max.id ? q : max, existingQuizzes[0])
-      console.log("Existing quiz found:", lastQuiz)
-      router.push({ name: 'Question', params: { id: lastQuiz.id } })
+      console.log("Existing ready quiz found:", lastQuiz)
+      return router.push({ name: 'Question', params: { id: lastQuiz.id } })
     }
-
 
     const payload = {
       prompt: cleanPrompt,
@@ -34,28 +33,20 @@ const createQuiz = async () => {
     console.log("Sending payload to create quiz:", payload)
     await api.post('/quizz', payload)
 
-    let tries = 0
-    const maxTries = 10
-    const delay = 1000
-
     const waitForQuiz = async () => {
-      tries++
       const response = await api.get(`/quizzess?title=${encodeURIComponent(cleanPrompt)}`)
-      const quizzes = response.data['hydra:member'].filter(q => q.title === cleanPrompt)
-
+      const quizzes = response.data['hydra:member'].filter(q => q.title === cleanPrompt && q.ready)
       if (quizzes.length > 0) {
         const lastQuiz = quizzes.reduce((max, q) => q.id > max.id ? q : max, quizzes[0])
-        console.log("Quiz created and found:", lastQuiz)
+        console.log("Quiz ready and found:", lastQuiz)
         router.push({ name: 'Question', params: { id: lastQuiz.id } })
-      } else if (tries < maxTries) {
-        console.log(`Waiting for quiz creation... try ${tries}`)
-        setTimeout(waitForQuiz, delay)
       } else {
-        console.error("Timeout: quiz creation took too long.")
+        console.log("Quiz en cours de génération...")
+        setTimeout(waitForQuiz, 1000)
       }
     }
 
-    setTimeout(waitForQuiz, delay)
+    waitForQuiz()
 
   } catch (error) {
     console.error("Erreur lors de la création ou vérification du quizz:", error)

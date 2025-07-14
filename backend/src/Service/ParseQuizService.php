@@ -77,7 +77,10 @@ class ParseQuizService
             }
         }
 
+        $quiz->setReady(true);
         $this->entityManager->flush();
+
+        $this->logger->info("Quiz ID $quizId marked as ready.");
     }
 }
 

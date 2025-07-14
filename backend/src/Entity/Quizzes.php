@@ -24,6 +24,9 @@ class Quizzes
     #[ORM\Column(nullable: true)]
     private ?int $createdBy = null;
 
+    #[ORM\Column(type: 'boolean', options: ['default' => false])]
+    private bool $ready = false;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -64,4 +67,16 @@ class Quizzes
 
         return $this;
     }
+
+    public function isReady(): bool
+    {
+        return $this->ready;
+    }
+
+    public function setReady(bool $ready): self
+    {
+        $this->ready = $ready;
+        return $this;
+    }
+
 }
