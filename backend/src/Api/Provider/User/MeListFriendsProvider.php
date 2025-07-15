@@ -2,28 +2,27 @@
 
 namespace App\Api\Provider\User;
 
+use ApiPlatform\Doctrine\Orm\Paginator;
+use ApiPlatform\State\Pagination\Pagination;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Repository\UserRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\User;
 use App\Exception\ValidationException;
-use ApiPlatform\State\Pagination\PaginatorInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
 
 class MeListFriendsProvider implements ProviderInterface
 {
-    private const PAGE_PARAMETER_NAME = 'page';
-    private const ITEMS_PER_PAGE_PARAMETER_NAME = 'itemsPerPage';
-
     public function __construct(
-        private readonly UserRepository $userRepository,
-        private readonly Security $security,
-        private readonly RequestStack $requestStack
+        private UserRepository $userRepository,
+        private Security $security,
+        private RequestStack $requestStack,
+        private Pagination $pagination
     ) {
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): PaginatorInterface
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Paginator
     {
         $user = $this->security->getUser();
 
@@ -31,15 +30,9 @@ class MeListFriendsProvider implements ProviderInterface
             throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
         }
 
-        $page = (int) $this->requestStack->getCurrentRequest()->query->get(self::PAGE_PARAMETER_NAME, 1);
-        $limit = (int) $this->requestStack->getCurrentRequest()->query->get(self::ITEMS_PER_PAGE_PARAMETER_NAME, 10);
+        [$page, , $limit] = $this->pagination->getPagination($operation, $context);
         $username = $this->requestStack->getCurrentRequest()->query->get('username');
 
-        return $this->userRepository->findFriendsByUserIdPaginated(
-            $user->getId()->__toString(),
-            $page,
-            $limit,
-            $username
-        );
+        return new Paginator($this->userRepository->findFriendsByUserIdPaginated($user->getId()->__toString(), $page, $limit, $username));
     }
 }

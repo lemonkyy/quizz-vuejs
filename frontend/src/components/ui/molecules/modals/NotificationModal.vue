@@ -4,6 +4,7 @@ import FriendRequestNotification from '@/components/menu/notifications/FriendReq
 import GameInviteNotification from '@/components/menu/notifications/GameInviteNotification.vue';
 import GenericNotification from '@/components/menu/notifications/GenericNotification.vue';
 import type { Notification } from '@/types';
+import { NotificationType, type NotificationTypeValue } from '@/constants/notificationType';
 import Title from '@/components/ui/atoms/Title.vue';
 
 const modelValue = defineModel({required: true, default: false});
@@ -13,9 +14,9 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'accept', notificationId: string): void;
-  (e: 'deny', notificationId: string): void;
-  (e: 'delete', notificationId: string): void;
+  (e: 'accept', notificationId: string, notificationType: NotificationTypeValue): void;
+  (e: 'deny', notificationId: string, notificationType: NotificationTypeValue): void;
+  (e: 'delete', notificationId: string, notificationType: NotificationTypeValue): void;
 }>();
 </script>
 
@@ -29,27 +30,27 @@ const emit = defineEmits<{
         <ul v-if="props.notifications.length > 0" class="px-4 max-h-96 overflow-y-auto">
           <template v-for="notification in props.notifications" :key="notification.id">
             <FriendRequestNotification
-              v-if="notification.type === 'friend_request'"
+              v-if="notification.type === NotificationType.FRIEND_REQUEST"
               :notification="notification as Notification"
-              @accept="emit('accept', $event)"
-              @deny="emit('deny', $event)"
-              @delete="emit('delete', $event)"
+              @accept="emit('accept', $event, notification.type)"
+              @deny="emit('deny', $event, notification.type)"
+              @delete="emit('delete', $event, notification.type)"
             />
             <GameInviteNotification
-              v-else-if="notification.type === 'game_invite'"
+              v-else-if="notification.type === NotificationType.INVITATION"
               :notification="notification as Notification"
-              @accept="emit('accept', $event)"
-              @deny="emit('deny', $event)"
-              @delete="emit('delete', $event)"
+              @accept="emit('accept', $event, notification.type)"
+              @deny="emit('deny', $event, notification.type)"
+              @delete="emit('delete', $event, notification.type)"
             />
             <GenericNotification
               v-else-if="notification.type === 'other'"
               :notification="notification as Notification"
-              @delete="emit('delete', $event)"
+              @delete="emit('delete', $event, notification.type)"
             />
           </template>
         </ul>
-        <p v-else class="text-sm text-notification-text p-4">No new notifications.</p>
+        <p v-else class="text-sm text-notification-text p-4">No notifications (｡•́︿•̀｡)</p>
       </div>
     </template>
   </Modal>

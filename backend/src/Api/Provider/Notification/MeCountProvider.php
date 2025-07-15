@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Api\Provider\User;
+namespace App\Api\Provider\Notification;
 
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
@@ -10,13 +10,15 @@ use App\Repository\FriendRequestRepository;
 use App\Repository\InvitationRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 
-class MeNotificationCountProvider implements ProviderInterface
+use App\Api\Dto\Notification\NotificationCountOutputDto;
+
+class MeCountProvider implements ProviderInterface
 {
     public function __construct(private Security $security, private FriendRequestRepository $friendRequestRepository, private InvitationRepository $invitationRepository)
     {
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): NotificationCountOutputDto
     {
         $user = $this->security->getUser();
 
@@ -27,8 +29,6 @@ class MeNotificationCountProvider implements ProviderInterface
         $friendRequestCount = $this->friendRequestRepository->countActiveForUser($user);
         $invitationCount = $this->invitationRepository->countActiveForUser($user);
 
-        return [
-            'notificationCount' => $friendRequestCount + $invitationCount,
-        ];
+        return new NotificationCountOutputDto($friendRequestCount + $invitationCount);
     }
 }

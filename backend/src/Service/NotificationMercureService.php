@@ -4,14 +4,14 @@ namespace App\Service;
 
 use App\Entity\FriendRequest;
 use App\Entity\Invitation;
-use Symfony\Component\Mercure\PublisherInterface;
+use Symfony\Component\Mercure\HubInterface;
 use Symfony\Component\Mercure\Update;
 
 class NotificationMercureService
 {
-    private PublisherInterface $publisher;
+    private HubInterface $publisher;
 
-    public function __construct(PublisherInterface $publisher)
+    public function __construct(HubInterface $publisher)
     {
         $this->publisher = $publisher;
     }

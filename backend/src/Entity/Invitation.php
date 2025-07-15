@@ -66,27 +66,27 @@ use Symfony\Component\Uid\UuidV7;
 #[ORM\Entity(repositoryClass: InvitationRepository::class)]
 class Invitation
 {
-    #[Groups(['invitation:read', 'notification:read'])]
+    #[Groups(['invitation:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
 
-    #[Groups(['invitation:read', 'notification:read'])]
+    #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: Room::class)]
     #[ORM\JoinColumn(nullable: false)]
     private ?Room $room = null;
 
-    #[Groups(['invitation:read', 'notification:read'])]
+    #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $invitedBy = null;
+    private ?User $sender = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $invitedUser = null;
+    private ?User $receiver = null;
 
-    #[Groups(['invitation:read', 'notification:read'])]
+    #[Groups(['invitation:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
     private ?DateTimeImmutable $sentAt = null;
 
@@ -105,7 +105,7 @@ class Invitation
     public function __construct()
     {
         $this->id = UuidV7::v7();
-        $this->invitedAt = new \DateTimeImmutable();
+        $this->sentAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?UuidV7
@@ -124,25 +124,25 @@ class Invitation
         return $this;
     }
 
-    public function getInvitedBy(): ?User
+    public function getSender(): ?User
     {
-        return $this->invitedBy;
+        return $this->sender;
     }
 
-    public function setInvitedBy(User $user): self
+    public function setSender(User $user): self
     {
-        $this->invitedBy = $user;
+        $this->sender = $user;
         return $this;
     }
 
-    public function getInvitedUser(): ?User
+    public function getReceiver(): ?User
     {
-        return $this->invitedUser;
+        return $this->receiver;
     }
 
-    public function setInvitedUser(User $user): self
+    public function setReceiver(User $user): self
     {
-        $this->invitedUser = $user;
+        $this->receiver = $user;
         return $this;
     }
 

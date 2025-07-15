@@ -3,6 +3,7 @@ import FriendRequestNotification from './FriendRequestNotification.vue';
 import GameInviteNotification from './GameInviteNotification.vue';
 import GenericNotification from './GenericNotification.vue';
 import type { Notification } from '@/types';
+import { NotificationType, type NotificationTypeValue } from '@/constants/notificationType';
 import Title from '@/components/ui/atoms/Title.vue';
 
 defineProps<{
@@ -10,9 +11,9 @@ defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'accept', notificationId: string): void;
-  (e: 'deny', notificationId: string): void;
-  (e: 'delete', notificationId: string): void;
+  (e: 'accept', notificationId: string, notificationType: NotificationTypeValue): void;
+  (e: 'deny', notificationId: string, notificationType: NotificationTypeValue): void;
+  (e: 'delete', notificationId: string, notificationType: NotificationTypeValue): void;
 }>();
 </script>
 
@@ -21,23 +22,23 @@ const emit = defineEmits<{
   <ul v-if="notifications.length > 0" class="px-4 max-h-96 overflow-y-auto">
     <template v-for="notification in notifications" :key="notification.id">
       <FriendRequestNotification
-        v-if="notification.type === 'friend_request'"
+        v-if="notification.type === NotificationType.FRIEND_REQUEST"
         :notification="notification"
-        @accept="emit('accept', $event)"
-        @deny="emit('deny', $event)"
-        @delete="emit('delete', $event)"
+        @accept="emit('accept', $event, notification.type)"
+        @deny="emit('deny', $event, notification.type)"
+        @delete="emit('delete', $event, notification.type)"
       />
       <GameInviteNotification
-        v-else-if="notification.type === 'game_invite'"
+        v-else-if="notification.type === NotificationType.INVITATION"
         :notification="notification"
-        @accept="emit('accept', $event)"
-        @deny="emit('deny', $event)"
-        @delete="emit('delete', $event)"
+        @accept="emit('accept', $event, notification.type)"
+        @deny="emit('deny', $event, notification.type)"
+        @delete="emit('delete', $event, notification.type)"
       />
       <GenericNotification
-        v-else-if="notification.type === 'other'"
+        v-else-if="notification.type === NotificationType.OTHER"
         :notification="notification"
-        @delete="emit('delete', $event)"
+        @delete="emit('delete', $event, notification.type)"
       />
     </template>
   </ul>

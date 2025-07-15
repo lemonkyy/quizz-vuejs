@@ -24,14 +24,30 @@ class InvitationRepository extends ServiceEntityRepository
 
         return $this->createQueryBuilder('i')
             ->select('count(i.id)')
-            ->where('i.invitedUser = :user')
+            ->where('i.receiver = :user')
             ->andWhere('i.revokedAt IS NULL')
             ->andWhere('i.deniedAt IS NULL')
             ->andWhere('i.acceptedAt IS NULL')
-            ->andWhere('i.invitedAt >= :minDate')
+            ->andWhere('i.sentAt >= :minDate')
             ->setParameter('user', $invitedUser)
             ->setParameter('minDate', $expiredThreshold)
             ->getQuery()
             ->getSingleScalarResult();
+    }
+
+    public function findActiveForUser(User $invitedUser): array
+    {
+        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold . '');
+
+        return $this->createQueryBuilder('i')
+            ->where('i.receiver = :user')
+            ->andWhere('i.revokedAt IS NULL')
+            ->andWhere('i.deniedAt IS NULL')
+            ->andWhere('i.acceptedAt IS NULL')
+            ->andWhere('i.sentAt >= :minDate')
+            ->setParameter('user', $invitedUser)
+            ->setParameter('minDate', $expiredThreshold)
+            ->getQuery()
+            ->getResult();
     }
 }

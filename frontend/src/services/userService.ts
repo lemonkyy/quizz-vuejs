@@ -67,7 +67,7 @@ export async function getUserByUsername(params: {username: string}): Promise<{co
   }
 }
 
-export async function searchUsers(username: string, page?: number, limit?: number): Promise<{code: string, users?: PublicUser[], error?: string}> {
+export async function searchUsers(username: string, page?: number, limit?: number): Promise<{code: string, users?: PublicUser[]}> {
   try {
     const response = await axios.get('/user/search', { params: { username, page, limit } });
     return {
@@ -79,7 +79,7 @@ export async function searchUsers(username: string, page?: number, limit?: numbe
   }
 }
 
-export async function getMe(): Promise<{code: string, user?: User, error?: string}> {
+export async function getMe(): Promise<{code: string, user?: User}> {
   try {
     const response = await axios.get('/user/me');
     return {

@@ -1,8 +1,10 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import type { Notification } from '@/types';
 import { useToast } from "vue-toastification";
 import { listNotifications as listNotificationsService, countNotifications as countNotificationsService } from '@/services/notificationService';
+import { acceptFriendRequest as acceptFriendRequestService, refuseFriendRequest as refuseFriendRequestService } from '@/services/friendService';
+import { acceptInvitation as acceptInvitationService, denyInvitation as denyInvitationService } from '@/services/invitationService';
 
 export const useNotificationStore = defineStore("notification", () => {
   //notificationCount split from notifications for pagination
@@ -54,6 +56,63 @@ export const useNotificationStore = defineStore("notification", () => {
     }
   }
 
+  const acceptFriendRequest = async (id: string, username: string = "user") => {
+    try {
+      const response = await acceptFriendRequestService(id);
+      if (response.code === 'SUCCESS') {
+        notificationCount.value--;
+        toast.success(`You and ${username} are now friends.`);
+      }
+    } catch (error) {
+      toast.error('Error accepting friend request.');
+      throw error;
+    }
+  };
+
+  const denyFriendRequest = async (id: string) => {
+    try {
+      const response = await refuseFriendRequestService(id);
+      if (response.code === 'SUCCESS') {
+        notificationCount.value--;
+      }
+    } catch (error) {
+      toast.error('Error denying friend request.');
+      throw error;
+    }
+  };
+
+  const acceptInvitation = async (id: string) => {
+    try {
+      const response = await acceptInvitationService(id);
+      if (response.code === 'SUCCESS') {
+        notificationCount.value--;
+        toast.success('Room joined.');
+      }
+    } catch (error: any) {
+      if (error.response && error.response.data && error.response.data.code === 'ERR_INVITATION_EXPIRED') {
+        toast.error('The invitation expired.');
+      } else {
+        toast.error('Error accepting invitation.');
+      }
+      throw error;
+    }
+  };
+
+  const denyInvitation = async (id: string) => {
+    try {
+      const response = await denyInvitationService(id);
+      if (response.code === 'SUCCESS') {
+        notificationCount.value--;
+      }
+    } catch (error) {
+      toast.error('Error denying invitation.');
+      throw error;
+    }
+  };
+
+  onMounted(countNotifications);
+
+
   return {
     notifications,
     notificationCount,
@@ -61,5 +120,9 @@ export const useNotificationStore = defineStore("notification", () => {
     listNotifications,
     loadMoreNotifications,
     countNotifications,
+    acceptFriendRequest,
+    denyFriendRequest,
+    acceptInvitation,
+    denyInvitation,
   };
 });

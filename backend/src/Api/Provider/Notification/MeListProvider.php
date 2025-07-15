@@ -3,28 +3,24 @@
 namespace App\Api\Provider\Notification;
 
 use ApiPlatform\Metadata\Operation;
-use ApiPlatform\State\Pagination\PaginatorInterface;
+use App\Api\Paginator\ArrayPaginator;
 use ApiPlatform\State\ProviderInterface;
 use App\Entity\User;
 use App\Exception\ValidationException;
 use App\Repository\NotificationRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
-use ApiPlatform\State\Pagination\Paginator;
 
 class MeListProvider implements ProviderInterface
 {
-    private const PAGE_PARAMETER_NAME = 'page';
-    private const ITEMS_PER_PAGE_PARAMETER_NAME = 'itemsPerPage';
-
     public function __construct(
-        private readonly Security $security,
-        private readonly NotificationRepository $notificationRepository,
-        private readonly RequestStack $requestStack
+        private Security $security,
+        private NotificationRepository $notificationRepository,
+        private RequestStack $requestStack,
     ) {
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): PaginatorInterface
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
     {
         $user = $this->security->getUser();
 
@@ -32,12 +28,10 @@ class MeListProvider implements ProviderInterface
             throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
         }
 
-        $page = (int) $this->requestStack->getCurrentRequest()->query->get(self::PAGE_PARAMETER_NAME, 1);
-        $itemsPerPage = (int) $this->requestStack->getCurrentRequest()->query->get(self::ITEMS_PER_PAGE_PARAMETER_NAME, 30);
+        //no automatic apiplatform pagination cause am using a native query
+        $page = $this->requestStack->getCurrentRequest()->query->get('page');
+        $limit = $this->requestStack->getCurrentRequest()->query->get('limit');
 
-        $notifications = $this->notificationRepository->getNotifications($user, $page, $itemsPerPage);
-        $totalItems = $this->notificationRepository->countNotifications($user);
-
-        return new Paginator($notifications, $page, $itemsPerPage, $totalItems);
+        return $this->notificationRepository->getNotificationsPaginated($user, $page, $limit);
     }
 }

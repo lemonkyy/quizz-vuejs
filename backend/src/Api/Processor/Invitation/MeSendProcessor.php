@@ -65,8 +65,8 @@ class MeSendProcessor implements ProcessorInterface
 
         $existing = $this->invitationRepository->findOneBy([
             'room' => $room,
-            'invitedBy' => $user,
-            'invitedUser' => $targetUser,
+            'sender' => $user,
+            'receiver' => $targetUser,
             'acceptedAt' => null,
             'revokedAt' => null,
             'deniedAt' => null
@@ -86,8 +86,8 @@ class MeSendProcessor implements ProcessorInterface
 
         $invitation = new Invitation();
         $invitation->setRoom($room);
-        $invitation->setInvitedBy($user);
-        $invitation->setInvitedUser($targetUser);
+        $invitation->setSender($user);
+        $invitation->setReceiver($targetUser);
 
         $this->entityManager->persist($invitation);
         $this->entityManager->flush();
@@ -97,4 +97,3 @@ class MeSendProcessor implements ProcessorInterface
         return $invitation;
     }
 }
-

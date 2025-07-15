@@ -30,7 +30,7 @@ class MeCancelProcessor implements ProcessorInterface
         }
         $invitation = $this->invitationRepository->find($uriVariables['id']);
 
-        if (!$invitation || $invitation->getInvitedBy() !== $user) {
+        if (!$invitation || $invitation->getSender() !== $user) {
             throw new ValidationException('ERR_INVITATION_NOT_FOUND', 'Invitation not found or not allowed', 404);
         }
 

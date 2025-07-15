@@ -22,6 +22,19 @@ class FriendRequestRepository extends ServiceEntityRepository
         parent::__construct($registry, FriendRequest::class);
     }
 
+    public function countActiveForUser(User $user): int
+    {
+        return $this->createQueryBuilder('fr')
+            ->select('count(fr.id)')
+            ->where('fr.receiver = :user')
+            ->andWhere('fr.revokedAt IS NULL')
+            ->andWhere('fr.deniedAt IS NULL')
+            ->andWhere('fr.acceptedAt IS NULL')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
+
     public function findAllActiveForUser(User $user): array
     {
         return $this->createQueryBuilder('fr')

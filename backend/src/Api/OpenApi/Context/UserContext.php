@@ -404,14 +404,8 @@ class UserContext
         return [
             'summary' => 'List current user\'s friends',
             'description' => 'Lists all friends of the current authenticated user with pagination and filtering.',
-            'parameters' => [
-                [
-                    'name' => 'page',
-                    'in' => 'query',
-                    'required' => false,
-                    'schema' => ['type' => 'integer', 'default' => 1],
-                    'description' => 'The page number for pagination'
-                ],
+            'parameters' =>
+            [
                 [
                     'name' => 'limit',
                     'in' => 'query',
@@ -457,7 +451,7 @@ class UserContext
         ];
     }
 
-    public static function getUserNotificationCountContext(): array
+    public static function getUserNotificationsCountContext(): array
     {
         return [
             'summary' => 'Get notification count for the current user',
@@ -483,11 +477,20 @@ class UserContext
         ];
     }
 
-    public static function getUserListNotificationsContext(): array
+    public static function getUserNotificationsGetCollectionContext(): array
     {
         return [
             'summary' => 'List all active notifications for the current user',
             'description' => 'Returns a list of active friend requests and invitations, ordered by creation date.',
+            'parameters' => [
+                [
+                    'name' => 'limit',
+                    'in' => 'query',
+                    'required' => false,
+                    'schema' => ['type' => 'integer', 'default' => 10],
+                    'description' => 'The number of results per page'
+                ]
+            ],
             'responses' => [
                 '200' => [
                     'description' => 'List of notifications',
@@ -502,14 +505,6 @@ class UserContext
                                         'id' => ['type' => 'string', 'format' => 'uuid'],
                                         'createdAt' => ['type' => 'string', 'format' => 'date-time'],
                                         'sender' => [
-                                            'type' => 'object',
-                                            'properties' => [
-                                                'id' => ['type' => 'string', 'format' => 'uuid'],
-                                                'username' => ['type' => 'string'],
-                                            ],
-                                            'nullable' => true,
-                                        ],
-                                        'invitedBy' => [
                                             'type' => 'object',
                                             'properties' => [
                                                 'id' => ['type' => 'string', 'format' => 'uuid'],

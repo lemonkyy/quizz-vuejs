@@ -19,13 +19,18 @@ const emit = defineEmits<{
 const formattedTimestamp = computed(() => {
   return formatTimestamp(props.notification.sentAt);
 });
+
+const userProfilePictureUrl = computed(() => {
+  return props.notification?.data?.sender?.profilePicture ? import.meta.env.VITE_PUBLIC_PFP_URL + '/' + props.notification.data.sender.profilePicture : "";
+})
+
 </script>
 
 <template>
   <li class="px-2 py-4 border-b border-notification-item-border last:border-b-0 flex items-center">
-    <UserIcon v-if="props.notification.data.senderId" :src="props.notification.data.senderProfilePicture" :size="3" class="mx-2" />
+    <UserIcon :src="userProfilePictureUrl" :size="3" class="mx-2" />
     <div class="flex-grow px-2">
-      <p class="text-sm text-notification-text">{{ props.notification.data.senderUsername }} invited you to a game.</p>
+      <p class="text-sm text-notification-text">{{ props.notification?.data?.sender?.username }} invited you to a game.</p>
       <p class="text-xs text-gray-500 mt-1">{{ formattedTimestamp }}</p>
       <div class="mt-2 flex flex-row gap-3">
         <Button size="sm" @click="emit('accept', props.notification.id)" transparent>Join</Button>

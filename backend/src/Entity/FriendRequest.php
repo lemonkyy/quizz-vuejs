@@ -65,12 +65,12 @@ use Symfony\Component\Uid\UuidV7;
 #[ORM\Entity(repositoryClass: FriendRequestRepository::class)]
 class FriendRequest
 {
-    #[Groups(['friendRequest:read', 'notification:read'])]
+    #[Groups(['friendRequest:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
 
-    #[Groups(['friendRequest:read', 'notification:read'])]
+    #[Groups(['friendRequest:read'])]
     #[ORM\ManyToOne(targetEntity: User::class, inversedBy: 'sentFriendRequests')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $sender = null;
@@ -80,7 +80,7 @@ class FriendRequest
     #[ORM\JoinColumn(nullable: false)]
     private ?User $receiver = null;
 
-    #[Groups(['friendRequest:read', 'notification:read'])]
+    #[Groups(['friendRequest:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
     private ?\DateTimeImmutable $sentAt = null;
 
@@ -173,3 +173,4 @@ class FriendRequest
         return $this;
     }
 }
+

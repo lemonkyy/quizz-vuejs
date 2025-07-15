@@ -17,15 +17,21 @@ const emit = defineEmits<{
 }>();
 
 const formattedTimestamp = computed(() => {
+  console.log(props.notification.data.sender?.username);
   return formatTimestamp(props.notification.sentAt);
 });
+
+const userProfilePictureUrl = computed(() => {
+  return props.notification?.data?.sender?.profilePicture ? import.meta.env.VITE_PUBLIC_PFP_URL + '/' + props.notification.data.sender.profilePicture : "";
+})
+
 </script>
 
 <template>
   <li class="px-2 py-4 border-b border-notification-item-border last:border-b-0 flex items-center">
-    <UserIcon :src="props.notification.data.senderProfilePicture" :size="3" class="mx-2" />
+    <UserIcon :src="userProfilePictureUrl" :size="3" class="mx-2" />
     <div class="flex-grow px-2">
-      <p class="text-sm text-notification-text">{{ props.notification.data.senderUsername }} sent you a friend request.</p>
+      <p class="text-sm text-notification-text">{{ props.notification?.data?.sender?.username }} sent you a friend request.</p>
       <p class="text-xs text-gray-500 mt-1">{{ formattedTimestamp }}</p>
       <div class="mt-2 flex flex-row gap-3">
         <Button size="sm" @click="emit('accept', props.notification.id)" transparent>Accept</Button>

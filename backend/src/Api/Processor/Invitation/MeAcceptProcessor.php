@@ -33,12 +33,12 @@ class MeAcceptProcessor implements ProcessorInterface
         
         $invitation = $this->invitationRepository->find($uriVariables['id']);
 
-        if (!$invitation || $invitation->getInvitedUser() !== $user) {
+        if (!$invitation || $invitation->getReceiver() !== $user) {
             throw new ValidationException('ERR_INVITATION_NOT_FOUND', 'Invitation not found', 404);
         }
 
         $expirationThreshold = $this->params->get('app.invite_expiration_threshold');
-        $expirationDate = (clone $invitation->getInvitedAt())->modify('+' . $expirationThreshold);
+        $expirationDate = (clone $invitation->getSentAt())->modify('+' . $expirationThreshold);
         $now = new \DateTimeImmutable();
 
         if ($now > $expirationDate) {

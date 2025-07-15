@@ -34,12 +34,14 @@ export interface JWTUserPayload {
 
 export interface Notification {
   id: string;
-  type: "friend_request" | "game_invite" | "other";
+  type: string;
   sentAt: string;
   data: {
-    senderId?: string;
-    senderUsername?: string;
-    senderProfilePicture?: string;
+    sender?: {
+      id?: string;
+      username?: string;
+      profilePicture?: string;
+    };
     message?: string;
   };
 }

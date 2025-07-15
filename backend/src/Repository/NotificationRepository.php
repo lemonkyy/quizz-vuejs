@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Api\Dto\Notification\NotificationDto;
+use App\Api\Dto\Notification\NotificationOutputDto;
 use App\Entity\User;
 use App\Enum\NotificationType;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -25,22 +25,20 @@ class NotificationRepository extends ServiceEntityRepository
     /**
      * @throws Exception
      */
-    public function getNotifications(User $user, int $page, int $limit): array
+    public function getNotificationsPaginated(User $user, int $page, int $limit): array
     {
         $rsm = new ResultSetMapping();
         $rsm->addScalarResult('type', 'type');
         $rsm->addScalarResult('id', 'id');
-        $rsm->addScalarResult('sendAt', 'sendAt');
+        $rsm->addScalarResult('sent_at', 'sent_at');
         $rsm->addScalarResult('sender_id', 'sender_id');
         $rsm->addScalarResult('sender_username', 'sender_username');
         $rsm->addScalarResult('sender_profile_picture', 'sender_profile_picture');
-        $rsm->addScalarResult('room_id', 'room_id');
-        $rsm->addScalarResult('room_name', 'room_name');
 
         $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold . '');
 
-        $sql = '''
-            SELECT 'friend_request' as type, fr.id, fr.sent_at as sendAt, fr_sender.id as sender_id, fr_sender.username as sender_username, pp.file_name as sender_profile_picture, null as room_id, null as room_name
+        $sql = <<<'SQL'
+            SELECT 'friend_request' as type, fr.id, fr.sent_at as sent_at, fr_sender.id as sender_id, fr_sender.username as sender_username, pp.file_name as sender_profile_picture
             FROM friend_request fr
             JOIN "user" fr_sender ON fr.sender_id = fr_sender.id
             LEFT JOIN profile_picture pp ON fr_sender.profile_picture_id = pp.id
@@ -48,15 +46,15 @@ class NotificationRepository extends ServiceEntityRepository
 
             UNION ALL
 
-            SELECT 'invitation' as type, i.id, i.invited_at as sendAt, i_sender.id as sender_id, i_sender.username as sender_username, pp.file_name as sender_profile_picture
+            SELECT 'invitation' as type, i.id, i.sent_at as sent_at, i_sender.id as sender_id, i_sender.username as sender_username, pp.file_name as sender_profile_picture
             FROM invitation i
-            JOIN "user" i_sender ON i.invited_by_id = i_sender.id
+            JOIN "user" i_sender ON i.sender_id = i_sender.id
             LEFT JOIN profile_picture pp ON i_sender.profile_picture_id = pp.id
-            WHERE i.invited_user_id = :userId AND i.accepted_at IS NULL AND i.denied_at IS NULL AND i.revoked_at IS NULL AND i.sent_at >= :minDate
+            WHERE i.receiver_id = :userId AND i.accepted_at IS NULL AND i.denied_at IS NULL AND i.revoked_at IS NULL AND i.sent_at >= :minDate
 
-            ORDER BY sendAt DESC
+            ORDER BY sent_at DESC
             LIMIT :limit OFFSET :offset
-        ''';
+        SQL;
 
         $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
         $query->setParameter('userId', $user->getId());
@@ -77,40 +75,14 @@ class NotificationRepository extends ServiceEntityRepository
                 ],
             ];
 
-            $notifications[] = new NotificationDto(
+            $notifications[] = new NotificationOutputDto(
                 $notificationType,
                 $result['id'],
-                new \DateTimeImmutable($result['sendAt']),
+                new \DateTimeImmutable($result['sent_at']),
                 $data
             );
         }
 
         return $notifications;
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function countNotifications(User $user): int
-    {
-        $rsm = new ResultSetMapping();
-        $rsm->addScalarResult('count', 'count');
-
-        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold . '');
-
-        $sql = '''
-            SELECT COUNT(*) as count
-            FROM (
-                SELECT fr.id FROM friend_request fr WHERE fr.receiver_id = :userId AND fr.accepted_at IS NULL AND fr.denied_at IS NULL AND fr.revoked_at IS NULL
-                UNION ALL
-                SELECT i.id FROM invitation i WHERE i.invited_user_id = :userId AND i.accepted_at IS NULL AND i.denied_at IS NULL AND i.revoked_at IS NULL AND i.sent_at >= :minDate
-            ) as notifications
-        ''';
-
-        $query = $this->getEntityManager()->createNativeQuery($sql, $rsm);
-        $query->setParameter('userId', $user->getId());
-        $query->setParameter('minDate', $expiredThreshold);
-
-        return (int) $query->getSingleScalarResult();
     }
 }
