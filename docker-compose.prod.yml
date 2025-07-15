@@ -7,13 +7,13 @@ networks:
     driver: bridge
 
 volumes:
-  postgres-data-dev:
-  uploads-data-dev:
-  ollama-data-dev:
-  matomo-data-dev:
-  node-modules-dev:
-  mercure-data-dev:
-  mercure-config-dev:
+  postgres-data-prod:
+  uploads-data-prod:
+  ollama-data-prod:
+  matomo-data-prod:
+  node-modules-prod:
+  mercure-data-prod:
+  mercure-config-prod:
 
 services:
   #postgres database
@@ -21,11 +21,11 @@ services:
     image: postgres:17.4-alpine
     container_name: postgres_quiz
     environment:
-      POSTGRES_USER: ${POSTGRES_USER_DEV}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
-      POSTGRES_DB: ${POSTGRES_DB_DEV}
+      POSTGRES_USER: ${POSTGRES_USER_PROD}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PROD}
+      POSTGRES_DB: ${POSTGRES_DB_PROD}
     volumes:
-      - postgres-data-dev:/var/lib/postgresql/data:rw
+      - postgres-data-prod:/var/lib/postgresql/data:rw
     networks:
       - database-backend-bridge
     healthcheck:
@@ -38,27 +38,27 @@ services:
   backend:
     build:
       context: ./backend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
       args:
-        DATABASE_URL: ${DATABASE_URL_DEV}
+        DATABASE_URL: ${DATABASE_URL_PROD}
     ports:
-      - "8000:80"
+      - "8000:443"
     container_name: backend_quiz
     environment:
-      APP_ENV: dev
+      APP_ENV: prod
       APP_DEBUG: 1
       SHELL_VERBOSITY: 3
-      APP_SECRET: ${APP_SECRET_DEV}
-      CORS_ALLOW_ORIGIN: ${SYMFONY_CORS_ALLOW_ORIGIN_DEV}
-      DATABASE_URL: ${DATABASE_URL_DEV}
-      JWT_PASSPHRASE: ${SYMFONY_JWT_PASSPHRASE_DEV}
-      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY_DEV}
-      MERCURE_URL: ${MERCURE_URL_DEV}
-      MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_DEV}
-      JWT_COOKIE_SECURE: FALSE
+      APP_SECRET: ${APP_SECRET_PROD}
+      CORS_ALLOW_ORIGIN: ${SYMFONY_CORS_ALLOW_ORIGIN}
+      DATABASE_URL: ${DATABASE_URL_PROD}
+      JWT_PASSPHRASE: ${SYMFONY_JWT_PASSPHRASE}
+      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY}
+      MERCURE_URL: ${MERCURE_URL}
+      MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY}
+      JWT_COOKIE_SECURE: TRUE
     volumes:
       - ./backend:/app:delegated
-      - uploads-data-dev:/app/public/uploads/images
+      - uploads-data-prod:/app/public/uploads/images
     depends_on:
       - database
     networks:
@@ -70,21 +70,21 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile.prod
     ports:
-      - "5173:80"
+      - "443:443"
     volumes:
       - ./frontend:/app:delegated
-      - node-modules-dev:/app/node_modules
+      - node-modules-prod:/app/node_modules
     container_name: frontend_quiz
     depends_on:
       - backend
     environment:
-      NODE_ENV: development
-      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_DEV}
-      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_DEV}
-      VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_DEV}
-      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
+      NODE_ENV: prodelopment
+      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL}
+      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL}
+      VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL}
+      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL}
       PATH: /app/node_modules/.bin:$PATH
 
       WATCHPACK_POLLING: true
@@ -99,7 +99,7 @@ services:
     ports:
       - "11434:11434"
     volumes:
-      - ollama-data-dev:/root/.ollama
+      - ollama-data-prod:/root/.ollama
     networks:
       - ollama-backend-bridge
 
@@ -114,13 +114,13 @@ services:
       MATOMO_DATABASE_HOST: database
       MATOMO_DATABASE_ADAPTER: postgres
       MATOMO_DATABASE_TABLES_PREFIX: matomo_
-      MATOMO_DATABASE_USERNAME: ${POSTGRES_USER_DEV}
-      MATOMO_DATABASE_PASSWORD: ${POSTGRES_PASSWORD_DEV}
+      MATOMO_DATABASE_USERNAME: ${POSTGRES_USER_PROD}
+      MATOMO_DATABASE_PASSWORD: ${POSTGRES_PASSWORD_PROD}
       MATOMO_DATABASE_DBNAME: matomo
     ports:
-      - "8081:80"
+      - "8081:443"
     volumes:
-      - matomo-data-dev:/var/www/html
+      - matomo-data-prod:/var/www/html
     networks:
       - backend-frontend-bridge
       - database-backend-bridge
@@ -131,21 +131,17 @@ services:
     restart: unless-stopped
     environment:
       SERVER_NAME: ':80'
-      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_KEY_DEV}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_KEY_DEV}
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_KEY}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_KEY}
       MERCURE_EXTRA_DIRECTIVES: |
-        cors_origins ${MERCURE_CORS_ALLOW_ORIGIN_DEV}
-    #for dev mode
-    command: /usr/bin/caddy run --config /etc/caddy/dev.Caddyfile
+        cors_origins ${MERCURE_CORS_ALLOW_ORIGIN}
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost/healthz"]
       timeout: 5s
       retries: 5
       start_period: 60s
     volumes:
-      - mercure-data-dev:/data
-      - mercure-config-dev:/config
-    ports: 
-      - '3000:80'
+      - mercure-data-prod:/data
+      - mercure-config-prod:/config
     networks: 
       - backend-frontend-bridge

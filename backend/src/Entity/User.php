@@ -33,6 +33,7 @@ use App\Api\Dto\User\UpdateDto;
 use App\Api\Dto\User\VerifyTotpCodeDto;
 use App\Api\Provider\User\MeListNotificationsProvider;
 use App\Api\Provider\User\MeNotificationCountProvider;
+use App\Api\Dto\Notification\NotificationDto;
 
 #[ApiResource(
     operations: [
@@ -92,6 +93,9 @@ use App\Api\Provider\User\MeNotificationCountProvider;
             provider: MeListFriendsProvider::class,
             input: false,
             normalizationContext: ['groups' => ['user:read']],
+            paginationEnabled: true,
+            paginationItemsPerPage: 10,
+            paginationMaximumItemsPerPage: 100,
             name: 'api_user_list_friends',
         ),
         new Get(
@@ -100,13 +104,16 @@ use App\Api\Provider\User\MeNotificationCountProvider;
             input: false,
             name: 'api_user_notifications_count',
         ),
-        new Get(
+        new GetCollection(
             uriTemplate: '/user/notifications',
-            provider: MeListNotificationsProvider::class,
-            input: false,
-            name: 'api_user_notifications_list',
+            output: NotificationDto::class,
+            provider: MeListProvider::class,
+            paginationEnabled: true,
+            paginationItemsPerPage: 10,
+            paginationMaximumItemsPerPage: 100,
             normalizationContext: ['groups' => ['notification:read']],
-        ),   
+            name: 'api_user_notifications_get_collection'
+        ),
     ]
 )]
 

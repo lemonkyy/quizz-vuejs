@@ -88,7 +88,7 @@ class Invitation
 
     #[Groups(['invitation:read', 'notification:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
-    private ?DateTimeImmutable $invitedAt = null;
+    private ?DateTimeImmutable $sentAt = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
@@ -146,14 +146,14 @@ class Invitation
         return $this;
     }
 
-    public function getInvitedAt(): \DateTimeImmutable
+    public function getSentAt(): \DateTimeImmutable
     {
-        return $this->invitedAt;
+        return $this->sentAt;
     }
 
-    public function setInvitedAt(\DateTimeImmutable $date): self
+    public function setSentAt(\DateTimeImmutable $date): self
     {
-        $this->invitedAt = $date;
+        $this->sentAt = $date;
         return $this;
     }
 

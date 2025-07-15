@@ -6,6 +6,8 @@ use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+use Doctrine\ORM\Tools\Pagination\Paginator;
+
 /**
  * @extends ServiceEntityRepository<User>
  */
@@ -29,7 +31,7 @@ class UserRepository extends ServiceEntityRepository
         return $qb->getQuery()->getArrayResult();
     }
 
-    public function findFriendsByUserIdPaginated(string $userId, ?int $page = 1, ?int $limit = 50, ?string $username = null): array
+    public function findFriendsByUserIdPaginated(string $userId, ?int $page = 1, ?int $limit = 50, ?string $username = null): Paginator
     {
         $qb = $this->createQueryBuilder('u')
             ->select('PARTIAL u.{id, username}', 'pp')
@@ -45,18 +47,8 @@ class UserRepository extends ServiceEntityRepository
 
         $qb->orderBy('u.username', 'ASC')
             ->setFirstResult(($page - 1) * $limit)
-            ->setMaxResults($limit + 1);
+            ->setMaxResults($limit);
 
-        $friends = $qb->getQuery()->getArrayResult();
-
-        $hasMore = count($friends) > $limit;
-        if ($hasMore) {
-            array_pop($friends);
-        }
-
-        return [
-            'friends' => $friends,
-            'hasMore' => $hasMore,
-        ];
+        return new Paginator($qb->getQuery());
     }
 }

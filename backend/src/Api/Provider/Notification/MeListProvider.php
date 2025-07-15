@@ -1,24 +1,24 @@
 <?php
 
-namespace App\Api\Provider\User;
+namespace App\Api\Provider\Notification;
 
 use ApiPlatform\Metadata\Operation;
+use ApiPlatform\State\Pagination\PaginatorInterface;
 use ApiPlatform\State\ProviderInterface;
-use App\Repository\UserRepository;
-use Symfony\Bundle\SecurityBundle\Security;
 use App\Entity\User;
 use App\Exception\ValidationException;
-use ApiPlatform\State\Pagination\PaginatorInterface;
+use App\Repository\NotificationRepository;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
 
-class MeListFriendsProvider implements ProviderInterface
+class MeListProvider implements ProviderInterface
 {
     private const PAGE_PARAMETER_NAME = 'page';
     private const ITEMS_PER_PAGE_PARAMETER_NAME = 'itemsPerPage';
 
     public function __construct(
-        private readonly UserRepository $userRepository,
         private readonly Security $security,
+        private readonly NotificationRepository $notificationRepository,
         private readonly RequestStack $requestStack
     ) {
     }
@@ -32,14 +32,11 @@ class MeListFriendsProvider implements ProviderInterface
         }
 
         $page = (int) $this->requestStack->getCurrentRequest()->query->get(self::PAGE_PARAMETER_NAME, 1);
-        $limit = (int) $this->requestStack->getCurrentRequest()->query->get(self::ITEMS_PER_PAGE_PARAMETER_NAME, 10);
-        $username = $this->requestStack->getCurrentRequest()->query->get('username');
+        $itemsPerPage = (int) $this->requestStack->getCurrentRequest()->query->get(self::ITEMS_PER_PAGE_PARAMETER_NAME, 30);
 
-        return $this->userRepository->findFriendsByUserIdPaginated(
-            $user->getId()->__toString(),
-            $page,
-            $limit,
-            $username
-        );
+        $notifications = $this->notificationRepository->getNotifications($user, $page, $itemsPerPage);
+        $totalItems = $this->notificationRepository->countNotifications($user);
+
+        return new \ApiPlatform\State\Pagination\Paginator($notifications, $page, $itemsPerPage, $totalItems);
     }
 }
