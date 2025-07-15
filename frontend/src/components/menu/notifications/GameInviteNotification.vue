@@ -17,7 +17,7 @@ const emit = defineEmits<{
 }>();
 
 const formattedTimestamp = computed(() => {
-  return formatTimestamp(props.notification.timestamp);
+  return formatTimestamp(props.notification.sentAt);
 });
 </script>
 

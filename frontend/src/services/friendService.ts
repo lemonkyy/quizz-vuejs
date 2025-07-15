@@ -63,9 +63,9 @@ export async function listReceivedFriendRequests(): Promise<{code: string, frien
   }
 }
 
-export async function listFriends(username?: string, page?: number, limit?: number): Promise<{code: string, friends?: PublicUser[], hasMore?: boolean, error?: string}> {
+export async function listFriends(params: {username?: string, page?: number, limit?: number}): Promise<{code: string, friends?: PublicUser[], hasMore?: boolean, error?: string}> {
   try {
-    const response = await axios.get('/user/friends', { params: { username, page, limit } });
+    const response = await axios.get('/user/friends', { params } );
     return {
       code: 'SUCCESS',
       friends: response.data.friends.member,

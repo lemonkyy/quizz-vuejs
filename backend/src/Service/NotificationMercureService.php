@@ -4,25 +4,35 @@ namespace App\Service;
 
 use App\Entity\FriendRequest;
 use App\Entity\Invitation;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Mercure\PublisherInterface;
+use Symfony\Component\Mercure\Update;
 
 class NotificationMercureService
 {
-    private EventDispatcherInterface $eventDispatcher;
+    private PublisherInterface $publisher;
 
-    public function __construct(EventDispatcherInterface $eventDispatcher)
+    public function __construct(PublisherInterface $publisher)
     {
-        $this->eventDispatcher = $eventDispatcher;
+        $this->publisher = $publisher;
     }
 
-    public function dispatchFriendRequest(FriendRequest $friendRequest): void
+    public function publishNotificationUpdate(string $userId): void
     {
-        dd("test");
-        $this->eventDispatcher->dispatch($friendRequest, 'friend_request.created');
+        $update = new Update(
+            sprintf('/notifications/%s', $userId),
+            json_encode(['status' => 'new_notification'])
+        );
+
+        ($this->publisher)($update);
     }
 
-    public function dispatchInvitation(Invitation $invitation): void
+    public function notifyFriendRequestUpdate(FriendRequest $friendRequest): void
     {
-        $this->eventDispatcher->dispatch($invitation, 'invitation.created');
+        $this->publishNotificationUpdate($friendRequest->getReceiver()->getId());
+    }
+
+    public function notifyInvitationUpdate(Invitation $invitation): void
+    {
+        $this->publishNotificationUpdate($invitation->getReceiver()->getId());
     }
 }

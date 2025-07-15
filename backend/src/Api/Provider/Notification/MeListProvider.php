@@ -10,6 +10,7 @@ use App\Exception\ValidationException;
 use App\Repository\NotificationRepository;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\RequestStack;
+use ApiPlatform\State\Pagination\Paginator;
 
 class MeListProvider implements ProviderInterface
 {
@@ -37,6 +38,6 @@ class MeListProvider implements ProviderInterface
         $notifications = $this->notificationRepository->getNotifications($user, $page, $itemsPerPage);
         $totalItems = $this->notificationRepository->countNotifications($user);
 
-        return new \ApiPlatform\State\Pagination\Paginator($notifications, $page, $itemsPerPage, $totalItems);
+        return new Paginator($notifications, $page, $itemsPerPage, $totalItems);
     }
 }

@@ -13,12 +13,14 @@ use App\Entity\FriendRequest;
 use App\Api\Dto\FriendRequest\SendDto;
 use App\Entity\User;
 use App\Exception\ValidationException;
+use App\Service\NotificationMercureService;
+
 class MeSendProcessor implements ProcessorInterface
 {
     private int $maxSentFriendRequests;
     private int $maxReceivedFriendRequests;
 
-    public function __construct(ParameterBagInterface $params, private UserRepository $userRepository, private FriendRequestRepository $friendRequestRepository, private EntityManagerInterface $entityManager, private Security $security)
+    public function __construct(ParameterBagInterface $params, private UserRepository $userRepository, private FriendRequestRepository $friendRequestRepository, private EntityManagerInterface $entityManager, private Security $security, private NotificationMercureService $notificationMercureService)
     {
         $this->maxSentFriendRequests = $params->get('app.max_sent_friend_requests');
         $this->maxReceivedFriendRequests = $params->get('app.max_received_friend_requests');
@@ -75,6 +77,9 @@ class MeSendProcessor implements ProcessorInterface
         $this->entityManager->persist($friendRequest);
         $this->entityManager->flush();
 
+        $this->notificationMercureService->notifyFriendRequestUpdate($friendRequest);
+
         return $friendRequest;
     }
 }
+

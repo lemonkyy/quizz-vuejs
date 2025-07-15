@@ -48,11 +48,10 @@ class NotificationRepository extends ServiceEntityRepository
 
             UNION ALL
 
-            SELECT 'invitation' as type, i.id, i.invited_at as sendAt, i_sender.id as sender_id, i_sender.username as sender_username, pp.file_name as sender_profile_picture, r.id as room_id, r.name as room_name
+            SELECT 'invitation' as type, i.id, i.invited_at as sendAt, i_sender.id as sender_id, i_sender.username as sender_username, pp.file_name as sender_profile_picture
             FROM invitation i
             JOIN "user" i_sender ON i.invited_by_id = i_sender.id
             LEFT JOIN profile_picture pp ON i_sender.profile_picture_id = pp.id
-            JOIN room r ON i.room_id = r.id
             WHERE i.invited_user_id = :userId AND i.accepted_at IS NULL AND i.denied_at IS NULL AND i.revoked_at IS NULL AND i.sent_at >= :minDate
 
             ORDER BY sendAt DESC
@@ -77,7 +76,7 @@ class NotificationRepository extends ServiceEntityRepository
                     'profilePicture' => $result['sender_profile_picture'],
                 ],
             ];
-            
+
             $notifications[] = new NotificationDto(
                 $notificationType,
                 $result['id'],

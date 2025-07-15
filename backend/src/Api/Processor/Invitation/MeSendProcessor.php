@@ -14,6 +14,7 @@ use App\Entity\Invitation;
 use App\Api\Dto\Invitation\SendDto;
 use App\Entity\User;
 use App\Exception\ValidationException;
+use App\Service\NotificationMercureService;
 
 class MeSendProcessor implements ProcessorInterface
 {
@@ -21,7 +22,7 @@ class MeSendProcessor implements ProcessorInterface
     private int $maxSentInvitations;
     private int $maxReceivedInvitations;
 
-    public function __construct(ParameterBagInterface $params, private UserRepository $userRepository, private RoomRepository $roomRepository, private InvitationRepository $invitationRepository, private EntityManagerInterface $entityManager, private Security $security)
+    public function __construct(ParameterBagInterface $params, private UserRepository $userRepository, private RoomRepository $roomRepository, private InvitationRepository $invitationRepository, private EntityManagerInterface $entityManager, private Security $security, private NotificationMercureService $notificationMercureService)
     {
         $this->maxRoomUsers = $params->get('app.max_room_users');
         $this->maxSentInvitations = $params->get('app.max_sent_invitations');
@@ -91,6 +92,9 @@ class MeSendProcessor implements ProcessorInterface
         $this->entityManager->persist($invitation);
         $this->entityManager->flush();
 
+        $this->notificationMercureService->notifyInvitationUpdate($invitation);
+
         return $invitation;
     }
 }
+

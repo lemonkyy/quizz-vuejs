@@ -24,11 +24,12 @@ export const useFriendStore = defineStore("friend", () => {
   const toast = useToast();
 
   const currentPage = ref(1);
+  const itemsPerPage = ref(10);
   const hasMoreFriends = ref(true);
 
   const currentUsernameFilter = ref<string | undefined>(undefined);
 
-  const listFriends = async (username?: string, page: number = 1, limit: number = 10) => {
+  const listFriends = async (username?: string, page: number = 1, limit: number = itemsPerPage.value) => {
     try {
       if (username !== undefined && username !== currentUsernameFilter.value) {
         friends.value = [];
@@ -41,8 +42,7 @@ export const useFriendStore = defineStore("friend", () => {
         return;
       }
 
-      const response = await listFriendsService(username, page, limit);
-      console.log(response);
+      const response = await listFriendsService({username, page, limit});
       
       if (response.code === 'SUCCESS' && response.friends) {
         if (page === 1) {
@@ -61,7 +61,7 @@ export const useFriendStore = defineStore("friend", () => {
 
   const loadMoreFriends = async () => {
     if (hasMoreFriends.value) {
-      await listFriends(currentUsernameFilter.value, currentPage.value + 1);
+      await listFriends(currentUsernameFilter.value, currentPage.value + 1, itemsPerPage.value);
     }
   };
 
