@@ -118,30 +118,26 @@ export const useNotificationStore = defineStore("notification", () => {
     setupMercureListener();
   });
 
+  //mercure stuff for live notifications
   const setupMercureListener = () => {
     if (!auth.user) {
-      console.warn('Mercure listener not set up: User not authenticated.');
       return;
     }
 
     const mercureUrl = import.meta.env.VITE_MERCURE_PUBLIC_URL;
-    console.log('Mercure URL from env:', mercureUrl);
     const url = new URL(mercureUrl);
     url.searchParams.append('topic', `/notifications/${auth.user.id}`);
+
     const eventSource = new EventSource(url, { withCredentials: true });
 
     eventSource.onmessage = (event) => {
-      console.log('Mercure update received:', event.data);
       notificationCount.value++;
       listNotifications(1, itemsPerPage.value);
     };
 
     eventSource.onerror = (error) => {
-      console.error('Mercure EventSource error:', error);
       eventSource.close();
     };
-
-    console.log('Mercure listener set up for user:', auth.user.id);
   };
 
   return {
