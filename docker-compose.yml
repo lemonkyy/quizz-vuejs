@@ -6,6 +6,15 @@ networks:
   ollama-backend-bridge:
     driver: bridge
 
+volumes:
+  postgres-data-dev:
+  uploads-data-dev:
+  ollama-data-dev:
+  matomo-data-dev:
+  node-modules-dev:
+  mercure-data-dev:
+  mercure-config-dev:
+
 services:
   #postgres database
   database:
@@ -40,10 +49,14 @@ services:
       APP_DEBUG: 1
       SHELL_VERBOSITY: 3
       APP_SECRET: ${APP_SECRET_DEV}
+      CORS_ALLOW_ORIGIN: ${SYMFONY_CORS_ALLOW_ORIGIN_DEV}
       DATABASE_URL: ${DATABASE_URL_DEV}
-      CORS_ALLOW_ORIGIN: '^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$'
-      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
-      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY}
+      JWT_PASSPHRASE: ${SYMFONY_JWT_PASSPHRASE_DEV}
+      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY_DEV}
+      MERCURE_URL: ${MERCURE_URL_DEV}
+      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
+      MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_DEV}
+      JWT_COOKIE_SECURE: FALSE
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images
@@ -63,15 +76,18 @@ services:
       - "5173:80"
     volumes:
       - ./frontend:/app:delegated
-      - /app/node_modules
+      - node-modules-dev:/app/node_modules
     container_name: frontend_quiz
     depends_on:
       - backend
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_API_URL: ${VUE_PUBLIC_API_URL}
-      NEXT_SERVER_API_URL: ${VUE_SERVER_API_URL}
-      NEXT_PUBLIC_IMAGES_URL: ${VUE_PUBLIC_IMAGES_URL}
+      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_DEV}
+      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_DEV}
+      VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_DEV}
+      VITE_MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
+      PATH: /app/node_modules/.bin:$PATH
+
       WATCHPACK_POLLING: true
     networks:
       - backend-frontend-bridge
@@ -88,11 +104,10 @@ services:
     networks:
       - ollama-backend-bridge
 
-
   #matomo - analytics
   matomo:
     image: matomo:latest
-    container_name: matomo
+    container_name: matomo_quiz
     restart: unless-stopped
     depends_on:
       - database
@@ -111,9 +126,28 @@ services:
       - backend-frontend-bridge
       - database-backend-bridge
 
-
-volumes:
-  postgres-data-dev:
-  uploads-data-dev:
-  ollama-data-dev:
-  matomo-data-dev:
+  mercure:
+    image: dunglas/mercure
+    container_name: mercure_quiz
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_KEY_DEV}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_KEY_DEV}
+      MERCURE_EXTRA_DIRECTIVES: | 
+        cors_origins ${MERCURE_CORS_ALLOW_ORIGIN_DEV}
+        anonymous
+    #for dev mode
+    
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost/healthz"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    volumes:
+      - mercure-data-dev:/data
+      - mercure-config-dev:/config
+    ports: 
+      - '3000:80'
+    networks: 
+      - backend-frontend-bridge

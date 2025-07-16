@@ -5,12 +5,12 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Get;
-use App\Controller\Api\Invitation\MeSendController;
-use App\Controller\Api\Invitation\MeListSentController;
-use App\Controller\Api\Invitation\MeListPendingController;
-use App\Controller\Api\Invitation\MeAcceptController;
-use App\Controller\Api\Invitation\MeDenyController;
-use App\Controller\Api\Invitation\MeCancelController;
+use App\Api\Processor\Invitation\MeAcceptProcessor;
+use App\Api\Processor\Invitation\MeCancelProcessor;
+use App\Api\Processor\Invitation\MeDenyProcessor;
+use App\Api\Processor\Invitation\MeSendProcessor;
+use App\Api\Provider\Invitation\MeListPendingProvider;
+use App\Api\Provider\Invitation\MeListSentProvider as InvitationMeListSentProvider;
 use App\Repository\InvitationRepository;
 use DateTimeImmutable;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,286 +20,45 @@ use Symfony\Component\Uid\UuidV7;
 #[ApiResource(
     operations: [
         new Post(
-            uriTemplate: '/invitation/send',
-            controller: MeSendController::class,
-            read: false,
-            name: 'api_invitation_send',
-            openapiContext: [
-                'summary' => 'Send a room invitation',
-                'description' => 'Send an invitation to another user to join your current room. Only possible if you are in a room, the user is not already in the room, and the room is not full.',
-                'requestBody' => [
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'user_id' => [
-                                        'type' => 'string',
-                                        'description' => 'ID of the user to invite'
-                                    ]
-                                ],
-                                'required' => ['user_id']
-                            ]
-                        ]
-                    ]
-                ],
-                'responses' => [
-                    '201' => [
-                        'description' => 'Invitation sent',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'message' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Business rule violation',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '404' => [
-                        'description' => 'User not found',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            uriTemplate: '/invitation/{id}/send',
+            input: false,
+            processor: MeSendProcessor::class,
+            name: 'api_invitation_send'
         ),
         new Get(
             uriTemplate: '/invitation/sent',
             input: false,
-            controller: MeListSentController::class,
-            read: false,
-            name: 'api_invitation_sent',
-            openapiContext: [
-                'summary' => 'List invitations sent by the current user',
-                'description' => 'Returns invitations sent by the current user that are still pending (not accepted, denied, or revoked). Optionally filter by user_id as a query parameter.',
-                'parameters' => [
-                    [
-                        'name' => 'user_id',
-                        'in' => 'query',
-                        'required' => false,
-                        'schema' => [ 'type' => 'string' ],
-                        'description' => 'Filter to invitations sent to this user (optional)'
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'List of pending invitations sent by the user',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'array',
-                                    'items' => [ 'type' => 'object' ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            provider: InvitationMeListSentProvider::class,
+            normalizationContext: ['groups' => ['invitation:read']],
+            name: 'api_invitation_sent'
         ),
         new Get(
             uriTemplate: '/invitation/pending',
             input: false,
-            controller: MeListPendingController::class,
-            read: false,
-            name: 'api_invitation_pending',
-            openapiContext: [
-                'summary' => 'List invitations received by the current user',
-                'description' => 'Returns invitations received by the current user that are still pending (not accepted, denied, or revoked, and not expired).',
-                'responses' => [
-                    '200' => [
-                        'description' => 'List of pending invitations received by the user',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'array',
-                                    'items' => [ 'type' => 'object' ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            provider: MeListPendingProvider::class,
+            normalizationContext: ['groups' => ['invitation:read']],
+            name: 'api_invitation_pending'
         ),
         new Post(
             uriTemplate: '/invitation/{id}/accept',
             input: false,
-            controller: MeAcceptController::class,
-            read: false,
-            name: 'api_invitation_accept',
-            openapiContext: [
-                'summary' => 'Accept an invitation',
-                'description' => 'Accepts an invitation, checks for expiration and revocation, and joins the new room.',
-                'parameters' => [
-                    [
-                        'name' => 'id',
-                        'in' => 'path',
-                        'required' => true,
-                        'schema' => [ 'type' => 'string' ],
-                        'description' => 'ID of the invitation to accept'
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'Invitation accepted',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'message' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Business rule violation (expired, revoked, room deleted, etc.)',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '404' => [
-                        'description' => 'Invitation not found',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            processor: MeAcceptProcessor::class,
+            normalizationContext: ['groups' => ['invitation:read']],
+            name: 'api_invitation_accept'
         ),
         new Post(
             uriTemplate: '/invitation/{id}/deny',
             input: false,
-            controller: MeDenyController::class,
-            read: false,
-            name: 'api_invitation_deny',
-            openapiContext: [
-                'summary' => 'Deny an invitation',
-                'description' => 'Denies an invitation by its id. Only the invited user can deny.',
-                'parameters' => [
-                    [
-                        'name' => 'id',
-                        'in' => 'path',
-                        'required' => true,
-                        'schema' => [ 'type' => 'string' ],
-                        'description' => 'ID of the invitation to deny'
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'Invitation denied',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'message' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '404' => [
-                        'description' => 'Invitation not found',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            processor: MeDenyProcessor::class,
+            normalizationContext: ['groups' => ['invitation:read']],
+            name: 'api_invitation_deny'
         ),
         new Post(
             uriTemplate: '/invitation/{id}/cancel',
             input: false,
-            controller: MeCancelController::class,
-            read: false,
-            name: 'api_invitation_cancel',
-            openapiContext: [
-                'summary' => 'Cancel an invitation the user sent',
-                'description' => 'Revokes an invitation by its id. Only the user who sent the invitation can revoke it.',
-                'parameters' => [
-                    [
-                        'name' => 'id',
-                        'in' => 'path',
-                        'required' => true,
-                        'schema' => [ 'type' => 'string' ],
-                        'description' => 'ID of the invitation to cancel'
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'Invitation revoked',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'message' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '404' => [
-                        'description' => 'Invitation not found or not allowed',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            processor: MeCancelProcessor::class,
+            normalizationContext: ['groups' => ['invitation:read']],
+            name: 'api_invitation_cancel'
         ),
     ]
 )]
@@ -320,16 +79,16 @@ class Invitation
     #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $invitedBy = null;
+    private ?User $sender = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $invitedUser = null;
+    private ?User $receiver = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
-    private ?DateTimeImmutable $invitedAt = null;
+    private ?DateTimeImmutable $sentAt = null;
 
     #[Groups(['invitation:read'])]
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
@@ -346,7 +105,7 @@ class Invitation
     public function __construct()
     {
         $this->id = UuidV7::v7();
-        $this->invitedAt = new \DateTimeImmutable();
+        $this->sentAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?UuidV7
@@ -365,36 +124,36 @@ class Invitation
         return $this;
     }
 
-    public function getInvitedBy(): ?User
+    public function getSender(): ?User
     {
-        return $this->invitedBy;
+        return $this->sender;
     }
 
-    public function setInvitedBy(User $user): self
+    public function setSender(User $user): self
     {
-        $this->invitedBy = $user;
+        $this->sender = $user;
         return $this;
     }
 
-    public function getInvitedUser(): ?User
+    public function getReceiver(): ?User
     {
-        return $this->invitedUser;
+        return $this->receiver;
     }
 
-    public function setInvitedUser(User $user): self
+    public function setReceiver(User $user): self
     {
-        $this->invitedUser = $user;
+        $this->receiver = $user;
         return $this;
     }
 
-    public function getInvitedAt(): \DateTimeImmutable
+    public function getSentAt(): \DateTimeImmutable
     {
-        return $this->invitedAt;
+        return $this->sentAt;
     }
 
-    public function setInvitedAt(\DateTimeImmutable $date): self
+    public function setSentAt(\DateTimeImmutable $date): self
     {
-        $this->invitedAt = $date;
+        $this->sentAt = $date;
         return $this;
     }
 

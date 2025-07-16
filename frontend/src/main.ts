@@ -1,15 +1,22 @@
-import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
-import router from './router'
-import { OhVueIcon, addIcons } from "oh-vue-icons";
-import * as Octicons from "oh-vue-icons/icons/oi";
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
+import Toast, { POSITION } from "vue-toastification";
+import "vue-toastification/dist/index.css";
+import './style.css';
+import App from './App.vue';
+import router from './router';
+import axios from './plugins/axios';
 
-const Oct = Object.values({ ...Octicons });
-addIcons(...Oct);
+const app = createApp(App);
+const pinia = createPinia();
+const  toastOptions = {
+  position: POSITION.BOTTOM_CENTER
+}
 
+app.use(router);
+app.use(pinia);
+app.use(Toast, toastOptions);
 
-const app = createApp(App)
-app.component("v-icon", OhVueIcon);
-app.use(router)
-app.mount('#app')
+app.config.globalProperties.$axios = axios;
+
+app.mount('#app');

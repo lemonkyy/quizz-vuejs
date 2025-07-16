@@ -19,7 +19,6 @@ security:
             pattern:  ^/api/login
             stateless: true
             provider: app_user_provider
-
             json_login:
                 check_path:               /api/login
                 username_path:            email
@@ -32,10 +31,13 @@ security:
             stateless: true
             provider: app_user_provider
             jwt: ~
+            entry_point: jwt
+
+            logout:
+                path: /api/user/logout
 
         main:
             lazy: true
-            provider: app_user_provider
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
             # https://symfony.com/doc/current/security/impersonating_user.html
@@ -43,8 +45,7 @@ security:
 
     access_control:
         - { path: ^/api/admin, roles: ROLE_ADMIN }
-        - { path: ^/api/user, roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/api, roles: PUBLIC_ACCESS  }
+        - { path: ^/api/user, roles: IS_AUTHENTICATED_FULLY  }
 
 when@test:
     security:
@@ -65,5 +66,4 @@ when@test:
             stateless: true
             provider: app_user_provider
         access_control:
-            - { path: ^/api/user/, roles: IS_AUTHENTICATED_FULLY }
-            - { path: ^/api, roles: PUBLIC_ACCESS  }
+            - { path: ^/api, roles: IS_AUTHENTICATED_FULLY  }

@@ -6,12 +6,17 @@ use App\Entity\Room;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class RoomRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+
+    private string $maxRoomUsers;
+
+    public function __construct(ManagerRegistry $registry, ParameterBagInterface $params)
     {
         parent::__construct($registry, Room::class);
+        $this->maxRoomUsers = $params->get('app.max_room_users');
     }
 
     /**
@@ -20,12 +25,13 @@ class RoomRepository extends ServiceEntityRepository
     public function findActiveRoomForUser(User $user): ?Room
     {
         $result = $this->createQueryBuilder('r')
-        ->join('r.users', 'u')
-        ->where('u = :user')
-        ->andWhere('r.deletedAt IS NULL')
-        ->setParameter('user', $user)
-        ->getQuery()
-        ->getResult();
+            ->join('r.roomPlayers', 'rp')
+            ->join('rp.player', 'u')
+            ->where('u = :user')
+            ->andWhere('r.deletedAt IS NULL')
+            ->setParameter('user', $user)
+            ->getQuery()
+            ->getResult();
 
         return $result[0] ?? null;
     }
@@ -33,24 +39,15 @@ class RoomRepository extends ServiceEntityRepository
     /**
      * @return Room[]
      */
-    public function findAllRoomsForUser(User $user): array
+    public function findPublicWithAvailableSlots(): array
     {
+        $maxUsers = $this->maxRoomUsers;
+        
         return $this->createQueryBuilder('r')
-            ->join('r.users', 'u')
-            ->where('u = :user')
-            ->setParameter('user', $user)
-            ->getQuery()
-            ->getResult();
-    }
-
-    /**
-     * @return Room[]
-     */
-    public function findPublicWithAvailableSlots(int $maxUsers): array
-    {
-        return $this->createQueryBuilder('r')
-            ->where('r.isPublic = true')
-            ->andWhere('(SELECT COUNT(u) FROM r.users u) < :max')
+            ->leftJoin('r.roomPlayers', 'rp')
+            ->where('rp.isPublic = true')
+            ->groupBy('rp.id')
+            ->having('COUNT(rp) < :max')
             ->setParameter('max', $maxUsers)
             ->getQuery()
             ->getResult();
@@ -59,16 +56,14 @@ class RoomRepository extends ServiceEntityRepository
     /**
      * @return Room|null
      */
-    public function findRoomByUserId(string $userId): ?Room
+    public function findRoomByRoomPlayerId(string $roomPlayerId): ?Room
     {
-        $result = $this->createQueryBuilder('r')
-            ->join('r.users', 'u')
-            ->where('u.id = :userId')
+        return $this->createQueryBuilder('r')
+            ->join('r.roomPlayers', 'rp')
+            ->where('rp.id = :rpId')
             ->andWhere('r.deletedAt IS NULL')
-            ->setParameter('userId', $userId)
+            ->setParameter('rpId', $roomPlayerId)
             ->getQuery()
-            ->getResult();
-
-        return $result[0] ?? null;
+            ->getOneOrNullResult();
     }
 }

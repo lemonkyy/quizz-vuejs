@@ -1,1 +1,127 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/forms";
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
+
+@theme {
+    --font-lexend: "lexend", sans-serif;
+
+    --color-white: #ffffff;
+    --color-black: #1C170D;
+    --color-grey-1: #e5e7eb;
+    --color-grey-2: #9ca3af;
+    --color-grey-3: #6b7281;
+    --color-grey-4: #11182c;
+    --color-grey-5: #E5E8EB;
+    --color-grey-6: #fafafa;
+
+    --color-yellow-1: #e7d4a0;
+    --color-yellow-2: #F2C247;
+    --color-yellow-3: #d8a00f;
+    --color-light-yellow-1: #F2F0E8;
+    --color-light-yellow-2: #F5F2F2;
+    --color-light-yellow-3: #F2E8CC;
+    --color-light-yellow-4: #FCFAF7;
+    --color-brown-1: #9C854A;
+    --color-brown-2: #827A66;
+
+    --website-background: var(--color-light-yellow-4);
+
+    --color-primary: var(--color-yellow-2);
+    --color-primary-focus: var(--color-yellow-3);
+    --color-secondary: var(--color-light-yellow-3);
+    --color-secondary-focus: var(--color-yellow-1);
+    --color-neutral: var(--color-light-yellow-1);
+    --color-alt: var(--color-brown-2);
+    --color-highlight: var(--color-brown-1);
+    --color-input-bg: var(--color-light-yellow-2);
+
+    --color-button-loading: var(--color-brown-2);
+
+    --color-button-primary: var(--color-yellow-2);
+    --color-button-primary-hover: var(--color-yellow-3);
+    --color-button-primary-text: var(--color-black);
+    --color-button-primary-active: var(--color-light-yellow-2);
+
+    --color-button-secondary: var(--color-light-yellow-3);
+    --color-button-secondary-hover: var(--color-yellow-1);
+    --color-button-secondary-text: var(--color-black);
+
+    --color-button-monochrome: var(--color-light-yellow-1);
+    --color-button-monochrome-hover: var(--color-light-yellow-3);
+    --color-button-monochrome-text: var(--color-black);
+
+    --color-button-square: var(--color-light-yellow-1);
+    --color-button-square-hover: var(--color-yellow-2);
+    --color-button-square-text: var(--color-black);
+
+    --color-button-transparent-text: var(--color-brown-2);
+
+    --color-input-primary-background: var(--color-white);
+    --color-input-primary-outline: var(--color-light-yellow-3);
+    --color-input-primary-outline-focus: var(--color-yellow-2);
+    --color-input-primary-placeholder: var(--color-brown-2);
+    --color-input-primary-text: var(--color-black);
+
+    --color-input-secondary-background: var(--color-light-yellow-2);
+    --color-input-secondary-outline: var(--color-brown-1);
+    --color-input-secondary-outline-focus: var(--color-yellow-2);
+    --color-input-primary-placeholder: var(--color-brown-2);
+    --color-input-secondary-text: var(--color-black);
+
+    --color-select-primary-background: var(--color-white);
+    --color-select-primary-outline: var(--color-light-yellow-3);
+    --color-select-primary-outline-focus: var(--color-yellow-2);
+    --color-select-primary-text: var(--color-brown-1);
+
+    --color-select-secondary-background: var(--color-light-yellow-1);
+    --color-select-secondary-outline: var(--color-brown-1);
+    --color-select-secondary-outline-focus: var(--color-yellow-2);
+    --color-select-secondary-text: var(--color-brown-2);
+
+    --color-autocomplete-background: var(--color-white);
+    --color-autocomplete-border: var(--color-grey-3);
+    --color-autocomplete-item-hover-background: var(--color-grey-1);
+    --color-autocomplete-item-highlight-background: var(--color-light-yellow-2);
+    --color-autocomplete-loading-text: var(--color-grey-2);
+
+    --color-modal-backdrop: rgba(0, 0, 0, 0.4);
+    --color-modal-background: var(--color-white);
+    --color-modal-border: var(--color-grey-1);
+    --color-modal-close-button-text: var(--color-grey-2);
+    --color-modal-close-button-background-hover: var(--color-grey-1);
+    --color-modal-close-button-text-hover: var(--color-grey-4);
+
+    --color-checkbox-border: var(--color-yellow-1);
+    --color-checkbox-tick: var(--color-primary);
+    --color-checkbox-tick-inside: var(--color-white);
+    --color-checkbox-focus-ring: var(--color-primary);
+    --color-checkbox-label: var(--color-black);
+
+    --color-menu-background: var(--color-white);
+    --color-menu-border: var(--color-grey-5);
+    --color-menu-text: var(--color-black);
+
+    --color-notification-background: var(--color-grey-6);
+    --color-notification-border: var(--color-grey-2);
+    --color-notification-text: var(--color-black);
+    --color-notification-item-border: var(--color-grey-1);
+
+    --color-notification-badge-background: #dc2626; /* red-600 */
+    --color-notification-badge-text: #fef2f2; /* red-100 */
+
+    --color-error-background: #fef2f2; /* red-50 */
+    --color-error-text: #b91c1c; /* red-700 */
+    --color-error-icon: #ef4444; /* red-400 */
+
+    --radius-custom-sm: 8px;
+    --radius-custom-md: 12px;
+    --radius-custom-lg: 20px;
+
+    --spacing-custom-xl: 480px;
+}
+
+@layer base{
+    body {
+        font-family: var(--font-lexend);
+    }
+}

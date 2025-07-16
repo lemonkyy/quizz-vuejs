@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Invitation;
+use App\Entity\Room;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -18,28 +19,56 @@ class InvitationRepository extends ServiceEntityRepository
         $this->inviteExpirationThreshold = $params->get('app.invite_expiration_threshold');
     }
 
-    /**
-     * @return Invitation[]
-     * find pending invites for user, may also be filtered by sender user
-     */
-    public function findActiveForUser(User $invitedUser, ?User $SenderUser = null): array
+    public function countActiveForUser(User $invitedUser): int
     {
-        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold);
+        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold . '');
 
-        $qb = $this->createQueryBuilder('i')
-            ->where('i.invitedUser = :user')
+        return $this->createQueryBuilder('i')
+            ->select('count(i.id)')
+            ->where('i.receiver = :user')
             ->andWhere('i.revokedAt IS NULL')
             ->andWhere('i.deniedAt IS NULL')
             ->andWhere('i.acceptedAt IS NULL')
-            ->andWhere('i.invitedAt >= :minDate')
+            ->andWhere('i.sentAt >= :minDate')
             ->setParameter('user', $invitedUser)
-            ->setParameter('minDate', $expiredThreshold);
+            ->setParameter('minDate', $expiredThreshold)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 
-        if ($SenderUser) {
-            $qb->andWhere('i.invitedBy = :sender')
-               ->setParameter('sender', $SenderUser);
-        }
+    public function findActiveForUser(User $invitedUser): array
+    {
+        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold . '');
 
-        return $qb->getQuery()->getResult();
+        return $this->createQueryBuilder('i')
+            ->where('i.receiver = :user')
+            ->andWhere('i.revokedAt IS NULL')
+            ->andWhere('i.deniedAt IS NULL')
+            ->andWhere('i.acceptedAt IS NULL')
+            ->andWhere('i.sentAt >= :minDate')
+            ->setParameter('user', $invitedUser)
+            ->setParameter('minDate', $expiredThreshold)
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function findActiveInvitation(Room $room, User $sender, User $receiver): ?Invitation
+    {
+        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold . '');
+
+        return $this->createQueryBuilder('i')
+            ->where('i.room = :room')
+            ->andWhere('i.sender = :sender')
+            ->andWhere('i.receiver = :receiver')
+            ->andWhere('i.acceptedAt IS NULL')
+            ->andWhere('i.revokedAt IS NULL')
+            ->andWhere('i.deniedAt IS NULL')
+            ->andWhere('i.sentAt >= :minDate')
+            ->setParameter('room', $room)
+            ->setParameter('sender', $sender)
+            ->setParameter('receiver', $receiver)
+            ->setParameter('minDate', $expiredThreshold)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

@@ -1,5 +1,7 @@
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
+imports:
+    - { resource: doctrine_extensions.yaml }
 
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
@@ -8,6 +10,21 @@ parameters:
     app.invite_expiration_threshold: '10 minutes'
     app.min_username_length: 1
     app.max_username_length: 20
+    app.max_friends: 200
+    app.max_sent_friend_requests: 100
+    app.max_received_friend_requests: 200
+    app.max_sent_invitations: 100
+    app.max_received_invitations: 200
+
+    jwt_cookie_lifetime: 3600
+    jwt_cookie_path: '/'
+    jwt_cookie_domain: null
+    jwt_cookie_secure: '%env(bool:JWT_COOKIE_SECURE)%' #!should be put to true in prod
+    jwt_cookie_http_only_hp: false
+    jwt_cookie_http_only_s: true
+    jwt_cookie_same_site: 'strict'
+
+    profile_picture_path: '/images/profilePictures/'
 
 services:
     # default configuration for services in *this* file
@@ -18,7 +35,22 @@ services:
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
     App\:
-        resource: '../src/'
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
+
+    App\EventListener\ExceptionListener:
+        tags:
+            - { name: kernel.event_listener, event: kernel.exception }
+
+    App\EventListener\FriendRequestMercureSubscriber:
+        tags:
+            - { name: doctrine.event_subscriber }
+
+
+    App\Api\OpenApi\OpenApiFactory:
+        decorates: 'api_platform.openapi.factory'
+        arguments:
+            - '@App\Api\OpenApi\OpenApiFactory.inner'

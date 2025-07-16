@@ -6,186 +6,119 @@ use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
+use App\Api\Dto\Notification\NotificationCountOutputDto;
+use App\Api\Dto\User\GetByUsernameDto;
+use App\Api\Dto\User\RegisterDto;
+use App\Api\Dto\User\SearchDto;
+use App\Api\Processor\User\MeGenerateTotpSecretProcessor;
+use App\Api\Processor\User\MeUpdateProcessor;
+use App\Api\Processor\User\RegisterProcessor;
+use App\Api\Processor\User\RemoveFriendProcessor;
+use App\Api\Processor\User\VerifyTotpCodeProcessor;
+use App\Api\Provider\User\GetByUsernameProvider;
+use App\Api\Provider\User\MeListFriendsProvider;
+use App\Api\Provider\User\MeReadProvider;
+use App\Api\Provider\User\SearchProvider;
+use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use SpecShaper\EncryptBundle\Annotations\Encrypted;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
-use App\Controller\Api\User\MeReadController;
-use App\Controller\Api\User\MeUpdateUsernameController;
-use App\Controller\Api\User\RegisterController;
-use App\Controller\Api\User\MeGenerateTOTPSecret;
-use App\Controller\Api\User\VerifyTOTPCode;
-use App\Repository\UserRepository;
-use SpecShaper\EncryptBundle\Annotations\Encrypted;
+
+use App\Api\Dto\User\UpdateDto;
+use App\Api\Dto\User\VerifyTotpCodeDto;
+use App\Api\Dto\Notification\NotificationOutputDto;
+use App\Api\Provider\Notification\MeCountProvider;
+use App\Api\Provider\Notification\MeListProvider;
 
 #[ApiResource(
     operations: [
         new Get(
-            uriTemplate: '/user/info',
-            input: false,
-            controller: MeReadController::class,
-            read: false,
+            uriTemplate: '/user/get-by-username',
+            provider: GetByUsernameProvider::class,
+            input: GetByUsernameDto::class,
+            name: 'api_user_get_by_username',  
+            normalizationContext: ['groups' => ['user:read']],
+        ),
+        new Get(
+            uriTemplate: '/user/me',
+            provider: MeReadProvider::class,
             name: 'api_user_info',
-            openapiContext: [
-                'summary' => 'Get current user info',
-                'description' => 'Returns the username and email of the current authenticated user.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'User info',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'username' => ['type' => 'string'],
-                                        'email' => ['type' => 'string'],
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized'
-                    ]
-                ]
-            ]
+            normalizationContext: ['groups' => ['user:read']],
+        ),
+        new Get(
+            uriTemplate: '/user/search',
+            provider: SearchProvider::class,
+            input: SearchDto::class,
+            name: 'api_user_search',
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Post(
             uriTemplate: '/register',
-            controller: RegisterController::class,
-            read: false,
-            name: 'api_register',
-            openapiContext: [
-                'summary' => 'Register a new user',
-                'description' => 'Registers a new user with email and password.',
-                'requestBody' => [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'email' => ['type' => 'string'],
-                                    'password' => ['type' => 'string'],
-                                ],
-                                'required' => ['email', 'password']
-                            ]
-                        ]
-                    ]
-                ],
-                'responses' => [
-                    '201' => [
-                        'description' => 'User created.'
-                    ],
-                    '400' => [
-                        'description' => 'Invalid input or email already in use.'
-                    ]
-                ]
-            ]
+            processor: RegisterProcessor::class,
+            input: RegisterDto::class,
+            name: 'api_user_register',
+            normalizationContext: ['groups' => ['user:read']],
         ),
         new Put(
-            uriTemplate: '/user/username',
-            input: false,
-            controller: MeUpdateUsernameController::class,
-            read: false,
-            name: 'api_update_username',
-            openapiContext: [
-                'summary' => 'Update current user username',
-                'description' => 'Updates the username of the current authenticated user.',
-                'requestBody' => [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'username' => ['type' => 'string'],
-                                ],
-                                'required' => ['username']
-                            ]
-                        ]
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'Username updated.'
-                    ],
-                    '400' => [
-                        'description' => 'Invalid username or already in use.'
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized.'
-                    ]
-                ]
-            ]
+            uriTemplate: '/user',
+            processor: MeUpdateProcessor::class,
+            input: UpdateDto::class,
+            name: 'api_user_update',
         ),
-        new Get(
-            uriTemplate: '/user/TOTP/secret',
-            controller: MeGenerateTOTPSecret::class,
-            read: false,
+        new Post(
+            uriTemplate: '/user/totp/secret',
+            processor: MeGenerateTotpSecretProcessor::class,
+            input: false,
             name: 'api_user_totp_secret_generate',
-            openapiContext: [
-                'summary' => 'Generate TOTP secret for the current user',
-                'description' => 'Generates a TOTP secret for the current authenticated user.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'TOTP secret generated successfully.',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'TOTPSecret' => ['type' => 'string'],
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Failed to generate TOTP key.'
-                    ],
-                    '401' => [
-                        'description' => 'Unauthorized'
-                    ]
-                ]
-            ]
         ),
         new Post(
             uriTemplate: '/login-verify',
-            controller: VerifyTOTPCode::class,
-            read: false,
+            processor: VerifyTotpCodeProcessor::class,
+            input: VerifyTotpCodeDto::class,
             name: 'api_user_totp_verify',
-            openapiContext: [
-                'summary' => 'Verify TOTP code for the current user',
-                'description' => 'Verifies the TOTP code submitted by the user.',
-                'responses' => [
-                    '200' => ['description' => 'TOTP code verified and JWT returned.'],
-                    '400' => ['description' => 'Invalid input.'],
-                    '401' => ['description' => 'Unauthorized or invalid TOTP code.']
-                ],
-                'requestBody' => [
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'totp_code' => ['type' => 'string'],
-                                    'temp_token' => ['type' => 'string']
-                                ],
-                                'required' => ['totp_code', 'temp_token']
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        )
+        ),
+        new Delete(
+            uriTemplate: '/user/friends/{id}',
+            processor: RemoveFriendProcessor::class,
+            input: false,
+            name: 'api_user_remove_friend',
+        ),
+        new GetCollection(
+            uriTemplate: '/user/friends',
+            provider: MeListFriendsProvider::class,
+            input: false,
+            normalizationContext: ['groups' => ['user:read']],
+            name: 'api_user_list_friends',
+        ),
+        new Get(
+            uriTemplate: '/user/notifications/count',
+            provider: MeCountProvider::class,
+            input: false,
+            output: NotificationCountOutputDto::class,
+            normalizationContext: ['groups' => ['notification:read']],
+            name: 'api_user_notifications_count',
+        ),
+        new GetCollection(
+            uriTemplate: '/user/notifications',
+            output: NotificationOutputDto::class,
+            provider: MeListProvider::class,
+            name: 'api_user_notifications_get_collection'
+        ),
     ]
 )]
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
-#[ORM\Table(name: "`user`")]
+#[ORM\Table(name: '`user`')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
-    #[Groups(["room:read", "invitation:read"])]
+    #[Groups(['room:read', 'invitation:read', 'friendRequest:read', 'user:read'])]
     #[ORM\Id]
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
@@ -193,7 +126,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(type: 'string', length: 100, unique: true)]
     private ?string $email = null;
 
-    #[Groups(["user:read", "room:read", "invitation:read"])]
+    #[Groups(['user:read', 'room:read', 'invitation:read', 'friendRequest:read'])]
     #[ORM\Column(type: 'string', length: 20, unique: true)]
     private ?string $username = null;
 
@@ -205,11 +138,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[Encrypted]
     #[ORM\Column(type: 'string', nullable: true)]
-    private ?string $TOTPSecret = null;
+    private ?string $totpSecret = null;
+
+    #[ORM\OneToOne(mappedBy: 'player', targetEntity: RoomPlayer::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
+    private ?RoomPlayer $roomPlayer = null;
+
+    #[Groups(['user:read'])]
+    #[ORM\ManyToOne]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?ProfilePicture $profilePicture = null;
+
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: FriendRequest::class, orphanRemoval: true)]
+    private Collection $sentFriendRequests;
+
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: FriendRequest::class, orphanRemoval: true)]
+    private Collection $receivedFriendRequests;
+
+    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'friends')]
+    #[ORM\JoinTable(name: 'user_friends')]
+    #[ORM\JoinColumn(name: 'user_id', referencedColumnName: 'id')]
+    #[ORM\InverseJoinColumn(name: 'friend_user_id', referencedColumnName: 'id')]
+    private Collection $friends;
+
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Invitation::class, orphanRemoval: true)]
+    private Collection $sentInvitations;
+
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Invitation::class, orphanRemoval: true)]
+    private Collection $receivedInvitations;
 
     public function __construct()
     {
         $this->id = UuidV7::v7();
+        $this->sentFriendRequests = new ArrayCollection();
+        $this->receivedFriendRequests = new ArrayCollection();
+        $this->friends = new ArrayCollection();
+        $this->sentInvitations = new ArrayCollection();
+        $this->receivedInvitations = new ArrayCollection();
     }
 
     public function getId(): ?UuidV7
@@ -258,7 +222,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getRoles(): array
     {
         $roles = $this->roles;
-        $roles[] = "ROLE_USER";
+        $roles[] = 'ROLE_USER';
 
         return array_unique($roles);
     }
@@ -283,14 +247,139 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->email;
     }
 
-    public function getTOTPSecret(): ?string
+    public function getTotpSecret(): ?string
     {
-        return $this->TOTPSecret;
+        return $this->totpSecret;
     }
 
-    public function setTOTPSecret(?string $TOTPSecret): self
+    public function setTotpSecret(?string $totpSecret): self
     {
-        $this->TOTPSecret = $TOTPSecret;
+        $this->totpSecret = $totpSecret;
         return $this;
     }
+
+    public function getRoomPlayer(): ?RoomPlayer
+    {
+        return $this->roomPlayer;
+    }
+
+    public function setRoomPlayer(?RoomPlayer $roomPlayer)
+    {
+        $this->roomPlayer = $roomPlayer;
+
+        return $this;
+    }
+
+    public function getProfilePicture(): ?ProfilePicture
+    {
+        return $this->profilePicture;
+    }
+
+    public function setProfilePicture(?ProfilePicture $profilePicture): static
+    {
+        $this->profilePicture = $profilePicture;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, FriendRequest>|\App\Entity\FriendRequest[]
+     */
+    public function getSentFriendRequests(): Collection
+    {
+        return $this->sentFriendRequests;
+    }
+
+    public function addSentFriendRequest(FriendRequest $sentFriendRequest): static
+    {
+        if (!$this->sentFriendRequests->contains($sentFriendRequest)) {
+            $this->sentFriendRequests->add($sentFriendRequest);
+            $sentFriendRequest->setSender($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSentFriendRequest(FriendRequest $sentFriendRequest): static
+    {
+        if ($this->sentFriendRequests->removeElement($sentFriendRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($sentFriendRequest->getSender() === $this) {
+                $sentFriendRequest->setSender(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, FriendRequest>|\App\Entity\FriendRequest[]
+     */
+    public function getReceivedFriendRequests(): Collection
+    {
+        return $this->receivedFriendRequests;
+    }
+
+    public function addReceivedFriendRequest(FriendRequest $receivedFriendRequest): static
+    {
+        if (!$this->receivedFriendRequests->contains($receivedFriendRequest)) {
+            $this->receivedFriendRequests->add($receivedFriendRequest);
+            $receivedFriendRequest->setReceiver($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReceivedFriendRequest(FriendRequest $receivedFriendRequest): static
+    {
+        if ($this->receivedFriendRequests->removeElement($receivedFriendRequest)) {
+            // set the owning side to null (unless already changed)
+            if ($receivedFriendRequest->getReceiver() === $this) {
+                $receivedFriendRequest->setReceiver(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, User>
+     */
+    public function getFriends(): Collection
+    {
+        return $this->friends;
+    }
+
+    public function addFriend(User $friend): static
+    {
+        if (!$this->friends->contains($friend)) {
+            $this->friends->add($friend);
+        }
+
+        return $this;
+    }
+
+    public function removeFriend(User $friend): static
+    {
+        $this->friends->removeElement($friend);
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Invitation>|Invitation[]
+     */
+    public function getSentInvitations(): Collection
+    {
+        return $this->sentInvitations;
+    }
+
+    /**
+     * @return Collection<int, Invitation>|Invitation[]
+     */
+    public function getReceivedInvitations(): Collection
+    {
+        return $this->receivedInvitations;
+    }
+
 }

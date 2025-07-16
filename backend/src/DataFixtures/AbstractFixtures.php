@@ -27,7 +27,7 @@ abstract class AbstractFixtures extends Fixture
                 }
             }
 
-            $this->postInstantiate($entity);
+            $this->postInstantiate($entity, $data);
             $manager->persist($entity);
             ++$key;
             if (method_exists($this, 'addReference')) {
@@ -43,7 +43,7 @@ abstract class AbstractFixtures extends Fixture
         return $this->manager;
     }
 
-    protected function postInstantiate(object $entity): void
+    protected function postInstantiate(object $entity, array $data): void
     {
     }
 

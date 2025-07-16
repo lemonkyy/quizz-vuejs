@@ -6,14 +6,16 @@ use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Get;
 use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Delete;
-use App\Controller\Api\Room\MeKickUserController;
-use App\Controller\Api\Room\MeCreateController;
-use App\Controller\Api\Room\MeDeleteController;
-use App\Controller\Api\Room\MeShowCurrentController;
-use App\Controller\Api\Room\MeJoinController;
-use App\Controller\Api\Room\MeLeaveController;
+use ApiPlatform\Metadata\GetCollection;
+use App\Api\Dto\Room\CreateDto;
+use App\Api\Processor\Room\MeCreateProcessor;
+use App\Api\Processor\Room\MeJoinProcessor;
+use App\Api\Processor\Room\MeLeaveProcessor;
+use App\Api\Processor\Room\MeDeleteProcessor;
+use App\Api\Processor\Room\MeKickUserProcessor;
+use App\Api\Provider\Room\ListPublicProvider;
+use App\Api\Provider\Room\MeShowCurrentProvider;
 use App\Repository\RoomRepository;
-use DateTime;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -22,289 +24,58 @@ use Symfony\Component\Serializer\Annotation\Groups;
 use Symfony\Component\Uid\UuidV7;
 
 #[ApiResource(
+    normalizationContext: ['groups' => ['room:read']],
     operations: [
         new Get(
             uriTemplate: '/room/current',
+            provider: MeShowCurrentProvider::class,
             input: false,
-            controller: MeShowCurrentController::class,
-            read: false,
+            normalizationContext: ['groups' => ['room:read']],
             name: 'api_user_room',
-            openapiContext: [
-                'summary' => 'Get the current room of the user',
-                'description' => 'Show the room the user currently belongs to (code, users, owner, createdAt, isPublic).'
-            ]
+            
+        ),
+        new GetCollection(
+            uriTemplate: '/room/public',
+            provider: ListPublicProvider::class,
+            input: false,
+            normalizationContext: ['groups' => ['room:read']],
+            name: 'api_room_list_public',
         ),
         new Post(
-            uriTemplate: '/room/kick',
-            controller: MeKickUserController::class,
-            read: false,
-            name: 'api_room_kick_user',
-            openapiContext: [
-                'summary' => 'Kick another user from the user\'s room',
-                'description' => 'Kicks a user from the current room. Only the room owner can kick other users. Cannot kick yourself.',
-                'requestBody' => [
-                    'required' => true,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'user_id' => [
-                                        'type' => 'string',
-                                        'description' => 'ID of the user to kick from the room'
-                                    ]
-                                ],
-                                'required' => ['user_id']
-                            ]
-                        ]
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'User kicked from room',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'message' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Business rule violation or invalid input',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '403' => [
-                        'description' => 'Only the room owner can kick users',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '404' => [
-                        'description' => 'User not found',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            uriTemplate: '/room/{id}/kick',
+            processor: MeKickUserProcessor::class,
+            input: false,
+            name: 'api_room_kick',
         ),
         new Post(
             uriTemplate: '/room/create',
-            controller: MeCreateController::class,
-            read: false,
+            processor: MeCreateProcessor::class,
+            input: CreateDto::class,
+            normalizationContext: ['groups' => ['room:read']],
             name: 'api_room_create',
-            openapiContext: [
-                'summary' => 'Create a new room',
-                'description' => 'Creates a new room with the current user as owner and member. Optionally accepts a code and isPublic flag.',
-                'requestBody' => [
-                    'required' => false,
-                    'content' => [
-                        'application/json' => [
-                            'schema' => [
-                                'type' => 'object',
-                                'properties' => [
-                                    'isPublic' => [
-                                        'type' => 'boolean',
-                                        'description' => 'Whether the room is public (optional)'
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ],
-                'responses' => [
-                    '201' => [
-                        'description' => 'Room created',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'id' => ['type' => 'string'],
-                                        'code' => ['type' => 'string'],
-                                        'createdAt' => ['type' => 'string', 'format' => 'date-time'],
-                                        'isPublic' => ['type' => 'boolean'],
-                                        'owner' => ['type' => 'string'],
-                                        'users' => ['type' => 'array', 'items' => ['type' => 'string']]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            
         ),
         new Delete(
             uriTemplate: '/room/delete',
             input: false,
-            controller: MeDeleteController::class,
-            read: false,
+            processor: MeDeleteProcessor::class,
             name: 'api_room_delete',
-            openapiContext: [
-                'summary' => 'Delete the room the user owns',
-                'description' => 'Soft-deletes the room where the current user is the owner.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'Room deleted',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'message' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '404' => [
-                        'description' => 'No active room found for user as owner',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            
         ),
         new Post(
             uriTemplate: '/room/{id}/join',
             input: false,
-            controller: MeJoinController::class,
-            read: false,
+            processor: MeJoinProcessor::class,
             name: 'api_room_join',
-            openapiContext: [
-                'summary' => 'Join a room by id',
-                'description' => 'Current user joins a room by its id.',
-                'parameters' => [
-                    [
-                        'name' => 'id',
-                        'in' => 'path',
-                        'required' => true,
-                        'schema' => [ 'type' => 'string' ],
-                        'description' => 'ID of the room to join'
-                    ]
-                ],
-                'responses' => [
-                    '200' => [
-                        'description' => 'Joined room',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'id' => ['type' => 'string'],
-                                        'code' => ['type' => 'string'],
-                                        'createdAt' => ['type' => 'string', 'format' => 'date-time'],
-                                        'isPublic' => ['type' => 'boolean'],
-                                        'owner' => ['type' => 'string'],
-                                        'users' => ['type' => 'array', 'items' => ['type' => 'string']]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'Business rule violation or invalid input',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '404' => [
-                        'description' => 'Room not found',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
+            
         ),
         new Post(
             uriTemplate: '/room/leave',
             input: false,
-            controller: MeLeaveController::class,
-            read: false,
+            processor: MeLeaveProcessor::class,
             name: 'api_room_leave',
-            openapiContext: [
-                'summary' => 'Leave the current room',
-                'description' => 'Current user leaves their active room.',
-                'responses' => [
-                    '200' => [
-                        'description' => 'Left room successfully',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'message' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ],
-                    '400' => [
-                        'description' => 'User is not in an active room',
-                        'content' => [
-                            'application/json' => [
-                                'schema' => [
-                                    'type' => 'object',
-                                    'properties' => [
-                                        'error' => ['type' => 'string']
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            ]
-        ),
+            
+        )
     ]
 )]
 
@@ -319,12 +90,7 @@ class Room
     #[Groups(['room:read'])]
     #[ORM\ManyToOne(targetEntity: User::class)]
     #[ORM\JoinColumn(nullable: false)]
-    private ?User $owner = null;
-
-    #[Groups(['room:read'])]
-    #[ORM\ManyToMany(targetEntity: User::class)]
-    #[ORM\JoinTable(name: 'room_users')]
-    private Collection $users;
+    private ?User $owner = null;    
 
     #[Groups(['room:read'])]
     #[ORM\Column(type: 'datetime_immutable')]
@@ -338,11 +104,19 @@ class Room
     #[ORM\Column(type: 'datetime_immutable', nullable: true)]
     private ?DateTimeImmutable $deletedAt = null;
 
+    #[Groups(['room:read'])]
+    #[ORM\Column(type: 'string', length: 20, unique: true)]
+    private ?string $code = null;
+
+    #[Groups(['room:read'])]
+    #[ORM\OneToMany(mappedBy: 'room', targetEntity: RoomPlayer::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
+    private Collection $roomPlayers;
+
     public function __construct()
     {
         $this->id = UuidV7::v7();
-        $this->users = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
+        $this->roomPlayers = new ArrayCollection();
     }
 
     public function getId(): ?UuidV7
@@ -358,25 +132,6 @@ class Room
     public function setOwner(?User $owner): self
     {
         $this->owner = $owner;
-        return $this;
-    }
-
-    public function getUsers(): Collection
-    {
-        return $this->users;
-    }
-
-    public function addUser(User $user): self
-    {
-        if (!$this->users->contains($user)) {
-            $this->users[] = $user;
-        }
-        return $this;
-    }
-
-    public function removeUser(User $user): self
-    {
-        $this->users->removeElement($user);
         return $this;
     }
 
@@ -410,6 +165,47 @@ class Room
     public function setDeletedAt(?\DateTimeImmutable $deletedAt): self
     {
         $this->deletedAt = $deletedAt;
+        return $this;
+    }
+
+    public function getCode(): ?string
+    {
+        return $this->code;
+    }
+
+    public function setCode(string $code): self
+    {
+        $this->code = $code;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, RoomPlayer>|\RoomPlayer[]
+     */
+    public function getRoomPlayers(): Collection
+    {
+        return $this->roomPlayers;
+    }
+
+    public function addRoomPlayer(RoomPlayer $roomPlayer): self
+    {
+        if (!$this->roomPlayers->contains($roomPlayer)) {
+            $this->roomPlayers->add($roomPlayer);
+            $roomPlayer->setRoom($this);
+        }
+
+        return $this;
+    }
+
+    public function removeRoomPlayer(RoomPlayer $roomPlayer): self
+    {
+        if ($this->roomPlayers->removeElement($roomPlayer)) {
+            // set the owning side to null (unless already changed)
+            if ($roomPlayer->getRoom() === $this) {
+                $roomPlayer->setRoom(null);
+            }
+        }
+
         return $this;
     }
 }
