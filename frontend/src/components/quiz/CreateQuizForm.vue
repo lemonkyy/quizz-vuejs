@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '/src/api/axios.ts'
+import Button from '@/components/ui/atoms/Button.vue';
+import Input from '@/components/ui/atoms/Input.vue';
+import Select from '@/components/ui/atoms/Select.vue';
+import ActiveTimerInput from '@/components/ui/molecules/inputs/ActiveTimerinput.vue';
 
 const router = useRouter()
 
 const prompt = ref('')
 const count = ref(10)
-const timePerQuestion = ref(30)
 const isLoading = ref(false)
+const minutes = ref(0)
+const seconds = ref(30)
+const invite = ref('')
+const timePerQuestion = computed(() => minutes.value * 60 + seconds.value)
 
 const createQuiz = async () => {
   const normalizePrompt = (str: string) =>
@@ -21,6 +28,7 @@ const createQuiz = async () => {
 
   const cleanPrompt = normalizePrompt(prompt.value)
   isLoading.value = true
+  
 
   try {
     console.log("Checking if quiz already exists...")
@@ -77,24 +85,47 @@ const createQuiz = async () => {
 </script>
 
 <template>
-  <div class="max-w-md mx-auto p-6 bg-white rounded-lg shadow">
+  <div class="mx-auto p-6 bg-white w-100">
     <h2 class="text-xl font-bold mb-4">Créer un Quiz</h2>
+
     <form @submit.prevent="createQuiz">
       <div class="mb-4">
-        <label class="block mb-1 font-semibold">Topic (Prompt)</label>
-        <input v-model="prompt" type="text" class="w-full border rounded px-3 py-2" placeholder="Ex: Vue.js" />
+        <Input
+          id="prompt"
+          v-model="prompt"
+          type="text"
+          theme="secondary"
+          placeholder="Ex: Pokémon"
+          rounded="sm"
+        />
       </div>
+
       <div class="mb-4">
-        <label class="block mb-1 font-semibold">Nombre de questions</label>
-        <input v-model="count" type="number" class="w-full border rounded px-3 py-2" min="1" />
+        <Input
+          id="count"
+          v-model="count"
+          type="number"
+          theme="secondary"
+          placeholder="Number of Questions"
+          rounded="sm"
+          min="1"
+        />
       </div>
-      <div class="mb-6">
-        <label class="block mb-1 font-semibold">Temps par question (s)</label>
-        <input v-model="timePerQuestion" type="number" class="w-full border rounded px-3 py-2" min="5" />
-      </div>
-      <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" :disabled="isLoading">
+
+      <!-- Timer placé visuellement dans le form, mais structurellement en dehors -->
+      <!-- On le place juste après le champ "count", mais toujours avant le bouton -->
+    </form>
+
+    <!-- Timer EN DEHORS du form, mais au bon endroit visuellement -->
+    <div class="mb-6">
+      <ActiveTimerInput v-model:minutes="minutes" v-model:seconds="seconds" />
+    </div>
+
+    <!-- Bouton toujours dans le form -->
+    <form @submit.prevent="createQuiz" class="mt-0">
+      <Button type="submit" theme="primary" class="primary" rounded="sm" :disabled="isLoading">
         {{ isLoading ? 'Création...' : 'Créer le Quiz' }}
-      </button>
+      </Button>
     </form>
   </div>
 </template>

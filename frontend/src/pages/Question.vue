@@ -1,11 +1,20 @@
 <template>
+
+    
+
     <div class="max-w-2xl mx-auto p-6" v-if="currentQuestion">
+      <ProgressBar :current="currentIndex + 1" :total="questions.length" class="mb-6" />
+
       <QuestionTitle :question="currentQuestion.questionText" />
   
       <OptionsList
         :options="currentQuestion.options"
         v-model="selected"
       />
+
+      <div class="w-full mb-4">
+      <CountdownTimer class="w-full" />
+    </div>
   
       <ActionButtons
         @submit="handleSubmit"
@@ -30,6 +39,9 @@
   import QuestionTitle from '../components/quiz/QuestionTitle.vue'
   import OptionsList from '../components/quiz/OptionsList.vue'
   import ActionButtons from '../components/quiz/ActionButtons.vue'
+  import ProgressBar from '../components/quiz/ProgressBar.vue'
+  import CountdownTimer from '../components/ui/molecules/inputs/CountdownTimer.vue'
+
   
   const route = useRoute()
   const quizId = route.params.id
