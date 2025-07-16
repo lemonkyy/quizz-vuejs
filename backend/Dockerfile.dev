@@ -45,5 +45,3 @@ RUN php bin/console lexik:jwt:generate-keypair --overwrite
 RUN chown -R www-data:www-data /app
 
 CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
-
-EXPOSE 80

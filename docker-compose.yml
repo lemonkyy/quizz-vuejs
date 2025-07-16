@@ -160,7 +160,9 @@ services:
 
   #matomo - analytics
   matomo:
-    image: matomo:latest
+    build:
+      context: ./matomo
+      dockerfile: Dockerfile.dev
     container_name: matomo_quiz
     restart: unless-stopped
     depends_on:
