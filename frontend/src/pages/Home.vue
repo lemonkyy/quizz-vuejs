@@ -5,7 +5,7 @@ import JoinRoom from '@/components/home/JoinRoom.vue';
 </script>
 
 <template>
-  <div class="flex flex-col gap-12 my-12">
+  <div class="flex flex-col gap-12 pt-20">
     <FeaturedQuizzes />
     <JoinRoom />
     <CreateRoom />

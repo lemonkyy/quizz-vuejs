@@ -15,7 +15,7 @@ const tempToken = ref<string | null>(null);
 const formError = ref<string | null>(null);
 const isLoading = ref(false);
 
-const { login, loginVerify } = useAuthStore();
+const auth = useAuthStore();
 
 const emailRegex = /^[^@]+@[^@]+\.[^@]+$/;
 
@@ -46,7 +46,7 @@ const handleLogin = async () => {
   }
 
   try {
-    const result = await login(email.value, password.value);
+    const result = await auth.login(email.value, password.value);
 
     if (result.code === 'TOTP_REQUIRED') {
       tempToken.value = result.tempToken ?? null;
@@ -67,7 +67,7 @@ const handleTotpSubmit = async (code: string) => {
   isLoading.value = true;
 
   try {
-    await loginVerify(code, tempToken.value);
+    await auth.loginVerify(code, tempToken.value);
   } catch (error) {
     const axiosError = error as AxiosError<{ code: string; error: string }>;
     const errorCode = axiosError.response?.data?.code;
@@ -80,6 +80,7 @@ const handleTotpSubmit = async (code: string) => {
 
 <template>
   <div>
+    <p v-if="auth.user" class="mt-8 text-center"> You are already logged in as {{ auth.user.username }}. <span @click="auth.logout" class="border-b cursor-pointer"> Logout </span></p>
     <Title :level="1" center>Welcome Back</Title>
     <form @submit.prevent="handleLogin" class="flex flex-col gap-7 mt-5 w-full sm:w-xl">
       <Input id="username-login" v-model="email" type="text" placeholder="Email" className="mx-4" theme="secondary" without-border autoComplete />
