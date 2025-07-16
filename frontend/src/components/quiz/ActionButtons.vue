@@ -14,7 +14,7 @@
   </template>
   
   <script setup>
-  import Button from '../ui/Button.vue'
+  import Button from '../ui/atoms/Button.vue'
   
   const emit = defineEmits(['submit', 'skip'])
   const onSubmit = () => emit('submit')

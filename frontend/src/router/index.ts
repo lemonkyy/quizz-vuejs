@@ -12,7 +12,7 @@ const routes = [
   { path: '/', name: 'Home', component: Home },
   { path: '/login', name: 'Login', component: Login },
   { path: '/question/:id?', name: 'Question', component: Question },
-  { path : '/create', name: 'Create', component: Create }
+  { path : '/create', name: 'Create', component: Create },
   { path: '/register', name: 'Register', component: Register },
   { path: '/ui', name: 'UIPreview', component: UIPreview },
 ];

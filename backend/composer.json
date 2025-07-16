@@ -14,7 +14,6 @@
         "doctrine/orm": "^2.20.5",
         "lexik/jwt-authentication-bundle": "^3.1.1",
         "nelmio/cors-bundle": "^2.5",
-
         "specshaper/encrypt-bundle": "dev-master",
         "symfony/asset": "^7.2",
         "symfony/console": "7.2.*",
@@ -22,11 +21,9 @@
         "symfony/dotenv": "7.2.*",
         "symfony/flex": "^2.8.1",
         "symfony/framework-bundle": "7.2.*",
-
         "symfony/http-client": "7.2.*",
-        "symfony/messenger": "7.2.*",
-
         "symfony/mercure-bundle": "^0.3.9",
+        "symfony/messenger": "7.2.*",
         "symfony/runtime": "7.2.*",
         "symfony/security-bundle": "7.2.*",
         "symfony/serializer": "7.2.*",

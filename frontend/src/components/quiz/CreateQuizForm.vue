@@ -11,13 +11,26 @@ const timePerQuestion = ref(30)
 const isLoading = ref(false)
 
 const createQuiz = async () => {
-  const cleanPrompt = prompt.value.trim()
+  const normalizePrompt = (str: string) =>
+  str
+    .trim()
+    .toLowerCase()
+    .normalize('NFD') // décompose les caractères accentués
+    .replace(/[\u0300-\u036f]/g, '') // supprime les diacritiques (accents)
+    .replace(/\s+/g, ' ') // unifie les espaces multiples
+
+  const cleanPrompt = normalizePrompt(prompt.value)
   isLoading.value = true
 
   try {
     console.log("Checking if quiz already exists...")
-    const initialResponse = await api.get(`/quizzess?title=${encodeURIComponent(cleanPrompt)}`)
-    const existingQuizzes = initialResponse.data['hydra:member'].filter(q => q.title === cleanPrompt && q.ready)
+    const initialResponse = await api.get(`/quizzes?title=${encodeURIComponent(cleanPrompt)}`)
+    const quizzesArray = initialResponse?.data?.['member']
+    const existingQuizzes = quizzesArray.filter(q =>
+      typeof q.title === 'string' &&
+      q.title.trim().toLowerCase() === cleanPrompt &&
+      q.ready == true
+    )
 
     if (existingQuizzes.length > 0) {
       const lastQuiz = existingQuizzes.reduce((max, q) => q.id > max.id ? q : max, existingQuizzes[0])
@@ -33,20 +46,27 @@ const createQuiz = async () => {
     console.log("Sending payload to create quiz:", payload)
     await api.post('/quizz', payload)
 
-    const waitForQuiz = async () => {
-      const response = await api.get(`/quizzess?title=${encodeURIComponent(cleanPrompt)}`)
-      const quizzes = response.data['hydra:member'].filter(q => q.title === cleanPrompt && q.ready)
+    const waitForQuiz = async (): Promise<void> => {
+      const response = await api.get(`/quizzes?title=${encodeURIComponent(cleanPrompt)}`)
+      const quizzesArray = response?.data?.['member']
+      const quizzes = quizzesArray.filter(q =>
+        typeof q.title === 'string' &&
+        q.title.trim().toLowerCase() === cleanPrompt &&
+        q.ready == true
+      )
+
       if (quizzes.length > 0) {
         const lastQuiz = quizzes.reduce((max, q) => q.id > max.id ? q : max, quizzes[0])
         console.log("Quiz ready and found:", lastQuiz)
-        router.push({ name: 'Question', params: { id: lastQuiz.id } })
+        await router.push({ name: 'Question', params: { id: lastQuiz.id } })
       } else {
         console.log("Quiz en cours de génération...")
-        setTimeout(waitForQuiz, 1000)
+        await new Promise(resolve => setTimeout(resolve, 1000))
+        return waitForQuiz()
       }
     }
 
-    waitForQuiz()
+    await waitForQuiz()
 
   } catch (error) {
     console.error("Erreur lors de la création ou vérification du quizz:", error)
