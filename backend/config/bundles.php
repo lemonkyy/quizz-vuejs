@@ -13,6 +13,7 @@ return [
     Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
     SpecShaper\EncryptBundle\SpecShaperEncryptBundle::class => ['all' => true],
     Nelmio\CorsBundle\NelmioCorsBundle::class => ['all' => true],
+
     ApiPlatform\Symfony\Bundle\ApiPlatformBundle::class => ['all' => true],
     Symfony\Bundle\MercureBundle\MercureBundle::class => ['all' => true],
 ];
