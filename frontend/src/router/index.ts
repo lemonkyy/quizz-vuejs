@@ -37,9 +37,31 @@ const routes = [
     },
   },
   {
+    path: '/question/:id?',
+    name: 'Question',
+    component: Question,
+    meta: {
+      title: 'Quizz App - Take a Quiz',
+      description: 'Answer the questions and see how you score in this quiz!',
+    },
+  },
+  {
+    path: '/create',
+    name: 'Create',
+    component: Create,
+    meta: {
+      title: 'Quizz App - Create a Quiz',
+      description: 'Create your own custom quiz to challenge your friends.',
+    },
+  },
+  {
     path: '/ui',
     name: 'UIPreview',
     component: UIPreview,
+    meta: {
+      title: 'Quizz App - UI Preview',
+      description: 'A preview of the UI components for the Quizz App.',
+    },
   },
 ];
 
