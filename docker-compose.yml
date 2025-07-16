@@ -49,10 +49,14 @@ services:
       APP_DEBUG: 1
       SHELL_VERBOSITY: 3
       APP_SECRET: ${APP_SECRET_DEV}
-      CORS_ALLOW_ORIGIN: '${CORS_ALLOW_ORIGIN}'
+      CORS_ALLOW_ORIGIN: ${SYMFONY_CORS_ALLOW_ORIGIN_DEV}
       DATABASE_URL: ${DATABASE_URL_DEV}
-      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
-      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY}
+      JWT_PASSPHRASE: ${SYMFONY_JWT_PASSPHRASE_DEV}
+      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY_DEV}
+      MERCURE_URL: ${MERCURE_URL_DEV}
+      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
+      MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_DEV}
+      JWT_COOKIE_SECURE: FALSE
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images
@@ -78,9 +82,10 @@ services:
       - backend
     environment:
       NODE_ENV: development
-      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL}
-      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL}
-      VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL}
+      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_DEV}
+      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_DEV}
+      VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_DEV}
+      VITE_MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
       PATH: /app/node_modules/.bin:$PATH
 
       WATCHPACK_POLLING: true
@@ -127,14 +132,22 @@ services:
     restart: unless-stopped
     environment:
       SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_KEY_DEV}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_KEY_DEV}
+      MERCURE_EXTRA_DIRECTIVES: | 
+        cors_origins ${MERCURE_CORS_ALLOW_ORIGIN_DEV}
+        anonymous
+    #for dev mode
+    
     healthcheck:
-      test: ["CMD", "curl", "-f", "https://localhost/healthz"]
+      test: ["CMD", "curl", "-f", "http://localhost/healthz"]
       timeout: 5s
       retries: 5
       start_period: 60s
     volumes:
       - mercure-data-dev:/data
       - mercure-config-dev:/config
-    ports: ['80']
+    ports: 
+      - '3000:80'
     networks: 
       - backend-frontend-bridge

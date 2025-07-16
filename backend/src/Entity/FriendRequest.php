@@ -173,3 +173,4 @@ class FriendRequest
         return $this;
     }
 }
+

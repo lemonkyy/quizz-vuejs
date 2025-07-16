@@ -19,7 +19,7 @@ parameters:
     jwt_cookie_lifetime: 3600
     jwt_cookie_path: '/'
     jwt_cookie_domain: null
-    jwt_cookie_secure: false #!should be put to true in prod
+    jwt_cookie_secure: '%env(bool:JWT_COOKIE_SECURE)%' #!should be put to true in prod
     jwt_cookie_http_only_hp: false
     jwt_cookie_http_only_s: true
     jwt_cookie_same_site: 'strict'
@@ -44,6 +44,10 @@ services:
     App\EventListener\ExceptionListener:
         tags:
             - { name: kernel.event_listener, event: kernel.exception }
+
+    App\EventListener\FriendRequestMercureSubscriber:
+        tags:
+            - { name: doctrine.event_subscriber }
 
 
     App\Api\OpenApi\OpenApiFactory:

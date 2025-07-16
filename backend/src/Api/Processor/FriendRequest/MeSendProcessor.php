@@ -13,13 +13,14 @@ use App\Entity\FriendRequest;
 use App\Api\Dto\FriendRequest\SendDto;
 use App\Entity\User;
 use App\Exception\ValidationException;
+use App\Service\NotificationMercureService;
 
 class MeSendProcessor implements ProcessorInterface
 {
     private int $maxSentFriendRequests;
     private int $maxReceivedFriendRequests;
 
-    public function __construct(ParameterBagInterface $params, private UserRepository $userRepository, private FriendRequestRepository $friendRequestRepository, private EntityManagerInterface $entityManager, private Security $security)
+    public function __construct(ParameterBagInterface $params, private UserRepository $userRepository, private FriendRequestRepository $friendRequestRepository, private EntityManagerInterface $entityManager, private Security $security, private NotificationMercureService $notificationMercureService)
     {
         $this->maxSentFriendRequests = $params->get('app.max_sent_friend_requests');
         $this->maxReceivedFriendRequests = $params->get('app.max_received_friend_requests');
@@ -47,14 +48,13 @@ class MeSendProcessor implements ProcessorInterface
             throw new ValidationException('ERR_USER_NOT_FOUND', 'Receiver user not found', 404);
         }
 
-        $existingRequest = $this->friendRequestRepository->findOneBy(['sender' => $user, 'receiver' => $receiver]);
-        if ($existingRequest && $existingRequest->getAcceptedAt() === null && $existingRequest->getDeniedAt() === null && $existingRequest->getRevokedAt() === null) {
-            throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_SENT', 'Friend request already sent', 400);
-        }
-
-        $existingRequest = $this->friendRequestRepository->findOneBy(['sender' => $receiver, 'receiver' => $user]);
-        if ($existingRequest && $existingRequest->getAcceptedAt() === null && $existingRequest->getDeniedAt() === null && $existingRequest->getRevokedAt() === null) {
-            throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_RECEIVED', 'You have a pending friend request from this user', 400);
+        $existingRequest = $this->friendRequestRepository->findPendingFriendRequest($user, $receiver);
+        if ($existingRequest) {
+            if ($existingRequest->getSender()->getId() === $user->getId()) {
+                throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_SENT', 'Friend request already sent', 400);
+            } else {
+                throw new ValidationException('ERR_FRIEND_REQUEST_ALREADY_RECEIVED', 'You have a pending friend request from this user', 400);
+            }
         }
 
         if ($user->getFriends()->contains($receiver)) {
@@ -76,6 +76,9 @@ class MeSendProcessor implements ProcessorInterface
         $this->entityManager->persist($friendRequest);
         $this->entityManager->flush();
 
+        $this->notificationMercureService->notifyFriendRequestUpdate($friendRequest);
+
         return $friendRequest;
     }
 }
+

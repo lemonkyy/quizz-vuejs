@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import HelpButton from '../ui/molecules/buttons/HelpButton.vue';
 import { useAuthStore } from '@/store/auth';
-import NotificationButton from '../ui/molecules/buttons/NotificationButton.vue';
+import NotificationContainer from './notifications/NotificationContainer.vue';
 import UserIcon from '../profile/UserIcon.vue';
 import MenuItem from './MenuItem.vue';
 import ProfileModal from '../ui/molecules/modals/ProfileModal.vue';
@@ -24,7 +24,7 @@ const showProfileModal = ref(false);
         </ul>
         <li v-else> <HelpButton /> </li>
         <ul v-if="auth.user" class="flex flex-row items-center gap-6">
-            <li> <NotificationButton /> </li>
+            <li> <NotificationContainer /> </li>
             <li> <UserIcon class="cursor-pointer" v-on:click="() => {showProfileModal = !showProfileModal}" :src="auth.userProfilePictureUrl" /> </li>
         </ul>
     </ul>

@@ -7,6 +7,8 @@ use ApiPlatform\Metadata\Post;
 use ApiPlatform\Metadata\Put;
 use ApiPlatform\Metadata\ApiResource;
 use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\GetCollection;
+use App\Api\Dto\Notification\NotificationCountOutputDto;
 use App\Api\Dto\User\GetByUsernameDto;
 use App\Api\Dto\User\RegisterDto;
 use App\Api\Dto\User\SearchDto;
@@ -31,6 +33,9 @@ use Symfony\Component\Uid\UuidV7;
 
 use App\Api\Dto\User\UpdateDto;
 use App\Api\Dto\User\VerifyTotpCodeDto;
+use App\Api\Dto\Notification\NotificationOutputDto;
+use App\Api\Provider\Notification\MeCountProvider;
+use App\Api\Provider\Notification\MeListProvider;
 
 #[ApiResource(
     operations: [
@@ -85,13 +90,27 @@ use App\Api\Dto\User\VerifyTotpCodeDto;
             input: false,
             name: 'api_user_remove_friend',
         ),
-        new Get(
+        new GetCollection(
             uriTemplate: '/user/friends',
             provider: MeListFriendsProvider::class,
             input: false,
             normalizationContext: ['groups' => ['user:read']],
             name: 'api_user_list_friends',
-        ),   
+        ),
+        new Get(
+            uriTemplate: '/user/notifications/count',
+            provider: MeCountProvider::class,
+            input: false,
+            output: NotificationCountOutputDto::class,
+            normalizationContext: ['groups' => ['notification:read']],
+            name: 'api_user_notifications_count',
+        ),
+        new GetCollection(
+            uriTemplate: '/user/notifications',
+            output: NotificationOutputDto::class,
+            provider: MeListProvider::class,
+            name: 'api_user_notifications_get_collection'
+        ),
     ]
 )]
 
@@ -141,10 +160,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\InverseJoinColumn(name: 'friend_user_id', referencedColumnName: 'id')]
     private Collection $friends;
 
-    #[ORM\OneToMany(mappedBy: 'invitedBy', targetEntity: Invitation::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'sender', targetEntity: Invitation::class, orphanRemoval: true)]
     private Collection $sentInvitations;
 
-    #[ORM\OneToMany(mappedBy: 'invitedUser', targetEntity: Invitation::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'receiver', targetEntity: Invitation::class, orphanRemoval: true)]
     private Collection $receivedInvitations;
 
     public function __construct()
@@ -362,4 +381,5 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return $this->receivedInvitations;
     }
+
 }

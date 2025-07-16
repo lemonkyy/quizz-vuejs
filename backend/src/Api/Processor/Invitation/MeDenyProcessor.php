@@ -30,7 +30,7 @@ class MeDenyProcessor implements ProcessorInterface
         }
         $invitation = $this->invitationRepository->find($uriVariables['id']);
 
-        if (!$invitation || $invitation->getInvitedUser() !== $user) {
+        if (!$invitation || $invitation->getReceiver() !== $user) {
             throw new ValidationException('ERR_INVITATION_NOT_FOUND', 'Invitation not found', 404);
         }
 

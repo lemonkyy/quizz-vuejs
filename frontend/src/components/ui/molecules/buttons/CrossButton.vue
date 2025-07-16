@@ -2,6 +2,11 @@
 import Button from '../../atoms/Button.vue';
 import Cross from '@/assets/images/icons/cross.svg';
 import Image from '../../atoms/Image.vue';
+
+defineProps({
+  size: { type: Number, default: 2 },
+});
+
 </script>
 
 <template>
@@ -12,6 +17,6 @@ import Image from '../../atoms/Image.vue';
     rounded="lg"
     aria-label="Close modal"
   >
-    <Image :src="Cross" alt="cross" :width="2" />
+    <Image :src="Cross" alt="cross" :width="size" :height="size" />
   </Button>
 </template>

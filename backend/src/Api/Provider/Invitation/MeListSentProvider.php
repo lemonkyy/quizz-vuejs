@@ -37,7 +37,7 @@ class MeListSentProvider implements ProviderInterface
         $targetUserId = $context['request']->query->get('user_id');
 
         $criteria = [
-            'invitedBy' => $user,
+            'sender' => $user,
             'acceptedAt' => null,
             'deniedAt' => null,
             'revokedAt' => null

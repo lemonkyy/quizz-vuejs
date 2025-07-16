@@ -31,3 +31,17 @@ export interface JWTUserPayload {
   iat: number;
   exp: number;
 }
+
+export interface Notification {
+  id: string;
+  type: string;
+  sentAt: string;
+  data: {
+    sender?: {
+      id?: string;
+      username?: string;
+      profilePicture?: string;
+    };
+    message?: string;
+  };
+}
