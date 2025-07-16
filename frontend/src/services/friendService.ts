@@ -27,7 +27,7 @@ export async function acceptFriendRequest(id: string): Promise<{code: string}> {
 
 export async function refuseFriendRequest(id: string): Promise<{code: string}> {
   try {
-    await axios.post(`/friend-request/${id}/refuse`);
+    await axios.post(`/friend-request/${id}/deny`);
 
     return {
       code: 'SUCCESS'

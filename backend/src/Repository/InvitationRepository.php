@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Invitation;
+use App\Entity\Room;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -49,5 +50,25 @@ class InvitationRepository extends ServiceEntityRepository
             ->setParameter('minDate', $expiredThreshold)
             ->getQuery()
             ->getResult();
+    }
+
+    public function findActiveInvitation(Room $room, User $sender, User $receiver): ?Invitation
+    {
+        $expiredThreshold = new \DateTimeImmutable('-' . $this->inviteExpirationThreshold . '');
+
+        return $this->createQueryBuilder('i')
+            ->where('i.room = :room')
+            ->andWhere('i.sender = :sender')
+            ->andWhere('i.receiver = :receiver')
+            ->andWhere('i.acceptedAt IS NULL')
+            ->andWhere('i.revokedAt IS NULL')
+            ->andWhere('i.deniedAt IS NULL')
+            ->andWhere('i.sentAt >= :minDate')
+            ->setParameter('room', $room)
+            ->setParameter('sender', $sender)
+            ->setParameter('receiver', $receiver)
+            ->setParameter('minDate', $expiredThreshold)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 }

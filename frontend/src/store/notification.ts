@@ -5,6 +5,7 @@ import { useToast } from "vue-toastification";
 import { listNotifications as listNotificationsService, countNotifications as countNotificationsService } from '@/services/notificationService';
 import { acceptFriendRequest as acceptFriendRequestService, refuseFriendRequest as refuseFriendRequestService } from '@/services/friendService';
 import { acceptInvitation as acceptInvitationService, denyInvitation as denyInvitationService } from '@/services/invitationService';
+import { useAuthStore } from './auth';
 
 export const useNotificationStore = defineStore("notification", () => {
   //notificationCount split from notifications for pagination
@@ -16,6 +17,8 @@ export const useNotificationStore = defineStore("notification", () => {
   const currentPage = ref(1);
   const itemsPerPage = ref(10);
   const hasMoreNotifications = ref(true);
+
+  const auth = useAuthStore();
 
   const listNotifications = async (page: number = 1, limit: number = itemsPerPage.value) => {
     try {
@@ -110,8 +113,36 @@ export const useNotificationStore = defineStore("notification", () => {
     }
   };
 
-  onMounted(countNotifications);
+  onMounted(() => {
+    countNotifications();
+    setupMercureListener();
+  });
 
+  const setupMercureListener = () => {
+    if (!auth.user) {
+      console.warn('Mercure listener not set up: User not authenticated.');
+      return;
+    }
+
+    const mercureUrl = import.meta.env.VITE_MERCURE_PUBLIC_URL;
+    console.log('Mercure URL from env:', mercureUrl);
+    const url = new URL(mercureUrl);
+    url.searchParams.append('topic', `/notifications/${auth.user.id}`);
+    const eventSource = new EventSource(url, { withCredentials: true });
+
+    eventSource.onmessage = (event) => {
+      console.log('Mercure update received:', event.data);
+      notificationCount.value++;
+      listNotifications(1, itemsPerPage.value);
+    };
+
+    eventSource.onerror = (error) => {
+      console.error('Mercure EventSource error:', error);
+      eventSource.close();
+    };
+
+    console.log('Mercure listener set up for user:', auth.user.id);
+  };
 
   return {
     notifications,

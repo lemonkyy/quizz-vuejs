@@ -82,8 +82,8 @@ const handleTotpSubmit = async (code: string) => {
   <div>
     <Title :level="1" center>Welcome Back</Title>
     <form @submit.prevent="handleLogin" class="flex flex-col gap-7 mt-5 w-full sm:w-xl">
-      <Input id="username-login" v-model="email" type="text" placeholder="Email" className="mx-4" theme="secondary" without-border />
-      <Input id="password-ligin" v-model="password" type="password" placeholder="Password" className="mx-4" theme="secondary" without-border />
+      <Input id="username-login" v-model="email" type="text" placeholder="Email" className="mx-4" theme="secondary" without-border autoComplete />
+      <Input id="password-ligin" v-model="password" type="password" placeholder="Password" className="mx-4" theme="secondary" without-border autoComplete />
 
       <Button theme="primary" type="submit" class="w-full" :loading="isLoading" :disabled="isLoading">
         Log In

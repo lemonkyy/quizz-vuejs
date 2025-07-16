@@ -12,18 +12,24 @@ class NotificationMercureService
     private HubInterface $publisher;
 
     public function __construct(HubInterface $publisher)
-    {
+    {@
         $this->publisher = $publisher;
     }
 
     public function publishNotificationUpdate(string $userId): void
     {
+        error_log(sprintf('Attempting to publish Mercure update for user: %s', $userId));
         $update = new Update(
             sprintf('/notifications/%s', $userId),
             json_encode(['status' => 'new_notification'])
         );
 
-        ($this->publisher)($update);
+        try {
+            $this->publisher->publish($update);
+            error_log(sprintf('Successfully published Mercure update for user: %s', $userId));
+        } catch (\Exception $e) {
+            error_log(sprintf('Failed to publish Mercure update for user %s: %s', $userId, $e->getMessage()));
+        }
     }
 
     public function notifyFriendRequestUpdate(FriendRequest $friendRequest): void

@@ -19,48 +19,56 @@ function toggleNotifications() {
   showNotifications.value = !showNotifications.value;
 }
 
+let isInsideClick = false;
+
+function handleAction(callback: () => void) {
+  isInsideClick = true;
+  callback();
+  setTimeout(() => {
+    isInsideClick = false;
+  }, 50);
+}
+
 function handleAccept(notificationId: string, notificationType: typeof NotificationType[keyof typeof NotificationType]) {
+  handleAction(() => {
+    const notification = notificationStore.notifications.find(n => n.id === notificationId);
 
-  console.log(`Accepted notification: ${notificationId} ${notificationType}`);
-  //getting the notification here to have its name for .acceptFriendRequest and make a better toast message
-  const notification = notificationStore.notifications.find(n => n.id === notificationId);
+    if (notificationType === NotificationType.FRIEND_REQUEST && notification?.data?.sender?.username) {
+      notificationStore.acceptFriendRequest(notificationId, notification.data.sender.username);
+    } else if (notificationType === NotificationType.INVITATION) {
+      notificationStore.acceptInvitation(notificationId);
+    } else {
+      console.log("Accept other notification");
+    }
 
-  if (notificationType === NotificationType.FRIEND_REQUEST && notification?.data?.sender?.username) {
-    notificationStore.acceptFriendRequest(notificationId, notification.data.sender.username);
-  } else if (notificationType === NotificationType.INVITATION) {
-    notificationStore.acceptInvitation(notificationId);
-  } else {
-    //other unused as of now
-    console.log("Accepter other notification");
-  }
-
-  const index = notificationStore.notifications.findIndex(n => n.id === notificationId);
-
-  if (index !== -1) {
-    notificationStore.notifications.splice(index, 1);
-  }
+    const index = notificationStore.notifications.findIndex(n => n.id === notificationId);
+    if (index !== -1) {
+      notificationStore.notifications.splice(index, 1);
+    }
+  });
 }
 
 function handleDeny(notificationId: string, notificationType: typeof NotificationType[keyof typeof NotificationType]) {
+  handleAction(() => {
+    if (notificationType === NotificationType.FRIEND_REQUEST) {
+      notificationStore.denyFriendRequest(notificationId);
+    } else if (notificationType === NotificationType.INVITATION) {
+      notificationStore.denyInvitation(notificationId);
+    } else {
+      console.log("Denied other notification");
+    }
 
-  console.log(`Denied notification: ${notificationId} ${notificationType}`);
-  if (notificationType === NotificationType.FRIEND_REQUEST) {
-    notificationStore.denyFriendRequest(notificationId);
-  } else if (notificationType === NotificationType.INVITATION) {
-    notificationStore.denyInvitation(notificationId);
-  } else {
-    //other unused as of now
-    console.log("Denied other notification");
-  }
-
-  const index = notificationStore.notifications.findIndex(n => n.id === notificationId);
-
-  if (index !== -1) {
-    notificationStore.notifications.splice(index, 1);
-  }
+    const index = notificationStore.notifications.findIndex(n => n.id === notificationId);
+    if (index !== -1) {
+      notificationStore.notifications.splice(index, 1);
+    }
+  });
 }
 
 const handleClickOutside = (event: MouseEvent) => {
+  if (isInsideClick) {
+    return;
+  }
   if (!isSmallScreen.value && notificationContainerRef.value && !notificationContainerRef.value.contains(event.target as Node)) {
     showNotifications.value = false;
   }

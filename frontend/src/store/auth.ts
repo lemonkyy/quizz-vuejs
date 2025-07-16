@@ -16,7 +16,6 @@ export const useAuthStore = defineStore("auth",  () => {
   const user = ref<User |null>(null);
 
   const userProfilePictureUrl = computed(() => {
-    console.log(user.value?.profilePicture ? import.meta.env.VITE_PUBLIC_PFP_URL + '/' + user.value.profilePicture.fileName : "");
     return user.value?.profilePicture ? import.meta.env.VITE_PUBLIC_PFP_URL + '/' + user.value.profilePicture.fileName : "";
   });
   const toast = useToast();

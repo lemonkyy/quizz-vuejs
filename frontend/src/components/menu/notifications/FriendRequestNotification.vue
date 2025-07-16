@@ -17,7 +17,6 @@ const emit = defineEmits<{
 }>();
 
 const formattedTimestamp = computed(() => {
-  console.log(props.notification.data.sender?.username);
   return formatTimestamp(props.notification.sentAt);
 });
 

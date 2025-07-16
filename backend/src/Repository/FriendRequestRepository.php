@@ -46,4 +46,17 @@ class FriendRequestRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findPendingFriendRequest(User $sender, User $receiver): ?FriendRequest
+    {
+        return $this->createQueryBuilder('fr')
+            ->where('(fr.sender = :sender AND fr.receiver = :receiver) OR (fr.sender = :receiver AND fr.receiver = :sender)')
+            ->andWhere('fr.acceptedAt IS NULL')
+            ->andWhere('fr.deniedAt IS NULL')
+            ->andWhere('fr.revokedAt IS NULL')
+            ->setParameter('sender', $sender)
+            ->setParameter('receiver', $receiver)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

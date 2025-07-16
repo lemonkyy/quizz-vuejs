@@ -39,18 +39,18 @@ class MeSendProcessor implements ProcessorInterface
         if (!$user instanceof User) {
             throw new ValidationException('ERR_USER_NOT_FOUND', 'User not authenticated.');
         }
-        $targetUserId = $uriVariables['id'];
+        $receiverId = $uriVariables['id'];
 
-        if (!$targetUserId) {
+        if (!$receiverId) {
             throw new ValidationException('ERR_MISSING_USER_ID', 'Missing user_id', 400);
         }
 
-        if ($targetUserId == $user->getId()) {
+        if ($receiverId == $user->getId()) {
             throw new ValidationException('ERR_CANNOT_INVITE_SELF', 'Cannot invite yourself', 400);
         }
 
-        $targetUser = $this->userRepository->find($targetUserId);
-        if (!$targetUser) {
+        $receiver = $this->userRepository->find($receiverId);
+        if (!$receiver) {
             throw new ValidationException('ERR_USER_NOT_FOUND', 'User not found', 404);
         }
 
@@ -63,14 +63,11 @@ class MeSendProcessor implements ProcessorInterface
             throw new ValidationException('ERR_ROOM_FULL', 'Room is at max capacity', 400);
         }
 
-        $existing = $this->invitationRepository->findOneBy([
-            'room' => $room,
-            'sender' => $user,
-            'receiver' => $targetUser,
-            'acceptedAt' => null,
-            'revokedAt' => null,
-            'deniedAt' => null
-        ]);
+        $existing = $this->invitationRepository->findActiveInvitation(
+            $room,
+            $user,
+            $receiver
+        );
 
         if ($existing) {
             throw new ValidationException('ERR_INVITATION_ALREADY_SENT', 'Invitation already sent', 400);
@@ -87,7 +84,7 @@ class MeSendProcessor implements ProcessorInterface
         $invitation = new Invitation();
         $invitation->setRoom($room);
         $invitation->setSender($user);
-        $invitation->setReceiver($targetUser);
+        $invitation->setReceiver($receiver);
 
         $this->entityManager->persist($invitation);
         $this->entityManager->flush();
