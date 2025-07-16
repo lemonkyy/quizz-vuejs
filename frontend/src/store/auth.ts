@@ -139,7 +139,7 @@ export const useAuthStore = defineStore("auth",  () => {
 
       user.value = null;
       router.push('/');
-      toast.success('You are logged out.');
+      toast.success('You are logged out. See you later!');
     } catch (error) {
       toast.error('Error during logout.')
       throw error;
