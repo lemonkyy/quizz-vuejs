@@ -14,7 +14,6 @@ RUN apk update && apk add --no-cache \
     unzip \
     libzip-dev \
     icu-dev \
-    nginx \
     postgresql-dev \
     postgresql \
     libsodium-dev \
@@ -31,8 +30,6 @@ RUN sed -i 's|listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|' /usr/local/etc/php
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-COPY ./build/nginx-dev.conf /etc/nginx/http.d/default.conf
-
 COPY ./build/php.ini /usr/local/etc/php/php.ini
 
 COPY . .
@@ -44,4 +41,4 @@ RUN php bin/console lexik:jwt:generate-keypair --overwrite
 
 RUN chown -R www-data:www-data /app
 
-CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
+CMD ["php-fpm"]

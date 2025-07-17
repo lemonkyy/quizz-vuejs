@@ -9,6 +9,10 @@ networks:
     driver: bridge
   mariadb-matomo-bridge:
     driver: bridge
+  reverse-proxy-bridge:
+    driver: bridge
+  glitchtip-backend-bridge:
+    driver: bridge
 
 volumes:
   postgres-data-dev:
@@ -19,8 +23,29 @@ volumes:
   mercure-config-dev:
   matomo-app-data-dev:
   matomo-db-data-dev:
+  glitchtip-postgres-data:
+  glitchtip-redis-data:
 
 services:
+  reverse-proxy:
+    container_name: nginx_quiz
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8888:80"
+    volumes:
+      -  matomo-db-data-dev:/var/www/html:ro
+      - ./backend/public:/app/public:ro
+    depends_on:
+      - backend
+      - frontend
+      - mercure
+      - matomo
+      - glitchtip-app
+    networks:
+      - reverse-proxy-bridge
+
   #postgres database for symfony
   backend-database:
     image: postgres:17.4-alpine
@@ -47,8 +72,6 @@ services:
       dockerfile: Dockerfile.dev
       args:
         DATABASE_URL: ${SYMFONY_DATABASE_URL_DEV}
-    ports:
-      - "8000:80"
     container_name: backend_quiz
     environment:
       APP_ENV: dev
@@ -70,16 +93,14 @@ services:
       - backend-database
     networks:
       - postgres-backend-bridge
-      - backend-frontend-bridge
       - ollama-backend-bridge
+      - reverse-proxy-bridge
 
   #frontend - vuejs
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    ports:
-      - "5173:80"
     volumes:
       - ./frontend:/app:delegated
       - node-modules-dev:/app/node_modules
@@ -98,7 +119,7 @@ services:
 
       WATCHPACK_POLLING: true
     networks:
-      - backend-frontend-bridge
+      - reverse-proxy-bridge
 
   #mercure for frontend live updating
   mercure:
@@ -120,10 +141,8 @@ services:
     volumes:
       - mercure-data-dev:/data
       - mercure-config-dev:/config
-    ports: 
-      - '3000:80'
     networks: 
-      - backend-frontend-bridge
+      - reverse-proxy-bridge
 
   #ollama - ai
   ollama:
@@ -160,23 +179,68 @@ services:
 
   #matomo - analytics
   matomo:
-    build:
-      context: ./matomo
-      dockerfile: Dockerfile.dev
+    image: matomo:fpm-alpine
     container_name: matomo_quiz
     restart: unless-stopped
     depends_on:
-      - backend-database
+      - matomo-database
     environment:
       MATOMO_DATABASE_HOST: matomo-database
       MATOMO_DATABASE_TABLES_PREFIX: matomo_
       MATOMO_DATABASE_USERNAME: ${MARIADB_USER_DEV}
       MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_DEV}
       MATOMO_DATABASE_DBNAME: ${MARIADB_DEV}
-    ports:
-      - "8080:80"
     volumes:
       - matomo-db-data-dev:/var/www/html
     networks:
-      - matomo-frontend-bridge
       - mariadb-matomo-bridge
+      - reverse-proxy-bridge
+
+  #glitchtip database
+  glitchtip-database:
+    image: postgres:14-alpine
+    container_name: glitchtip_db_quiz
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: glitchtip_db
+      POSTGRES_USER: glitchtip_user
+      POSTGRES_PASSWORD: glitchtip_password
+    volumes:
+      - glitchtip-postgres-data:/var/lib/postgresql/data
+    networks:
+      - glitchtip-backend-bridge
+    healthcheck:
+      test: ["CMD", "pg_isready", "-d", "glitchtip_db", "-U", "glitchtip_user"]
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+
+  #glitchtip redis
+  glitchtip-redis:
+    image: redis:alpine
+    container_name: glitchtip_redis_quiz
+    restart: unless-stopped
+    volumes:
+      - glitchtip-redis-data:/data
+    networks:
+      - glitchtip-backend-bridge
+
+  #glitchtip application
+  glitchtip-app:
+    image: glitchtip/glitchtip:latest
+    container_name: glitchtip_app_quiz
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: ${GLITCHTIP_DATABASE_URL_DEV}
+      REDIS_URL: redis://glitchtip-redis:6379/0
+      SECRET_KEY: ${GLITCHTIP_SECRET_KEY_DEV}
+      GLITCHTIP_DOMAIN: ${GLITCHTIP_DOMAIN_DEV}
+      EMAIL_URL: ${GLITCHTIP_EMAIL_URL_DEV}
+      DEFAULT_FROM_EMAIL: ${GLITCHTIP_DEFAULT_FROM_EMAIL_DEV}
+    depends_on:
+      - glitchtip-database
+      - glitchtip-redis
+    networks:
+      - glitchtip-backend-bridge
+      - reverse-proxy-bridge
+    command: sh -c "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn glitchtip.wsgi:application --bind 0.0.0.0:8000"

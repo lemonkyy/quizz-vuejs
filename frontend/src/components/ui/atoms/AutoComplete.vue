@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, defineProps, defineEmits, watch, type PropType } from 'vue'
+import { ref, watch, type PropType } from 'vue'
 import { useIntersectionObserver } from '@/composables/useIntersectionObserver';
 import Input from '@/components/ui/atoms/Input.vue';
 import LoadingSpinner from '@/components/ui/atoms/LoadingSpinner.vue';

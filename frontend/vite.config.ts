@@ -22,6 +22,7 @@ export default defineConfig({
       protocol: 'ws',
       host: 'localhost',
       port: 5173,
+      clientPort: 8888,
     },
   },
 })
