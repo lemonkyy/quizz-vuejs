@@ -4,7 +4,7 @@ const currentYear = new Date().getFullYear();
 
 <template>
   <footer class="bg-gray-800 p-4 text-white text-center mt-auto">
-    <p>&copy; {{ currentYear }} Quiz-It. All rights reserved.</p>
+    <p>&copy; {{ currentYear }} QuizUp. All rights reserved.</p>
   </footer>
 </template>
 

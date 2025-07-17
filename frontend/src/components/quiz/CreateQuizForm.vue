@@ -5,7 +5,7 @@ import api from '/src/api/axios.ts'
 import Button from '@/components/ui/atoms/Button.vue';
 import Input from '@/components/ui/atoms/Input.vue';
 import Select from '@/components/ui/atoms/Select.vue';
-import ActiveTimerInput from '@/components/ui/molecules/inputs/ActiveTimerinput.vue';
+import ActiveTimerInput from '../ui/molecules/inputs/ActiveTimerInput.vue';
 
 const router = useRouter()
 

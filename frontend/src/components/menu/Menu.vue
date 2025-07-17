@@ -6,15 +6,29 @@ import UserIcon from '../profile/UserIcon.vue';
 import MenuItem from './MenuItem.vue';
 import ProfileModal from '../ui/molecules/modals/ProfileModal.vue';
 import { ref } from 'vue';
+import MobileMenu from './MobileMenu.vue';
+import MenuToggleButton from '../ui/molecules/buttons/MenuToggleButton.vue';
+
+const isMenuOpen = ref(false);
 
 const auth = useAuthStore();
-const userInGame = false; //temporary
+const userInGame = ref(false); //temporary
 const showProfileModal = ref(false);
+
+const toggleMenu = () => {
+  isMenuOpen.value = !isMenuOpen.value;
+  console.log('isMenuOpen:', isMenuOpen.value);
+};
+
+const closeMenu = () => {
+  isMenuOpen.value = false;
+};
 
 </script>
 
 <template>
-    <ul class="flex flex-row justify-around items-center gap-12">
+    <MenuToggleButton :is-open="isMenuOpen" @toggle="toggleMenu" />
+    <ul class="hidden md:flex flex-row justify-around items-center gap-12">
         <ul class="flex flex-row justify-around items-center gap-12" v-if="!userInGame">
             <MenuItem links-to="/">Home</MenuItem>
             <MenuItem links-to="/create" v-if="auth.user">Create</MenuItem>
@@ -28,5 +42,6 @@ const showProfileModal = ref(false);
             <li> <UserIcon class="cursor-pointer" v-on:click="() => {showProfileModal = !showProfileModal}" :src="auth.userProfilePictureUrl" /> </li>
         </ul>
     </ul>
+    <MobileMenu :is-open="isMenuOpen" @close-menu="closeMenu" :user-in-game="userInGame" />
     <ProfileModal v-model="showProfileModal" no-header />
 </template>

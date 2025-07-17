@@ -23,24 +23,22 @@ lexik_jwt_authentication:
                 - jwt_hp #header + payload
                 - jwt_s  #signature
 
-    # set_cookies:
-    #     jwt_hp:
-    #         lifetime: null
-    #         samesite: strict
-    #         path: /
-    #         domain: null
-    #         httpOnly: false
-    #         secure: true
-    #         split:
-    #             - header
-    #             - payload
+    set_cookies:
+        jwt_hp:
+            lifetime: null
+            samesite: lax
+            path: /
+            httpOnly: false
+            secure: false
+            split:
+                - header
+                - payload
 
-    #     jwt_s:
-    #         lifetime: 0
-    #         samesite: strict
-    #         path: /
-    #         domain: null
-    #         httpOnly: true
-    #         secure: true
-    #         split:
-    #             - signature
+        jwt_s:
+            lifetime: 0
+            samesite: lax
+            path: /
+            httpOnly: true
+            secure: false
+            split:
+                - signature
