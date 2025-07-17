@@ -1,15 +1,7 @@
 <template>
     <div class="flex justify-center space-x-4 mt-8">
-      <Button
-        label="Submit"
-        type="secondary"
-        @click="onSubmit"
-      />
-      <Button
-        label="Skip"
-        :transparent="true"
-        @click="onSkip"
-      />
+      <Button theme="primary" type="button" rounded="sm" label="submit" @click="onSubmit"> Submit</Button> 
+      <Button type="button" rounded="sm" label="submit" @click="onSkip" style="background-color:#F2F0E8;"> Skip</Button>
     </div>
   </template>
   
