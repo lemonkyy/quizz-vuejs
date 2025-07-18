@@ -1,0 +1,5 @@
+when@prod:
+      sentry:
+          dsn: '%env(SENTRY_DSN)%'
+          options:
+              traces_sample_rate: 1.0

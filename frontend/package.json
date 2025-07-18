@@ -9,6 +9,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@sentry/vite-plugin": "^3.6.1",
+    "@sentry/vue": "^9.40.0",
     "@tailwindcss/vite": "^4.1.11",
     "axios": "^1.10.0",
     "jwt-decode": "^4.0.0",
