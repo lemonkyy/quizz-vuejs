@@ -39,8 +39,9 @@ declare global {
 
 Sentry.init({
   app,
-  dsn: import.meta.env.SENTRY_DSN,
-  sendDefaultPii: true
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  sendDefaultPii: true,
+  environment: "development"
 });
 
 window._paq.push(['trackPageView']);

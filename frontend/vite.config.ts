@@ -1,3 +1,4 @@
+import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
@@ -5,12 +6,17 @@ import { fileURLToPath, URL } from 'node:url'
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [vue(), tailwindcss()],
+  plugins: [vue(), tailwindcss(), sentryVitePlugin({
+    org: "redwine",
+    project: "javascript-vue"
+  })],
+
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))
     }
   },
+
   server: {
     host: '0.0.0.0',
     port: 5173,
@@ -25,4 +31,8 @@ export default defineConfig({
       clientPort: 8888,
     },
   },
+
+  build: {
+    sourcemap: true
+  }
 })
