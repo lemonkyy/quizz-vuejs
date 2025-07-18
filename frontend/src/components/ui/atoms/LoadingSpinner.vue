@@ -1,9 +1,7 @@
 <script setup lang="ts">
-  
-
-  const props = defineProps({
-    color: { type: String, default: 'text-white' }
-  });
+defineProps({
+  color: { type: String, default: 'text-white' }
+});
 </script>
 
 <template>

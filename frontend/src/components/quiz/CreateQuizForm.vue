@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '/src/api/axios.ts'
+import api from '@/api/axios.ts'
 import Button from '@/components/ui/atoms/Button.vue';
 import Input from '@/components/ui/atoms/Input.vue';
 import ActiveTimerInput from '../ui/molecules/inputs/ActiveTimerInput.vue';
@@ -13,7 +13,7 @@ const count = ref(10)
 const isLoading = ref(false)
 const minutes = ref(0)
 const seconds = ref(30)
-const invite = ref('')
+//const invite = ref('')
 const timePerQuestion = computed(() => minutes.value * 60 + seconds.value)
 
 const createQuiz = async () => {
@@ -33,14 +33,14 @@ const createQuiz = async () => {
     console.log("Checking if quiz already exists...")
     const initialResponse = await api.get(`/quizzes?title=${encodeURIComponent(cleanPrompt)}`)
     const quizzesArray = initialResponse?.data?.['member']
-    const existingQuizzes = quizzesArray.filter(q =>
+    const existingQuizzes = quizzesArray.filter((q: any) =>
       typeof q.title === 'string' &&
       q.title.trim().toLowerCase() === cleanPrompt &&
       q.ready == true
     )
 
     if (existingQuizzes.length > 0) {
-      const lastQuiz = existingQuizzes.reduce((max, q) => q.id > max.id ? q : max, existingQuizzes[0])
+      const lastQuiz = existingQuizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, existingQuizzes[0])
       console.log("Existing ready quiz found:", lastQuiz)
       return router.push({ name: 'Question', params: { id: lastQuiz.id } })
     }
@@ -56,14 +56,14 @@ const createQuiz = async () => {
     const waitForQuiz = async (): Promise<void> => {
       const response = await api.get(`/quizzes?title=${encodeURIComponent(cleanPrompt)}`)
       const quizzesArray = response?.data?.['member']
-      const quizzes = quizzesArray.filter(q =>
+      const quizzes = quizzesArray.filter((q: any) =>
         typeof q.title === 'string' &&
         q.title.trim().toLowerCase() === cleanPrompt &&
         q.ready == true
       )
 
       if (quizzes.length > 0) {
-        const lastQuiz = quizzes.reduce((max, q) => q.id > max.id ? q : max, quizzes[0])
+        const lastQuiz = quizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, quizzes[0])
         console.log("Quiz ready and found:", lastQuiz)
         await router.push({ name: 'Question', params: { id: lastQuiz.id } })
       } else {

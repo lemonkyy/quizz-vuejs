@@ -130,7 +130,7 @@ export const useNotificationStore = defineStore("notification", () => {
 
     const eventSource = new EventSource(url, { withCredentials: true });
 
-    eventSource.onmessage = (event) => {
+    eventSource.onmessage = () => {
       notificationCount.value++;
       listNotifications(1, itemsPerPage.value);
     };

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { computed, type PropType } from 'vue';
 
-const modelValue = defineModel({required: true, default: ''});
+const modelValue = defineModel<string | number>({
+  default: ''
+});
 
 type InputType = 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search' | undefined;
 type InputStyle = 'primary' | 'secondary';
