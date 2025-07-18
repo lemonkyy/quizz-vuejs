@@ -82,6 +82,7 @@ services:
       MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
       MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_DEV}
       JWT_COOKIE_SECURE: FALSE
+      SENTRY_DSN: ${SENTRY_DSN_DEV}
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images
@@ -111,8 +112,8 @@ services:
       VITE_MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
       VITE_MATOMO_HOST: ${VITE_MATOMO_HOST_DEV}
       VITE_MATOMO_SITE_ID: ${VITE_MATOMO_SITE_ID_DEV}
-      PATH: /app/node_modules/.bin:$PATH
-
+      #PATH: /app/node_modules/.bin:$PATH
+      SENTRY_DSN: ${SENTRY_DSN_DEV}
       WATCHPACK_POLLING: true
     networks:
       - reverse-proxy-bridge
