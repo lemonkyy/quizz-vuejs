@@ -24,15 +24,21 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 
 const props = defineProps({
   duration: Number,
   showHours: {
     type: Boolean,
     default: false
+  },
+  isActive: {
+    type: Boolean,
+    default: true
   }
 })
+
+const emit = defineEmits(['timeExpired'])
 
 const remaining = ref(props.duration ?? 0)
 
@@ -56,8 +62,17 @@ let interval: number
 
 onMounted(() => {
   interval = window.setInterval(() => {
-    if (remaining.value > 0) remaining.value--
+    if (props.isActive && remaining.value > 0) {
+      remaining.value--
+      if (remaining.value === 0) {
+        emit('timeExpired')
+      }
+    }
   }, 1000)
+})
+
+watch(() => props.duration, (newDuration) => {
+  remaining.value = newDuration ?? 0
 })
 
 onUnmounted(() => {

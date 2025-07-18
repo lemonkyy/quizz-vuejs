@@ -5,6 +5,7 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\QuizzesRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 
 #[ORM\Entity(repositoryClass: QuizzesRepository::class)]
 #[ApiResource]
@@ -26,6 +27,12 @@ class Quizzes
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $ready = false;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $timePerQuestion = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?int $count = null;
 
     public function getId(): ?int
     {
@@ -76,6 +83,28 @@ class Quizzes
     public function setReady(bool $ready): self
     {
         $this->ready = $ready;
+        return $this;
+    }
+
+    public function getTimePerQuestion(): ?int
+    {
+        return $this->timePerQuestion;
+    }
+
+    public function setTimePerQuestion(?int $timePerQuestion): self
+    {
+        $this->timePerQuestion = $timePerQuestion;
+        return $this;
+    }
+
+    public function getCount(): ?int
+    {
+        return $this->count;
+    }
+
+    public function setCount(?int $count): self
+    {
+        $this->count = $count;
         return $this;
     }
 
