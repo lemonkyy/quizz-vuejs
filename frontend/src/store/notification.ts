@@ -21,6 +21,9 @@ export const useNotificationStore = defineStore("notification", () => {
   const auth = useAuthStore();
 
   const listNotifications = async (page: number = 1, limit: number = itemsPerPage.value) => {
+    if (!auth.user) {
+      return;
+    }
     try {
       if (!hasMoreNotifications.value && page > 1) {
         return;
@@ -37,8 +40,7 @@ export const useNotificationStore = defineStore("notification", () => {
         currentPage.value = page;
       }
     } catch (error) {
-      toast.error("Error while fetching notifications.");
-      throw error;
+      console.warn("Error while fetching notifications:", error);
     }
   };
 
@@ -49,13 +51,16 @@ export const useNotificationStore = defineStore("notification", () => {
   };
 
   const countNotifications = async () => {
+    if (!auth.user) {
+      return;
+    }
     try {
       const response = await countNotificationsService();
       if (response.code === 'SUCCESS' && response.notificationCount) {
         notificationCount.value = response.notificationCount;
       }
     } catch (error) {
-      throw error;
+      console.warn('Error counting notifications:', error);
     }
   }
 
@@ -114,8 +119,11 @@ export const useNotificationStore = defineStore("notification", () => {
   };
 
   onMounted(() => {
-    countNotifications();
-    setupMercureListener();
+    // Only load notifications if user is authenticated
+    if (auth.user) {
+      countNotifications();
+      setupMercureListener();
+    }
   });
 
   //mercure stuff for live notifications
@@ -140,6 +148,13 @@ export const useNotificationStore = defineStore("notification", () => {
     };
   };
 
+  const initNotifications = () => {
+    if (auth.user) {
+      countNotifications();
+      setupMercureListener();
+    }
+  };
+
   return {
     notifications,
     notificationCount,
@@ -151,5 +166,6 @@ export const useNotificationStore = defineStore("notification", () => {
     denyFriendRequest,
     acceptInvitation,
     denyInvitation,
+    initNotifications,
   };
 });

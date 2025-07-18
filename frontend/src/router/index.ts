@@ -6,6 +6,7 @@ import UIPreview from '../pages/UIPreview.vue';
 import Register from '@/pages/Register.vue';
 import Question from '../pages/Question.vue'
 import Create from '../pages/Create.vue'
+import Room from '../pages/Room.vue'
 
 
 const routes = [
@@ -52,6 +53,15 @@ const routes = [
     meta: {
       title: 'Quizz App - Create a Quiz',
       description: 'Create your own custom quiz to challenge your friends.',
+    },
+  },
+  {
+    path: '/room',
+    name: 'Room',
+    component: Room,
+    meta: {
+      title: 'Quizz App - Room',
+      description: 'Join your friends in this quiz room and start playing!',
     },
   },
   {

@@ -1,5 +1,5 @@
 import type { Notification } from "@/types";
-import axios from "@/plugins/axios";
+import axios from "@/api/axios";
 
 export async function listNotifications(params: {page?: number, limit?: number}): Promise<{code: string, notifications?: Notification[],  hasMore?: boolean}> {
   try {

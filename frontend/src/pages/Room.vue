@@ -1,0 +1,171 @@
+<script setup lang="ts">
+import { onMounted, computed, ref, watch, onUnmounted } from 'vue';
+import { useRouter } from 'vue-router';
+import { useRoomStore } from '@/store/room';
+import { useAuthStore } from '@/store/auth';
+import { useToast } from 'vue-toastification';
+import axios from '@/api/axios';
+import Title from '../components/ui/atoms/Title.vue';
+import CountdownTimer from '../components/ui/molecules/inputs/CountdownTimer.vue';
+import RoomProfilePictures from '../components/room/RoomProfilePictures.vue';
+
+const router = useRouter();
+const roomStore = useRoomStore();
+const authStore = useAuthStore();
+const toast = useToast();
+
+const quizReady = ref(false);
+const isCheckingQuiz = ref(false);
+
+const quizTopic = ref(localStorage.getItem('currentQuizTopic') || 'Trivia Night');
+
+const timerDuration = ref(15);
+
+let refreshInterval: number | null = null;
+
+const checkQuizReadiness = async () => {
+  if (!roomStore.currentRoom || isCheckingQuiz.value) {
+    return;
+  }
+  
+  isCheckingQuiz.value = true;
+  
+  try {
+    const currentTopic = localStorage.getItem('currentQuizTopic');
+    
+    if (!currentTopic) {
+      isCheckingQuiz.value = false;
+      return;
+    }
+    
+    const response = await axios.get(`/quizzes?title=${encodeURIComponent(currentTopic.trim().toLowerCase())}`);
+    const quizzesArray = response?.data?.['member'] || [];
+    
+    const readyQuiz = quizzesArray.find((q: any) => 
+      typeof q.title === 'string' &&
+      q.title.trim().toLowerCase() === currentTopic.trim().toLowerCase() &&
+      q.ready === true
+    );
+    
+    quizReady.value = !!readyQuiz;
+    
+    if (readyQuiz && roomStore.currentRoom.roomPlayers.length >= 2) {
+      console.log('Quiz ready and 2+ players - launching quiz!');
+      await launchQuizForAllPlayers(readyQuiz.id);
+    }
+    
+  } catch (error) {
+    console.error('Error checking quiz readiness:', error);
+  } finally {
+    isCheckingQuiz.value = false;
+  }
+};
+
+const launchQuizForAllPlayers = async (quizId: number) => {
+  try {
+    toast.success('Quiz is ready! Starting now...');
+    
+    router.push({ name: 'Question', params: { id: quizId } });
+    
+  } catch (error) {
+    console.error('Error launching quiz:', error);
+    toast.error('Error starting quiz');
+  }
+};
+
+
+onMounted(async () => {
+
+  await roomStore.getCurrentRoom();
+  
+  console.log('Room state after getCurrentRoom:', roomStore.currentRoom);
+
+  if (!roomStore.currentRoom) {
+    router.push('/');
+  }
+
+  refreshInterval = window.setInterval(async () => {
+    if (roomStore.currentRoom) {
+      await roomStore.getCurrentRoom();
+      await checkQuizReadiness();
+    }
+  }, 2000);
+});
+
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
+});
+
+
+watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
+  
+  if (newPlayers && oldPlayers) {
+    const newPlayerCount = newPlayers.length;
+    const oldPlayerCount = oldPlayers.length;
+    
+    if (newPlayerCount > oldPlayerCount) {
+      console.log('New player joined the room! Total players:', newPlayerCount);
+      console.log('Latest player:', newPlayers[newPlayerCount - 1]);
+    } else if (newPlayerCount < oldPlayerCount) {
+      console.log('Player left the room! Total players:', newPlayerCount);
+    }
+  }
+}, { deep: true });
+</script>
+
+<template>
+  <div class="min-h-screen bg-[#f8f6f2] py-8 w-full">
+    <div class="w-full px-8">
+      <div v-if="roomStore.currentRoom" class="space-y-8">
+        
+        <div class="text-center">
+          <Title :level="1" class="text-3xl font-bold text-[#2c2c2c] mb-2">
+            Quiz Room: {{ quizTopic }}
+          </Title>
+        </div>
+
+        <div class="space-y-4">
+          <Title :level="2" class="text-xl font-semibold text-[#2c2c2c]">
+            Participants ({{ roomStore.currentRoom?.roomPlayers?.length || 0 }})
+          </Title>
+          <RoomProfilePictures :players="roomStore.currentRoom?.roomPlayers || []" />
+          
+          <div class="mt-4 p-3 rounded-lg" :class="quizReady ? 'bg-green-100 border border-green-300' : 'bg-yellow-100 border border-yellow-300'">
+            <div class="flex items-center gap-2">
+              <div class="w-2 h-2 rounded-full" :class="quizReady ? 'bg-green-500' : 'bg-yellow-500'"></div>
+              <span class="text-sm font-medium" :class="quizReady ? 'text-green-800' : 'text-yellow-800'">
+                {{ quizReady ? 'Quiz Ready!' : 'Preparing quiz...' }}
+              </span>
+            </div>
+            <p class="text-xs mt-1" :class="quizReady ? 'text-green-600' : 'text-yellow-600'">
+              {{ quizReady 
+                ? (roomStore.currentRoom?.roomPlayers?.length >= 2 
+                  ? 'Starting quiz automatically!' 
+                  : 'Waiting for 2nd player to start') 
+                : 'Quiz will start when ready and 2+ players are present' 
+              }}
+            </p>
+          </div>
+        </div>
+
+        <div class="space-y-4">
+          <Title :level="2" class="text-xl font-semibold text-[#2c2c2c]">
+            Countdown
+          </Title>
+          <div class="mx-auto w-full">
+            <CountdownTimer :duration="timerDuration" :showHours="true" />
+          </div>
+        </div>
+
+      </div>
+
+      <div v-else class="flex justify-center items-center min-h-[400px]">
+        <div class="text-center">
+          <p class="text-gray-600">Loading room...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>

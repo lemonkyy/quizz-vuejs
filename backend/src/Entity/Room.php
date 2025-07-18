@@ -13,6 +13,7 @@ use App\Api\Processor\Room\MeJoinProcessor;
 use App\Api\Processor\Room\MeLeaveProcessor;
 use App\Api\Processor\Room\MeDeleteProcessor;
 use App\Api\Processor\Room\MeKickUserProcessor;
+use App\Api\Processor\Room\SearchByCodeProcessor;
 use App\Api\Provider\Room\ListPublicProvider;
 use App\Api\Provider\Room\MeShowCurrentProvider;
 use App\Repository\RoomRepository;
@@ -75,6 +76,12 @@ use Symfony\Component\Uid\UuidV7;
             processor: MeLeaveProcessor::class,
             name: 'api_room_leave',
             
+        ),
+        new Post(
+            uriTemplate: '/room/search-by-code',
+            input: false,
+            processor: SearchByCodeProcessor::class,
+            name: 'api_room_search_by_code',
         )
     ]
 )]
