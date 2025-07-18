@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { defineProps } from 'vue';
+  
 
   const props = defineProps({
     color: { type: String, default: 'text-white' }

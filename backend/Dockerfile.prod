@@ -1,0 +1,48 @@
+FROM php:8.4-fpm-alpine AS builder
+
+WORKDIR /app
+
+RUN apk update && apk add --no-cache \
+    git \
+    unzip \
+    libzip-dev \
+    icu-dev \
+    postgresql-dev \
+    postgresql \
+    libsodium-dev \
+    && docker-php-ext-configure intl \
+    && docker-php-ext-install \
+        zip \
+        intl \
+        pgsql \
+        pdo \
+        pdo_pgsql \
+        sodium
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+COPY . .
+
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
+
+FROM php:8.4-fpm-alpine
+
+WORKDIR /app
+
+COPY --from=builder /app/vendor /app/vendor
+COPY --from=builder /app/bin /app/bin
+COPY --from=builder /app/config /app/config
+COPY --from=builder /app/public /app/public
+COPY --from=builder /app/src /app/src
+COPY --from=builder /app/templates /app/templates
+COPY --from=builder /app/migrations /app/migrations
+COPY --from=builder /app/composer.json /app/composer.json
+COPY --from=builder /app/composer.lock /app/composer.lock
+COPY --from=builder /app/symfony.lock /app/symfony.lock
+COPY ./build/php.ini /usr/local/etc/php/php.ini
+
+RUN sed -i 's|listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|' /usr/local/etc/php-fpm.d/www.conf
+
+RUN chown -R www-data:www-data /app
+
+EXPOSE 9000
+CMD ["php-fpm"]

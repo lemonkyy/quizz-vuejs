@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, type PropType } from 'vue';
-import AutoComplete from './AutoComplete.vue';
+import { computed, type PropType } from 'vue';
 
 const modelValue = defineModel({required: true, default: ''});
 
@@ -21,7 +20,7 @@ const props = defineProps({
     className: { type: String, default: '' },
     maxlength: { type: Number, default: 255 },
     inputmode: { type: String as PropType<InputType>, default: undefined },
-    AutoComplete: { type: Boolean, default: false }
+    
 });
 
 const labelClasses = computed(() => {
@@ -95,7 +94,6 @@ const inputClasses = computed(() => {
           inputClasses,
           className,
         ]"
-        :autocomplete="props.AutoComplete ? id : 'off'"
       />
   </div>
 </template>

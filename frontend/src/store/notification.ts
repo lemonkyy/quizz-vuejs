@@ -135,7 +135,7 @@ export const useNotificationStore = defineStore("notification", () => {
       listNotifications(1, itemsPerPage.value);
     };
 
-    eventSource.onerror = (error) => {
+    eventSource.onerror = () => {
       eventSource.close();
     };
   };
