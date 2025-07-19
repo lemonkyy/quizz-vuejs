@@ -4,7 +4,7 @@ import { useRouter } from 'vue-router';
 import { useRoomStore } from '@/store/room';
 import { useAuthStore } from '@/store/auth';
 import { useToast } from 'vue-toastification';
-import axios from '@/api/axios';
+import api from '@/api/axios';
 import Title from '../components/ui/atoms/Title.vue';
 import Button from '../components/ui/atoms/Button.vue';
 import CountdownTimer from '../components/ui/molecules/inputs/CountdownTimer.vue';
@@ -39,7 +39,7 @@ const checkQuizReadiness = async () => {
       return;
     }
     
-    const response = await axios.get(`/quizzes?title=${encodeURIComponent(currentTopic.trim().toLowerCase())}`);
+    const response = await api.get(`/quizzes?title=${encodeURIComponent(currentTopic.trim().toLowerCase())}`);
     const quizzesArray = response?.data?.['member'] || [];
     
     const readyQuiz = quizzesArray.find((q: any) => 
@@ -78,7 +78,7 @@ const startQuiz = async () => {
   }
   
   try {
-    const response = await axios.get(`/quizzes?title=${encodeURIComponent(currentTopic.trim().toLowerCase())}`);
+    const response = await api.get(`/quizzes?title=${encodeURIComponent(currentTopic.trim().toLowerCase())}`);
     const quizzesArray = response?.data?.['member'] || [];
     
     const readyQuiz = quizzesArray.find((q: any) => 
@@ -105,6 +105,18 @@ const leaveRoom = async () => {
   } catch (error) {
     console.error('Error leaving room:', error);
     toast.error('Error leaving room');
+  }
+};
+
+const copyRoomCode = async () => {
+  if (roomStore.currentRoom?.code) {
+    try {
+      await navigator.clipboard.writeText(roomStore.currentRoom.code);
+      toast.success('Room code copied to clipboard!');
+    } catch (error) {
+      console.error('Failed to copy room code:', error);
+      toast.error('Failed to copy room code');
+    }
   }
 };
 
@@ -182,6 +194,16 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
                 : 'Quiz will start when ready and 2+ players are present' 
               }}
             </p>
+            <div v-if="roomStore.currentRoom?.code" class="mt-2 pt-2 border-t" :class="quizReady ? 'border-green-200' : 'border-yellow-200'">
+              <p class="text-xs font-medium" :class="quizReady ? 'text-green-700' : 'text-yellow-700'">
+                Room Code: 
+                <span class="font-mono bg-white px-2 py-1 rounded text-sm cursor-pointer select-all" 
+                      :class="quizReady ? 'text-green-800' : 'text-yellow-800'"
+                      @click="copyRoomCode">
+                  {{ roomStore.currentRoom.code }}
+                </span>
+              </p>
+            </div>
           </div>
 
           <div class="flex justify-center space-x-4 mt-6">

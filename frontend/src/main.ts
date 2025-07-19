@@ -5,7 +5,7 @@ import "vue-toastification/dist/index.css";
 import './style.css';
 import App from './App.vue';
 import router from './router';
-import axios from './plugins/axios';
+import axios from './api/axios';
 import VueMatomo from 'vue-matomo/src/index.js'
 
 

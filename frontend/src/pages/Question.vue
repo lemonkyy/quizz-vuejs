@@ -41,7 +41,7 @@
   <script setup>
   import { ref, computed, onMounted } from 'vue'
   import { useRoute, useRouter } from 'vue-router'
-  import axios from '/src/api/axios'
+  import axios from '@/api/axios'
   import QuestionTitle from '../components/quiz/QuestionTitle.vue'
   import OptionsList from '../components/quiz/OptionsList.vue'
   import ActionButtons from '../components/quiz/ActionButtons.vue'

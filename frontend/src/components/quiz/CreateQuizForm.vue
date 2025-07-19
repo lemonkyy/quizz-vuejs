@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '/src/api/axios.ts'
+import api from '@/api/axios'
 import Button from '@/components/ui/atoms/Button.vue';
 import Input from '@/components/ui/atoms/Input.vue';
 import Select from '@/components/ui/atoms/Select.vue';

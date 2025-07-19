@@ -1,4 +1,3 @@
-// src/api/axios.ts
 import axios from "axios";
 
 const api = axios.create({
@@ -9,12 +8,21 @@ const api = axios.create({
   withCredentials: true
 });
 
-// Response interceptor to handle authentication errors
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      // Handle unauthorized access - could redirect to login or show message
       console.warn('Authentication required for this request');
     }
     return Promise.reject(error);
