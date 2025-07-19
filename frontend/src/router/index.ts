@@ -5,6 +5,8 @@ import Login from '../pages/Login.vue';
 import Register from '@/pages/Register.vue';
 import Question from '../pages/Question.vue'
 import Create from '../pages/Create.vue'
+import Room from '../pages/Room.vue'
+import Results from '../pages/Results.vue'
 
 
 const routes = [
@@ -13,8 +15,8 @@ const routes = [
     name: 'Home',
     component: Home,
     meta: {
-      title: 'Quizz App - Home',
-      description: 'Welcome to the Quizz App! Challenge your friends and test your knowledge with fun quizzes.',
+      title: 'QuizUp - Home',
+      description: 'Welcome to QuizUp! Challenge your friends and test your knowledge with fun quizzes.',
     },
   },
   {
@@ -22,8 +24,8 @@ const routes = [
     name: 'Login',
     component: Login,
     meta: {
-      title: 'Quizz App - Login',
-      description: 'Login to your Quizz App account to access your quizzes and challenge your friends.',
+      title: 'QuizUp - Login',
+      description: 'Login to your QuizUp account to access your quizzes and challenge your friends.',
     },
   },
   {
@@ -31,8 +33,8 @@ const routes = [
     name: 'Register',
     component: Register,
     meta: {
-      title: 'Quizz App - Register',
-      description: 'Create a new account on the Quizz App to start creating and playing quizzes.',
+      title: 'QuizUp - Register',
+      description: 'Create a new account on QuizUp to start creating and playing quizzes.',
     },
   },
   {
@@ -40,7 +42,7 @@ const routes = [
     name: 'Question',
     component: Question,
     meta: {
-      title: 'Quizz App - Take a Quiz',
+      title: 'QuizUp - Take a Quiz',
       description: 'Answer the questions and see how you score in this quiz!',
     },
   },
@@ -49,8 +51,35 @@ const routes = [
     name: 'Create',
     component: Create,
     meta: {
-      title: 'Quizz App - Create a Quiz',
+      title: 'QuizUp - Create a Quiz',
       description: 'Create your own custom quiz to challenge your friends.',
+    },
+  },
+  {
+    path: '/room',
+    name: 'Room',
+    component: Room,
+    meta: {
+      title: 'QuizUp - Room',
+      description: 'Join your friends in this quiz room and start playing!',
+    },
+  },
+  {
+    path: '/results',
+    name: 'Results',
+    component: Results,
+    meta: {
+      title: 'QuizUp - Results',
+      description: 'See the quiz results and how you performed!',
+    },
+  },
+  {
+    path: '/ui',
+    name: 'UIPreview',
+    component: UIPreview,
+    meta: {
+      title: 'QuizUp - UI Preview',
+      description: 'A preview of the UI components for QuizUp.',
     },
   },
 ];

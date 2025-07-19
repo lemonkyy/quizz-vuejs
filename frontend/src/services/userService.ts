@@ -1,4 +1,4 @@
-import axios from '@/plugins/axios';
+import axios from '@/api/axios';
 import type { User, PublicUser } from '@/types';
 
 export async function login(params: {email: string, password: string}): Promise<{code: string, message?: string, tempToken?: string, error?: string}> {

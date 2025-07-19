@@ -16,12 +16,14 @@ class QuizzController extends AbstractController
     {
         $content = json_decode($request->getContent(), true);
         $prompt = $content['prompt'] ?? '';
+        $count = $content['count'] ?? 10;
+        $timePerQuestion = $content['timePerQuestion'] ?? 30;
 
         if (empty($prompt)) {
             return $this->json(['error' => 'Prompt is required'], 400);
         }
 
-        $bus->dispatch(new GenerateQuizz($prompt));
+        $bus->dispatch(new GenerateQuizz($prompt, $count, $timePerQuestion));
 
         return $this->json(['status' => 'processing']);
     }

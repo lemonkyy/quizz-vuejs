@@ -13,7 +13,13 @@
       />
 
       <div class="w-full mb-4">
-      <CountdownTimer class="w-full" />
+      <CountdownTimer 
+        class="w-full" 
+        :duration="timePerQuestion" 
+        :key="currentIndex" 
+        @timeExpired="handleTimeExpired"
+        :isActive="isTimerActive"
+      />
     </div>
   
       <ActionButtons
@@ -34,8 +40,8 @@
   
   <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { useRoute } from 'vue-router'
-  import axios from '/src/api/axios'
+  import { useRoute, useRouter } from 'vue-router'
+  import axios from '@/api/axios'
   import QuestionTitle from '../components/quiz/QuestionTitle.vue'
   import OptionsList from '../components/quiz/OptionsList.vue'
   import ActionButtons from '../components/quiz/ActionButtons.vue'
@@ -44,6 +50,7 @@
 
   
   const route = useRoute()
+  const router = useRouter()
   const quizId = route.params.id
   
   const questions = ref([])
@@ -51,20 +58,23 @@
   const selected = ref('')
   const showResult = ref(false)
   const isCorrect = ref(false)
+  const timePerQuestion = ref(30)
+  const isTimerActive = ref(true)
   
   const currentQuestion = computed(() => questions.value[currentIndex.value])
   
   onMounted(async () => {
     try {
+        const quizResponse = await axios.get(`/quizzes/${quizId}`)
+        timePerQuestion.value = quizResponse.data.timePerQuestion || 30
+
         const response = await axios.get(`/quizzes/${quizId}/questions`)
-        console.log(response.data)
         questions.value = response.data.map(q => ({
         id: q.id,
         questionText: q.questionText,
         options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
         correctAnswer: q.correctAnswer
         }))
-        console.log("Questions chargées :", questions.value)
     } catch (error) {
         console.error("Erreur lors du chargement des questions:", error)
     }
@@ -73,6 +83,7 @@
   
   function handleSubmit() {
     if (!selected.value) return
+    isTimerActive.value = false
     isCorrect.value = selected.value === currentQuestion.value.correctAnswer
     showResult.value = true
   
@@ -82,17 +93,29 @@
   }
   
   function handleSkip() {
+    isTimerActive.value = false
     nextQuestion()
+  }
+
+  function handleTimeExpired() {
+    if (showResult.value) return
+    isTimerActive.value = false
+    isCorrect.value = false
+    showResult.value = true
+    
+    setTimeout(() => {
+      nextQuestion()
+    }, 1200)
   }
   
   function nextQuestion() {
     showResult.value = false
     selected.value = ''
+    isTimerActive.value = true
     if (currentIndex.value < questions.value.length - 1) {
       currentIndex.value++
     } else {
-      console.log("Quiz terminé !")
-
+      router.push('/results')
     }
   }
   </script>

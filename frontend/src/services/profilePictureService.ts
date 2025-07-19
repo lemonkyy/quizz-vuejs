@@ -1,5 +1,5 @@
 import type { ProfilePicture } from "@/types";
-import axios from "@/plugins/axios";
+import axios from "@/api/axios";
 
 export async function getAllProfilePictures(): Promise<{code: string, profilePictures?: ProfilePicture[]}> {
   try {

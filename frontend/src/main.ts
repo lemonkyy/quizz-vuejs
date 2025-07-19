@@ -5,8 +5,9 @@ import "vue-toastification/dist/index.css";
 import './style.css';
 import App from './App.vue';
 import router from './router';
-import axios from './plugins/axios';
-import VueMatomo from 'vue-matomo';
+import axios from './api/axios';
+import VueMatomo from 'vue-matomo/src/index.js'
+
 
 import * as Sentry from "@sentry/vue";
 
@@ -21,15 +22,18 @@ const  toastOptions = {
 app.use(router);
 app.use(pinia);
 app.use(Toast, toastOptions);
-app.use(VueMatomo, {
-  host: import.meta.env.VITE_MATOMO_HOST,
-  siteId: import.meta.env.VITE_MATOMO_SITE_ID,
-  router: router,
-  enableLinkTracking: true,
-  trackInitialView: true,
-  trackHeartbeat: true,
-  debug: false,
-});
+const matomoHost = import.meta.env.VITE_MATOMO_HOST || import.meta.env.VITE_MATOMO_HOST_DEV;
+if (matomoHost) {
+  app.use(VueMatomo, {
+    host: matomoHost,
+    siteId: import.meta.env.VITE_MATOMO_SITE_ID || import.meta.env.VITE_MATOMO_SITE_ID_DEV,
+    router: router,
+    enableLinkTracking: true,
+    trackInitialView: true,
+    trackHeartbeat: true,
+    debug: false,
+  });
+}
 
 declare global {
   interface Window {
@@ -44,7 +48,9 @@ Sentry.init({
   environment: "development"
 });
 
-window._paq.push(['trackPageView']);
+if (matomoHost && window._paq) {
+  window._paq.push(['trackPageView']);
+}
 
 app.config.globalProperties.$axios = axios;
 

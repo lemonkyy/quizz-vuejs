@@ -24,7 +24,7 @@ class ProfilePicture
     #[ORM\Column(type: 'uuid', unique: true)]
     private ?UuidV7 $id = null;
 
-    #[Groups(['user:read', 'profilePicture:read'])]
+    #[Groups(['user:read', 'room:read', 'profilePicture:read'])]
     #[ORM\Column(length: 255, type: "string", unique: true)]
     private ?string $fileName = null;
 

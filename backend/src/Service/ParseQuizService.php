@@ -16,7 +16,7 @@ class ParseQuizService
         private LoggerInterface $logger,
     ) {}
 
-    public function parseAndPersistQuestions(int $quizId): void
+    public function parseAndPersistQuestions(int $quizId, ?int $expectedCount = null): void
     {
         $quiz = $this->quizzesRepository->find($quizId);
 
@@ -25,11 +25,16 @@ class ParseQuizService
         }
 
         $content = trim($quiz->getContentJson());
+        $questionsCount = 0;
 
         if (str_starts_with($content, '{')) {
             $data = json_decode($content, true);
             if (json_last_error() !== JSON_ERROR_NONE) {
                 throw new \Exception("Invalid JSON: " . json_last_error_msg());
+            }
+
+            if ($expectedCount && count($data['questions']) !== $expectedCount) {
+                $this->logger->warning("Expected $expectedCount questions but got " . count($data['questions']) . " questions for quiz ID $quizId");
             }
 
             foreach ($data['questions'] as $q) {
@@ -40,6 +45,7 @@ class ParseQuizService
                 $question->setOptions($q['options']);
                 $this->entityManager->persist($question);
                 $this->logger->info("Added question from JSON: " . $q['question']);
+                $questionsCount++;
             }
         } else {
             preg_match('/Réponses\s*:\s*(.*)/i', $content, $answerMatch);
@@ -74,6 +80,11 @@ class ParseQuizService
 
                 $this->entityManager->persist($question);
                 $this->logger->info("Added question: " . $questionText . " => Answer: " . ($correctAnswer ?? "TODO"));
+                $questionsCount++;
+            }
+
+            if ($expectedCount && $questionsCount !== $expectedCount) {
+                $this->logger->warning("Expected $expectedCount questions but got $questionsCount questions for quiz ID $quizId");
             }
         }
 

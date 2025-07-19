@@ -1,4 +1,4 @@
-import axios from '@/plugins/axios';
+import axios from '@/api/axios';
 import type { PublicUser } from '@/types';
 
 export async function sendFriendRequest(id: string): Promise<{code: string}> {

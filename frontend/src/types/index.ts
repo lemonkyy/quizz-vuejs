@@ -45,3 +45,24 @@ export interface Notification {
     message?: string;
   };
 }
+
+export interface Room {
+  id: string;
+  owner: PublicUser;
+  createdAt: string;
+  isPublic: boolean;
+  deletedAt?: string;
+  code: string;
+  roomPlayers: RoomPlayer[];
+}
+
+export interface RoomPlayer {
+  id: string;
+  user: PublicUser;
+  room: Room;
+  joinedAt: string;
+}
+
+export interface CreateRoomDto {
+  isPublic: boolean;
+}
