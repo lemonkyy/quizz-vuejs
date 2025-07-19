@@ -66,4 +66,17 @@ class RoomRepository extends ServiceEntityRepository
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    /**
+     * @return Room|null
+     */
+    public function findByCode(string $code): ?Room
+    {
+        return $this->createQueryBuilder('r')
+            ->where('r.code = :code')
+            ->andWhere('r.deletedAt IS NULL')
+            ->setParameter('code', $code)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
 }

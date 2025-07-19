@@ -1,4 +1,4 @@
-import axios from '@/plugins/axios';
+import axios from '@/api/axios';
 
 export async function sendInvitation(id: string): Promise<{code: string}> {
   try {

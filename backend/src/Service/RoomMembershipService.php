@@ -33,6 +33,10 @@ class RoomMembershipService
         $room->setIsPublic($isPublic);
         $room->setCode($this->roomCodeGenerationService->generateUniqueRoomCode());
 
+        // Establish bidirectional relationships
+        $room->addRoomPlayer($roomPlayer);
+        $user->setRoomPlayer($roomPlayer);
+
         $this->entityManager->persist($room);
         $this->entityManager->persist($roomPlayer);
         $this->entityManager->flush();
@@ -45,6 +49,10 @@ class RoomMembershipService
         $this->handleUserLeavingRoom($user);
 
         $roomPlayer = new RoomPlayer($user, $room);
+
+        // Establish bidirectional relationships
+        $room->addRoomPlayer($roomPlayer);
+        $user->setRoomPlayer($roomPlayer);
 
         $this->entityManager->persist($roomPlayer);
         $this->entityManager->flush();

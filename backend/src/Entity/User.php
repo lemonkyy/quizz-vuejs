@@ -143,7 +143,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToOne(mappedBy: 'player', targetEntity: RoomPlayer::class, cascade: ['persist', 'remove'], orphanRemoval: true)]
     private ?RoomPlayer $roomPlayer = null;
 
-    #[Groups(['user:read'])]
+    #[Groups(['user:read', 'room:read'])]
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false)]
     private ?ProfilePicture $profilePicture = null;

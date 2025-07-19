@@ -5,8 +5,9 @@ import "vue-toastification/dist/index.css";
 import './style.css';
 import App from './App.vue';
 import router from './router';
-import axios from './plugins/axios';
-import VueMatomo from 'vue-matomo';
+import axios from './api/axios';
+import VueMatomo from 'vue-matomo/src/index.js'
+
 
 import * as Sentry from "@sentry/vue";
 
@@ -22,8 +23,8 @@ app.use(router);
 app.use(pinia);
 app.use(Toast, toastOptions);
 app.use(VueMatomo, {
-  host: import.meta.env.VITE_MATOMO_HOST,
-  siteId: import.meta.env.VITE_MATOMO_SITE_ID,
+  host: import.meta.env.VITE_MATOMO_HOST || import.meta.env.VITE_MATOMO_HOST_DEV,
+  siteId: import.meta.env.VITE_MATOMO_SITE_ID || import.meta.env.VITE_MATOMO_SITE_ID_DEV,
   router: router,
   enableLinkTracking: true,
   trackInitialView: true,
