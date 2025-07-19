@@ -2,13 +2,13 @@
 import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoomStore } from '@/store/room';
-import { useToast } from 'vue-toastification';
+//import { useToast } from 'vue-toastification';
 import Title from '../components/ui/atoms/Title.vue';
 import Button from '../components/ui/atoms/Button.vue';
 
 const router = useRouter();
 const roomStore = useRoomStore();
-const toast = useToast();
+//const toast = useToast();
 
 const quizTopic = ref(localStorage.getItem('currentQuizTopic') || 'Trivia Night');
 

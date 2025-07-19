@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, computed, ref, watch, onUnmounted } from 'vue';
+import { onMounted, ref, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoomStore } from '@/store/room';
-import { useAuthStore } from '@/store/auth';
+//import { useAuthStore } from '@/store/auth';
 import { useToast } from 'vue-toastification';
 import api from '@/api/axios';
 import Title from '../components/ui/atoms/Title.vue';
@@ -12,7 +12,7 @@ import RoomProfilePictures from '../components/room/RoomProfilePictures.vue';
 
 const router = useRouter();
 const roomStore = useRoomStore();
-const authStore = useAuthStore();
+//const authStore = useAuthStore();
 const toast = useToast();
 
 const quizReady = ref(false);
@@ -177,7 +177,7 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
           <Title :level="2" class="text-xl font-semibold text-[#2c2c2c]">
             Participants ({{ roomStore.currentRoom?.roomPlayers?.length || 0 }})
           </Title>
-          <RoomProfilePictures :players="roomStore.currentRoom?.roomPlayers || []" />
+          <RoomProfilePictures :players="(roomStore.currentRoom?.roomPlayers || []) as any[]" />
           
           <div class="mt-4 p-3 rounded-lg" :class="quizReady ? 'bg-green-100 border border-green-300' : 'bg-yellow-100 border border-yellow-300'">
             <div class="flex items-center gap-2">

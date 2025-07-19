@@ -73,15 +73,6 @@ const routes = [
       description: 'See the quiz results and how you performed!',
     },
   },
-  {
-    path: '/ui',
-    name: 'UIPreview',
-    component: UIPreview,
-    meta: {
-      title: 'QuizUp - UI Preview',
-      description: 'A preview of the UI components for QuizUp.',
-    },
-  },
 ];
 
 const router = createRouter({

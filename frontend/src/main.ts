@@ -6,7 +6,7 @@ import './style.css';
 import App from './App.vue';
 import router from './router';
 import axios from './api/axios';
-import VueMatomo from 'vue-matomo/src/index.js'
+import VueMatomo from 'vue-matomo'
 
 
 import * as Sentry from "@sentry/vue";

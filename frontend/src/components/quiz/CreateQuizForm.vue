@@ -1,12 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/api/axios.ts'
 import api from '@/api/axios'
 import Button from '@/components/ui/atoms/Button.vue';
 import Input from '@/components/ui/atoms/Input.vue';
-import Select from '@/components/ui/atoms/Select.vue';
-import ActiveTimerInput from '@/components/ui/molecules/inputs/ActiveTimerinput.vue';
+import ActiveTimerInput from '../ui/molecules/inputs/ActiveTimerInput.vue';
 import { useAuthStore } from '@/store/auth';
 import { useRoomStore } from '@/store/room';
 import { useToast } from 'vue-toastification';
