@@ -4,8 +4,7 @@ import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import Button from '@/components/ui/atoms/Button.vue';
 import Input from '@/components/ui/atoms/Input.vue';
-import Select from '@/components/ui/atoms/Select.vue';
-import ActiveTimerInput from '@/components/ui/molecules/inputs/ActiveTimerinput.vue';
+import ActiveTimerInput from '../ui/molecules/inputs/ActiveTimerInput.vue';
 import { useAuthStore } from '@/store/auth';
 import { useRoomStore } from '@/store/room';
 import { useToast } from 'vue-toastification';
@@ -21,7 +20,7 @@ const count = ref(10)
 const isLoading = ref(false)
 const minutes = ref(0)
 const seconds = ref(30)
-const invite = ref('')
+//const invite = ref('')
 const timePerQuestion = computed(() => minutes.value * 60 + seconds.value)
 
 const createQuiz = async () => {
@@ -74,14 +73,14 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     console.log("Checking if quiz already exists...")
     const initialResponse = await api.get(`/quizzes?title=${encodeURIComponent(cleanPrompt)}`)
     const quizzesArray = initialResponse?.data?.['member']
-    const existingQuizzes = quizzesArray.filter(q =>
+    const existingQuizzes = quizzesArray.filter((q: any) =>
       typeof q.title === 'string' &&
       q.title.trim().toLowerCase() === cleanPrompt &&
       q.ready == true
     )
 
     if (existingQuizzes.length > 0) {
-      const lastQuiz = existingQuizzes.reduce((max, q) => q.id > max.id ? q : max, existingQuizzes[0])
+      const lastQuiz = existingQuizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, existingQuizzes[0])
       console.log("Existing ready quiz found:", lastQuiz)
       return
     }
@@ -97,14 +96,14 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     const waitForQuiz = async (): Promise<void> => {
       const response = await api.get(`/quizzes?title=${encodeURIComponent(cleanPrompt)}`)
       const quizzesArray = response?.data?.['member']
-      const quizzes = quizzesArray.filter(q =>
+      const quizzes = quizzesArray.filter((q: any) =>
         typeof q.title === 'string' &&
         q.title.trim().toLowerCase() === cleanPrompt &&
         q.ready == true
       )
 
       if (quizzes.length > 0) {
-        const lastQuiz = quizzes.reduce((max, q) => q.id > max.id ? q : max, quizzes[0])
+        const lastQuiz = quizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, quizzes[0])
         console.log("Quiz ready and found:", lastQuiz)
         return
       } else {

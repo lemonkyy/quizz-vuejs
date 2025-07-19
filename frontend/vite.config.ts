@@ -4,10 +4,12 @@ import vue from '@vitejs/plugin-vue'
 import tailwindcss from '@tailwindcss/vite'
 import { fileURLToPath, URL } from 'node:url'
 
+const allowedHosts = process.env.VITE_ALLOWED_HOSTS?.split(',').map(h => h.trim()) || [];
+
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [vue(), tailwindcss(), sentryVitePlugin({
-    org: "redwine",
+    org: process.env.VITE_SENTRY_ORG,
     project: "javascript-vue"
   })],
 
@@ -30,6 +32,7 @@ export default defineConfig({
       port: 5173,
       clientPort: 8888,
     },
+    allowedHosts,
   },
 
   build: {
