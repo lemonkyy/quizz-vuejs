@@ -82,7 +82,7 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     if (existingQuizzes.length > 0) {
       const lastQuiz = existingQuizzes.reduce((max, q) => q.id > max.id ? q : max, existingQuizzes[0])
       console.log("Existing ready quiz found:", lastQuiz)
-      return router.push({ name: 'Question', params: { id: lastQuiz.id } })
+      return
     }
 
     const payload = {
@@ -105,7 +105,7 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
       if (quizzes.length > 0) {
         const lastQuiz = quizzes.reduce((max, q) => q.id > max.id ? q : max, quizzes[0])
         console.log("Quiz ready and found:", lastQuiz)
-        await router.push({ name: 'Question', params: { id: lastQuiz.id } })
+        return
       } else {
         console.log("Quiz en cours de génération...")
         await new Promise(resolve => setTimeout(resolve, 1000))

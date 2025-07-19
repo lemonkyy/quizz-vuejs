@@ -40,7 +40,7 @@
   
   <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { useRoute } from 'vue-router'
+  import { useRoute, useRouter } from 'vue-router'
   import axios from '/src/api/axios'
   import QuestionTitle from '../components/quiz/QuestionTitle.vue'
   import OptionsList from '../components/quiz/OptionsList.vue'
@@ -50,6 +50,7 @@
 
   
   const route = useRoute()
+  const router = useRouter()
   const quizId = route.params.id
   
   const questions = ref([])
@@ -68,15 +69,12 @@
         timePerQuestion.value = quizResponse.data.timePerQuestion || 30
 
         const response = await axios.get(`/quizzes/${quizId}/questions`)
-        console.log(response.data)
         questions.value = response.data.map(q => ({
         id: q.id,
         questionText: q.questionText,
         options: typeof q.options === 'string' ? JSON.parse(q.options) : q.options,
         correctAnswer: q.correctAnswer
         }))
-        console.log("Questions chargées :", questions.value)
-        console.log("Time per question:", timePerQuestion.value)
     } catch (error) {
         console.error("Erreur lors du chargement des questions:", error)
     }
@@ -117,7 +115,7 @@
     if (currentIndex.value < questions.value.length - 1) {
       currentIndex.value++
     } else {
-      console.log("Quiz terminé !")
+      router.push('/results')
     }
   }
   </script>

@@ -6,6 +6,7 @@ import { useAuthStore } from '@/store/auth';
 import { useToast } from 'vue-toastification';
 import axios from '@/api/axios';
 import Title from '../components/ui/atoms/Title.vue';
+import Button from '../components/ui/atoms/Button.vue';
 import CountdownTimer from '../components/ui/molecules/inputs/CountdownTimer.vue';
 import RoomProfilePictures from '../components/room/RoomProfilePictures.vue';
 
@@ -49,11 +50,6 @@ const checkQuizReadiness = async () => {
     
     quizReady.value = !!readyQuiz;
     
-    if (readyQuiz && roomStore.currentRoom.roomPlayers.length >= 2) {
-      console.log('Quiz ready and 2+ players - launching quiz!');
-      await launchQuizForAllPlayers(readyQuiz.id);
-    }
-    
   } catch (error) {
     console.error('Error checking quiz readiness:', error);
   } finally {
@@ -70,6 +66,45 @@ const launchQuizForAllPlayers = async (quizId: number) => {
   } catch (error) {
     console.error('Error launching quiz:', error);
     toast.error('Error starting quiz');
+  }
+};
+
+const startQuiz = async () => {
+  const currentTopic = localStorage.getItem('currentQuizTopic');
+  
+  if (!currentTopic) {
+    toast.error('Quiz topic not found');
+    return;
+  }
+  
+  try {
+    const response = await axios.get(`/quizzes?title=${encodeURIComponent(currentTopic.trim().toLowerCase())}`);
+    const quizzesArray = response?.data?.['member'] || [];
+    
+    const readyQuiz = quizzesArray.find((q: any) => 
+      typeof q.title === 'string' &&
+      q.title.trim().toLowerCase() === currentTopic.trim().toLowerCase() &&
+      q.ready === true
+    );
+    
+    if (readyQuiz) {
+      await launchQuizForAllPlayers(readyQuiz.id);
+    } else {
+      toast.error('Quiz not ready yet');
+    }
+  } catch (error) {
+    console.error('Error starting quiz:', error);
+    toast.error('Error starting quiz');
+  }
+};
+
+const leaveRoom = async () => {
+  try {
+    await roomStore.leaveRoom();
+    router.push('/');
+  } catch (error) {
+    console.error('Error leaving room:', error);
+    toast.error('Error leaving room');
   }
 };
 
@@ -142,11 +177,31 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
             <p class="text-xs mt-1" :class="quizReady ? 'text-green-600' : 'text-yellow-600'">
               {{ quizReady 
                 ? (roomStore.currentRoom?.roomPlayers?.length >= 2 
-                  ? 'Starting quiz automatically!' 
+                  ? 'Ready to start!' 
                   : 'Waiting for 2nd player to start') 
                 : 'Quiz will start when ready and 2+ players are present' 
               }}
             </p>
+          </div>
+
+          <div class="flex justify-center space-x-4 mt-6">
+            <Button 
+              v-if="quizReady && roomStore.currentRoom?.roomPlayers?.length >= 2"
+              theme="primary" 
+              type="button" 
+              rounded="sm" 
+              @click="startQuiz"
+            >
+              Lancer le Quiz
+            </Button>
+            <Button 
+              type="button" 
+              rounded="sm" 
+              @click="leaveRoom" 
+              style="background-color:#F2F0E8;"
+            >
+              Quitter la Room
+            </Button>
           </div>
         </div>
 
