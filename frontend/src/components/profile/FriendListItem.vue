@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import Button from '@/components/ui/atoms/Button.vue';
-import UserIcon from '@/components/profile/UserIcon.vue';
+import UserIcon from './UserIcon.vue';
 import type { PublicUser } from '@/types';
 import { ref, type PropType } from 'vue';
+import { useRoomStore } from '@/store/room';
 
 const props = defineProps({
   friend: { type: Object as PropType<PublicUser>, required: true },
@@ -10,9 +11,10 @@ const props = defineProps({
 
 const profilePictureUrl = import.meta.env.VITE_PUBLIC_PFP_URL + '/' + props.friend.profilePicture.fileName;
 
-const emit = defineEmits(['remove-friend']);
+const emit = defineEmits(['remove-friend', 'invite-friend']);
 
 const removeConfirmed = ref(false);
+const roomStore = useRoomStore();
 
 const handleRemoveFriend = () => {
   if (removeConfirmed.value) {
@@ -20,6 +22,10 @@ const handleRemoveFriend = () => {
   } else {
     removeConfirmed.value = true;
   }
+};
+
+const handleInviteFriend = () => {
+  emit('invite-friend', props.friend.id);
 };
 </script>
 
@@ -31,12 +37,22 @@ const handleRemoveFriend = () => {
       <UserIcon :src="profilePictureUrl" />
       <span class="font-semibold">{{ friend.username }}</span>
     </div>
-    <Button
-      @click="handleRemoveFriend()"
-      theme="monochrome"
-      rounded="md"
-    >
-      {{ removeConfirmed ? 'Are you sure?' : 'Remove' }}
-    </Button>
+    <div class="flex space-x-2">
+      <Button
+        v-if="roomStore.currentRoom"
+        @click="handleInviteFriend()"
+        theme="primary"
+        rounded="md"
+      >
+        Invite
+      </Button>
+      <Button
+        @click="handleRemoveFriend()"
+        theme="monochrome"
+        rounded="md"
+      >
+        {{ removeConfirmed ? 'Are you sure?' : 'Remove' }}
+      </Button>
+    </div>
   </div>
 </template>
