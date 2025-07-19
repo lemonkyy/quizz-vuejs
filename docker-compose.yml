@@ -102,6 +102,8 @@ services:
       - ./frontend:/app:delegated
       - node-modules-dev:/app/node_modules
     container_name: frontend_quiz
+    ports:
+      - "5173:5173"
     depends_on:
       - backend
     environment:

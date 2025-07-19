@@ -8,6 +8,7 @@ import Question from '../pages/Question.vue'
 import Create from '../pages/Create.vue'
 import Room from '../pages/Room.vue'
 import Results from '../pages/Results.vue'
+import QuizHistory from '../pages/QuizHistory.vue'
 
 
 const routes = [
@@ -72,6 +73,15 @@ const routes = [
     meta: {
       title: 'QuizUp - Results',
       description: 'See the quiz results and how you performed!',
+    },
+  },
+  {
+    path: '/history',
+    name: 'QuizHistory',
+    component: QuizHistory,
+    meta: {
+      title: 'QuizUp - Quiz History',
+      description: 'View your quiz history and performance statistics.',
     },
   },
   {
