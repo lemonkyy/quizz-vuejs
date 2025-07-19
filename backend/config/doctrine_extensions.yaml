@@ -1,5 +1,0 @@
-doctrine:
-    orm:
-        dql:
-            string_functions:
-                unaccent: App\DoctrineExtensions\Query\Postgresql\Unaccent

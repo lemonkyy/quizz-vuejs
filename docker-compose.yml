@@ -83,6 +83,7 @@ services:
       MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_DEV}
       JWT_COOKIE_SECURE: FALSE
       SENTRY_DSN: ${SENTRY_DSN_DEV}
+      ENABLE_API_DOCS: true
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images

@@ -105,10 +105,10 @@ const handleRegister = async () => {
     <div>
         <Title :level="1" center> Create your account </Title>
         <form @submit.prevent="handleRegister" class="flex flex-col gap-7 mt-5 w-full sm:w-xl">
-          <Input id="email-register" theme="secondary" v-model="email" type="text" placeholder="Email" className="mx-4" without-border/>
-          <Input id="username-register" theme="secondary" v-model="username" type="text" placeholder="Username" className="mx-4" without-border/>
-          <Input id="password-register" theme="secondary" v-model="password" type="password" placeholder="Password" className="mx-4" without-border/>
-          <Input id="password-verify-register" theme="secondary" v-model="confirmPassword" type="password"placeholder="Password Confirmation" className="mx-4" without-border/>
+          <Input id="email-register" theme="secondary" v-model="email" type="text" placeholder="Email" className="mx-4" without-border autocomplete="email"/>
+          <Input id="username-register" theme="secondary" v-model="username" type="text" placeholder="Username" className="mx-4" without-border autocomplete="username"/>
+          <Input id="password-register" theme="secondary" v-model="password" type="password" placeholder="Password" className="mx-4" without-border autocomplete="new-password"/>
+          <Input id="password-verify-register" theme="secondary" v-model="confirmPassword" type="password"placeholder="Password Confirmation" className="mx-4" without-border autocomplete="new-password"/>
           <Checkbox id="tos-register" theme="secondary" label="I agree to the Terms of Service" v-model="tosAgreedTo" />
 
           <Error v-if="formError" class="mx-4">

@@ -12,6 +12,8 @@ networks:
   reverse-proxy-bridge:
     driver: bridge
 
+
+
 volumes:
   postgres-data-prod:
   uploads-data-prod:
@@ -19,8 +21,8 @@ volumes:
   ollama-data-prod:
   mercure-data-prod:
   mercure-config-prod:
-  matomo-app-data-prod:
-  matomo-db-data-prod:
+  frontend-build-prod:
+  mariadb-data-prod:
 
 services:
   reverse-proxy:
@@ -32,12 +34,18 @@ services:
       - "80:80"
       - "443:443"
     volumes:
-      - /home/deployer/certs:/etc/nginx/certs:ro
+      - /etc/letsencrypt/live/play-quizup.com:/etc/nginx/certs:ro
+      - /etc/letsencrypt/archive/play-quizup.com:/etc/nginx/archive:ro
+      - frontend-build-prod:/usr/share/nginx/html/frontend:ro
     depends_on:
-      - backend
-      - frontend
-      - mercure
-      - matomo
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_completed_successfully
+      mercure:
+        condition: service_started
+      matomo:
+        condition: service_started
     networks:
       - reverse-proxy-bridge
 
@@ -68,6 +76,11 @@ services:
       dockerfile: Dockerfile.prod
       args:
         DATABASE_URL: ${SYMFONY_DATABASE_URL_PROD}
+        SENTRY_DSN: ${SENTRY_DSN_PROD}
+        MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_PROD}
+        MERCURE_URL: ${MERCURE_URL_PROD}
+        MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_PROD}
+        SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY_PROD}
     container_name: backend_quiz
     environment:
       APP_ENV: prod
@@ -82,6 +95,7 @@ services:
       MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_PROD}
       JWT_COOKIE_SECURE: TRUE
       SENTRY_DSN: ${SENTRY_DSN_PROD}
+      ENABLE_API_DOCS: false
     volumes:
       - uploads-data-prod:/app/public/uploads/images
     depends_on:
@@ -96,22 +110,21 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    container_name: frontend_quiz
-    depends_on:
-      - backend
-    environment:
-      NODE_ENV: production
-      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_PROD}
-      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_PROD}
-      VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_PROD}
-      VITE_MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_PROD}
-      VITE_MATOMO_HOST: ${VITE_MATOMO_HOST_PROD}
-      VITE_MATOMO_SITE_ID: ${VITE_MATOMO_SITE_ID_PROD}
-      VITE_SENTRY_DSN: ${SENTRY_DSN_PROD}
-      SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN_PROD}
-      VITE_SENTRY_ORG: ${VITE_SENTRY_ORG_PROD}
-      VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS_PROD}
-      
+      args:
+        VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_PROD}
+        VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_PROD}
+        VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_PROD}
+        VITE_MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_PROD}
+        VITE_MATOMO_HOST: ${VITE_MATOMO_HOST_PROD}
+        VITE_MATOMO_SITE_ID: ${VITE_MATOMO_SITE_ID_PROD}
+        VITE_SENTRY_DSN: ${SENTRY_DSN_PROD}
+        SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN_PROD}
+        VITE_SENTRY_ORG: ${VITE_SENTRY_ORG_PROD}
+        VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS_PROD}
+    container_name: frontend_builder_quiz
+    command: sh -c 'cp -r /app/dist/. /app/dist_volume'
+    volumes:
+      - frontend-build-prod:/app/dist_volume
     networks:
       - reverse-proxy-bridge
 
@@ -155,7 +168,7 @@ services:
       MYSQL_USER: ${MARIADB_USER_PROD}
       MYSQL_PASSWORD: ${MARIADB_PASSWORD_PROD}
     volumes:
-      - matomo-app-data-prod:/var/lib/mysql
+      - mariadb-data-prod:/var/lib/mysql
     networks:
       - mariadb-matomo-bridge
     healthcheck:
@@ -166,19 +179,17 @@ services:
 
   #matomo - analytics
   matomo:
-    image: matomo:fpm-alpine
+    image: matomo:latest
     container_name: matomo_quiz
     restart: unless-stopped
     depends_on:
-      - backend-database
+      - matomo-database
     environment:
       MATOMO_DATABASE_HOST: matomo-database
       MATOMO_DATABASE_TABLES_PREFIX: matomo_
       MATOMO_DATABASE_USERNAME: ${MARIADB_USER_PROD}
       MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_PROD}
       MATOMO_DATABASE_DBNAME: ${MARIADB_PROD}
-    volumes:
-      - matomo-db-data-prod:/var/www/html
     networks:
       - mariadb-matomo-bridge
       - reverse-proxy-bridge

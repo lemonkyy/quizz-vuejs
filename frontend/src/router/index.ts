@@ -2,7 +2,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../pages/Home.vue';
 import Login from '../pages/Login.vue';
-import UIPreview from '../pages/UIPreview.vue';
 import Register from '@/pages/Register.vue';
 import Question from '../pages/Question.vue'
 import Create from '../pages/Create.vue'
@@ -52,15 +51,6 @@ const routes = [
     meta: {
       title: 'Quizz App - Create a Quiz',
       description: 'Create your own custom quiz to challenge your friends.',
-    },
-  },
-  {
-    path: '/ui',
-    name: 'UIPreview',
-    component: UIPreview,
-    meta: {
-      title: 'Quizz App - UI Preview',
-      description: 'A preview of the UI components for the Quizz App.',
     },
   },
 ];

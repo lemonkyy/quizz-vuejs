@@ -22,6 +22,7 @@ const props = defineProps({
     className: { type: String, default: '' },
     maxlength: { type: Number, default: 255 },
     inputmode: { type: String as PropType<InputType>, default: undefined },
+    autocomplete: { type: String, default: undefined },
     
 });
 
@@ -91,6 +92,7 @@ const inputClasses = computed(() => {
         :placeholder="placeholder"
         :maxlength="maxlength"
         :inputmode="inputmode"
+        :autocomplete="autocomplete"
         v-model="modelValue"
         :class="[
           inputClasses,

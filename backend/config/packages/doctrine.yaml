@@ -28,7 +28,7 @@ doctrine:
             auto_mapping: false
         dql:
             string_functions:
-                unaccent: App\DoctrineExtensions\Query\Postgresql\Unaccent
+                unaccent: App\DQL\Unaccent
 
 when@test:
     doctrine:
