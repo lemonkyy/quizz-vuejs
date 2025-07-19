@@ -22,15 +22,18 @@ const  toastOptions = {
 app.use(router);
 app.use(pinia);
 app.use(Toast, toastOptions);
-app.use(VueMatomo, {
-  host: import.meta.env.VITE_MATOMO_HOST || import.meta.env.VITE_MATOMO_HOST_DEV,
-  siteId: import.meta.env.VITE_MATOMO_SITE_ID || import.meta.env.VITE_MATOMO_SITE_ID_DEV,
-  router: router,
-  enableLinkTracking: true,
-  trackInitialView: true,
-  trackHeartbeat: true,
-  debug: false,
-});
+const matomoHost = import.meta.env.VITE_MATOMO_HOST || import.meta.env.VITE_MATOMO_HOST_DEV;
+if (matomoHost) {
+  app.use(VueMatomo, {
+    host: matomoHost,
+    siteId: import.meta.env.VITE_MATOMO_SITE_ID || import.meta.env.VITE_MATOMO_SITE_ID_DEV,
+    router: router,
+    enableLinkTracking: true,
+    trackInitialView: true,
+    trackHeartbeat: true,
+    debug: false,
+  });
+}
 
 declare global {
   interface Window {
@@ -45,7 +48,9 @@ Sentry.init({
   environment: "development"
 });
 
-window._paq.push(['trackPageView']);
+if (matomoHost && window._paq) {
+  window._paq.push(['trackPageView']);
+}
 
 app.config.globalProperties.$axios = axios;
 
