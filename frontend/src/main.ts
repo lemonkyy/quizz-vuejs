@@ -9,6 +9,8 @@ import axios from './api/axios';
 import VueMatomo from 'vue-matomo/src/index.js'
 
 
+import * as Sentry from "@sentry/vue";
+
 const app = createApp(App);
 
 const pinia = createPinia();
@@ -35,6 +37,13 @@ declare global {
     _paq: any;
   }
 }
+
+Sentry.init({
+  app,
+  dsn: import.meta.env.VITE_SENTRY_DSN,
+  sendDefaultPii: true,
+  environment: "development"
+});
 
 window._paq.push(['trackPageView']);
 

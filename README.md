@@ -24,3 +24,7 @@ The following variables are defined in your `.env` file:
 - `VUE_PUBLIC_API_URL`: Public URL for the API (used by the frontend)
 - `VUE_SERVER_API_URL`: Internal URL for the API (used by the frontend server)
 - `VUE_PUBLIC_IMAGES_URL`: Public URL for uploaded images
+
+frontend accessible at localhost:8888
+api documentation accessible at localohst:888/api/docs
+matomo at localhost:8888/matomo

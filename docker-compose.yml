@@ -9,6 +9,8 @@ networks:
     driver: bridge
   mariadb-matomo-bridge:
     driver: bridge
+  reverse-proxy-bridge:
+    driver: bridge
 
 volumes:
   postgres-data-dev:
@@ -21,17 +23,36 @@ volumes:
   matomo-db-data-dev:
 
 services:
+  reverse-proxy:
+    container_name: nginx_quiz
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8888:80"
+    volumes:
+      - matomo-db-data-dev:/var/www/html:ro
+      - ./backend/public:/app/public:ro
+    depends_on:
+      - backend
+      - frontend
+      - mercure
+      - matomo
+    networks:
+      - reverse-proxy-bridge
+
   #postgres database for symfony
   backend-database:
     image: postgres:17.4-alpine
-    container_name: postgres_quiz
+    container_name: backend_database_quiz
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER_DEV}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_DEV}
       POSTGRES_DB: ${POSTGRES_DB_DEV}
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - postgres-data-dev:/var/lib/postgresql/data:rw
+      - postgres-data-dev:/var/lib/postgresql/data/pgdata
     networks:
       - postgres-backend-bridge
     healthcheck:
@@ -47,8 +68,6 @@ services:
       dockerfile: Dockerfile.dev
       args:
         DATABASE_URL: ${SYMFONY_DATABASE_URL_DEV}
-    ports:
-      - "8000:80"
     container_name: backend_quiz
     environment:
       APP_ENV: dev
@@ -63,6 +82,7 @@ services:
       MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
       MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_DEV}
       JWT_COOKIE_SECURE: FALSE
+      SENTRY_DSN: ${SENTRY_DSN_DEV}
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images
@@ -70,16 +90,14 @@ services:
       - backend-database
     networks:
       - postgres-backend-bridge
-      - backend-frontend-bridge
       - ollama-backend-bridge
+      - reverse-proxy-bridge
 
   #frontend - vuejs
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.dev
-    ports:
-      - "5173:80"
     volumes:
       - ./frontend:/app:delegated
       - node-modules-dev:/app/node_modules
@@ -94,11 +112,11 @@ services:
       VITE_MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_DEV}
       VITE_MATOMO_HOST: ${VITE_MATOMO_HOST_DEV}
       VITE_MATOMO_SITE_ID: ${VITE_MATOMO_SITE_ID_DEV}
-      PATH: /app/node_modules/.bin:$PATH
-
+      VITE_SENTRY_DSN: ${SENTRY_DSN_DEV}
+      SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN}
       WATCHPACK_POLLING: true
     networks:
-      - backend-frontend-bridge
+      - reverse-proxy-bridge
 
   #mercure for frontend live updating
   mercure:
@@ -112,18 +130,11 @@ services:
       MERCURE_EXTRA_DIRECTIVES: | 
         cors_origins ${MERCURE_CORS_ALLOW_ORIGIN_DEV}
         anonymous
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/healthz"]
-      timeout: 5s
-      retries: 5
-      start_period: 60s
     volumes:
       - mercure-data-dev:/data
       - mercure-config-dev:/config
-    ports: 
-      - '3000:80'
     networks: 
-      - backend-frontend-bridge
+      - reverse-proxy-bridge
 
   #ollama - ai
   ollama:
@@ -141,7 +152,7 @@ services:
   #mariadb database for matomo
   matomo-database:
     image: mariadb:11.8.2
-    container_name: mariadb_quiz
+    container_name: matomo_database_quiz
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD_DEV}
@@ -160,9 +171,7 @@ services:
 
   #matomo - analytics
   matomo:
-    build:
-      context: ./matomo
-      dockerfile: Dockerfile.dev
+    image: matomo:fpm-alpine
     container_name: matomo_quiz
     restart: unless-stopped
     depends_on:
@@ -173,10 +182,8 @@ services:
       MATOMO_DATABASE_USERNAME: ${MARIADB_USER_DEV}
       MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_DEV}
       MATOMO_DATABASE_DBNAME: ${MARIADB_DEV}
-    ports:
-      - "8080:80"
     volumes:
       - matomo-db-data-dev:/var/www/html
     networks:
-      - matomo-frontend-bridge
       - mariadb-matomo-bridge
+      - reverse-proxy-bridge

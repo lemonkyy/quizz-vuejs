@@ -26,7 +26,7 @@ security:
                 success_handler:          App\Security\LoginSuccessHandler
                 failure_handler:          lexik_jwt_authentication.handler.authentication_failure
 
-        api:
+        api: 
             pattern:   ^/api
             stateless: true
             provider: app_user_provider

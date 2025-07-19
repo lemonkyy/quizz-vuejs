@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import LoadingSpinner from '@/components/ui/atoms/LoadingSpinner.vue';
 import FriendListItem from '@/components/profile/FriendListItem.vue';
-import { ref, onMounted, watch, defineProps, defineEmits } from 'vue';
+import { ref, onMounted, watch } from 'vue';
 import { useFriendStore } from '@/store/friendship';
 import { useIntersectionObserver } from '@/composables/useIntersectionObserver';
 
