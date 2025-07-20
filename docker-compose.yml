@@ -31,7 +31,7 @@ services:
     ports:
       - "8888:80"
     volumes:
-      - matomo-db-data-dev:/var/www/html:ro
+      - matomo-app-data-dev:/var/www/html:ro
       - ./backend/public:/app/public:ro
     depends_on:
       - backend
@@ -152,7 +152,6 @@ services:
     networks:
       - ollama-backend-bridge
 
-  
   #mariadb database for matomo
   matomo-database:
     image: mariadb:11.8.2
@@ -164,7 +163,7 @@ services:
       MYSQL_USER: ${MARIADB_USER_DEV}
       MYSQL_PASSWORD: ${MARIADB_PASSWORD_DEV}
     volumes:
-      - matomo-app-data-dev:/var/lib/mysql
+      - matomo-db-data-dev:/var/lib/mysql
     networks:
       - mariadb-matomo-bridge
     healthcheck:
@@ -175,11 +174,11 @@ services:
 
   #matomo - analytics
   matomo:
-    image: matomo:fpm-alpine
+    image: matomo:5.3.2-apache
     container_name: matomo_quiz
     restart: unless-stopped
     depends_on:
-      - backend-database
+      - matomo-database
     environment:
       MATOMO_DATABASE_HOST: matomo-database
       MATOMO_DATABASE_TABLES_PREFIX: matomo_
@@ -187,7 +186,7 @@ services:
       MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_DEV}
       MATOMO_DATABASE_DBNAME: ${MARIADB_DEV}
     volumes:
-      - matomo-db-data-dev:/var/www/html
+      - matomo-app-data-dev:/var/www/html
     networks:
       - mariadb-matomo-bridge
       - reverse-proxy-bridge

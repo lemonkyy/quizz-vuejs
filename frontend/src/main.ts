@@ -31,7 +31,13 @@ if (matomoHost) {
     enableLinkTracking: true,
     trackInitialView: true,
     trackHeartbeat: true,
-    debug: false,
+    debug: import.meta.env.NODE_ENV === 'development',
+    enableHeartBeatTimer: true,
+    heartBeatTimerInterval: 15,
+    disableCookies: false,
+    requireConsent: false,
+    trackSiteSearch: true,
+    enableJSErrorTracking: true,
   });
 }
 
