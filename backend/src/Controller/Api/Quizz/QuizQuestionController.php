@@ -7,11 +7,12 @@ use App\Repository\QuizzesRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Uid\UuidV7;
 
 class QuizQuestionController extends AbstractController
 {
     #[Route('/api/quizzes/{id}/questions', name: 'api_quizz_questions', methods: ['GET'])]
-    public function getQuizQuestions(int $id, QuizzQuestionsRepository $repository, QuizzesRepository $quizzesRepository): JsonResponse
+    public function getQuizQuestions(UuidV7 $id, QuizzQuestionsRepository $repository, QuizzesRepository $quizzesRepository): JsonResponse
     {
         $quiz = $quizzesRepository->find($id);
         if (!$quiz) {
