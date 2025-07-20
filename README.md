@@ -27,7 +27,7 @@
     Ceci démarrera les services backend (API Symfony) et frontend (Vue.js), ainsi que d'autres dépendances de développement.
 
 5.  **Générer les clés SSL JWT (Backend pour le développement) :**
-    Pour que l'authentification JWT fonctionne en développement, mettez à jour la variable `SYMFONY_JWT_PASSPHRASE_DEV` avec un mot de passe de votre choix puis exécutez la commande suivante depuis le racine de votre projet :
+    Pour que l'authentification JWT fonctionne en développement, mettez à jour la variable `SYMFONY_JWT_PASSPHRASE_DEV` avec un mot de passe de votre choix puis exécutez la commande suivante depuis la racine de votre projet :
     ```bash
     docker compose exec backend php bin/console lexik:jwt:generate-keypair --overwrite
     ```

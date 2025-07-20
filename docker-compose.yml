@@ -31,7 +31,7 @@ services:
     ports:
       - "8888:80"
     volumes:
-      - ./backend/public:/app/public:ro
+      - ./backend:/app/backend:ro
     depends_on:
       - backend
       - frontend
