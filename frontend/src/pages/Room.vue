@@ -5,6 +5,7 @@ import { useRoomStore } from '@/store/room';
 //import { useAuthStore } from '@/store/auth';
 import { useToast } from 'vue-toastification';
 import api from '@/api/axios';
+import { useMatomo } from '@/composables/useMatomo';
 import Title from '../components/ui/atoms/Title.vue';
 import Button from '../components/ui/atoms/Button.vue';
 import CountdownTimer from '../components/ui/molecules/inputs/CountdownTimer.vue';
@@ -16,6 +17,7 @@ const router = useRouter();
 const roomStore = useRoomStore();
 //const authStore = useAuthStore();
 const toast = useToast();
+const { trackEvent } = useMatomo();
 
 const quizReady = ref(false);
 const isCheckingQuiz = ref(false);
@@ -98,23 +100,28 @@ const startQuiz = async () => {
     );
     
     if (readyQuiz) {
+      trackEvent('Quiz', 'Start', currentTopic, readyQuiz.id);
       await launchQuizForAllPlayers(readyQuiz.id);
     } else {
       toast.error('Quiz not ready yet');
+      trackEvent('Quiz', 'Start Failed', 'Not Ready', 0);
     }
   } catch (error) {
     console.error('Error starting quiz:', error);
     toast.error('Error starting quiz');
+    trackEvent('Quiz', 'Start Failed', 'Error', 0);
   }
 };
 
 const leaveRoom = async () => {
   try {
+    trackEvent('Room', 'Leave', quizTopic.value, 1);
     await roomStore.leaveRoom();
     router.push('/');
   } catch (error) {
     console.error('Error leaving room:', error);
     toast.error('Error leaving room');
+    trackEvent('Room', 'Leave Failed', 'Error', 0);
   }
 };
 
@@ -123,6 +130,7 @@ const copyRoomCode = async () => {
     try {
       await navigator.clipboard.writeText(roomStore.currentRoom.code);
       toast.success('Room code copied to clipboard!');
+      trackEvent('Room', 'Code Copied', roomStore.currentRoom.code, 1);
     } catch (error) {
       console.error('Failed to copy room code:', error);
       toast.error('Failed to copy room code');

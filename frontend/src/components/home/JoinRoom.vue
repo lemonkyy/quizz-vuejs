@@ -7,12 +7,14 @@ import { useRouter } from 'vue-router';
 import { useRoomStore } from '@/store/room';
 import { useToast } from 'vue-toastification';
 import axios from '@/api/axios';
+import { useMatomo } from '@/composables/useMatomo';
 
 const inputValue = ref('');
 const router = useRouter();
 const roomStore = useRoomStore();
 const toast = useToast();
 const isLoading = ref(false);
+const { trackEvent } = useMatomo();
 
 const cleanRoomCode = computed({
   get: () => inputValue.value,
@@ -62,6 +64,9 @@ const joinRoom = async () => {
         
         await roomStore.joinRoom(roomId);
         
+        // Track successful room join
+        trackEvent('Room', 'Join Success', roomCode, 1);
+        
         router.push('/room');
         
     } catch (error: any) {
@@ -69,10 +74,19 @@ const joinRoom = async () => {
         
         if (error.response?.status === 404) {
             toast.error('Room not found with this code');
+            trackEvent('Room', 'Join Failed', 'Room Not Found', 0);
         } else if (error.response?.status === 400) {
-            toast.error('Cannot join this room');
+            const errorData = error.response?.data;
+            if (errorData?.code === 'ERR_ROOM_FULL') {
+                toast.error('Room is full (max 4 players)');
+                trackEvent('Room', 'Join Failed', 'Room Full', 0);
+            } else {
+                toast.error('Cannot join this room');
+                trackEvent('Room', 'Join Failed', 'Cannot Join', 0);
+            }
         } else {
             toast.error('Error joining room');
+            trackEvent('Room', 'Join Failed', 'Unknown Error', 0);
         }
     } finally {
         isLoading.value = false;

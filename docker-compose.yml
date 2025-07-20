@@ -31,6 +31,7 @@ services:
     ports:
       - "8888:80"
     volumes:
+      - matomo-app-data-dev:/var/www/html:ro
       - ./backend/public:/app/public:ro
     depends_on:
       - backend
@@ -162,7 +163,7 @@ services:
       MYSQL_USER: ${MARIADB_USER_DEV}
       MYSQL_PASSWORD: ${MARIADB_PASSWORD_DEV}
     volumes:
-      - mariadb-data-dev:/var/lib/mysql
+      - matomo-db-data-dev:/var/lib/mysql
     networks:
       - mariadb-matomo-bridge
     healthcheck:
@@ -185,7 +186,7 @@ services:
       MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_DEV}
       MATOMO_DATABASE_DBNAME: ${MARIADB_DEV}
     volumes:
-      - matomo-data-dev:/var/www/html
+      - matomo-app-data-dev:/var/www/html
     networks:
       - mariadb-matomo-bridge
       - reverse-proxy-bridge
