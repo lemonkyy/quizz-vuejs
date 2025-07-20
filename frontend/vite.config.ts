@@ -27,10 +27,7 @@ export default defineConfig({
       usePolling: true,
     },
     hmr: {
-      protocol: 'ws',
-      host: 'localhost',
-      port: 5173,
-      clientPort: 8888,
+      clientPort: Number(process.env.VITE_HMR_PORT || 8888),
     },
     allowedHosts,
   },

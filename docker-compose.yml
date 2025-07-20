@@ -117,6 +117,7 @@ services:
       SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN_DEV}
       VITE_SENTRY_ORG: ${VITE_SENTRY_ORG_DEV}
       VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS_DEV}
+      VITE_HMR_PORT: 8888
       WATCHPACK_POLLING: true
     networks:
       - reverse-proxy-bridge

@@ -5,7 +5,7 @@ import Title from '../ui/atoms/Title.vue';
 defineProps({
     image: {type: String, required: true},
     title: {type: String, required: true},
-    linksTo: {type: String, required: true}
+    linksTo: {type: [String, Object], required: true}
 })
 </script>
 

@@ -29,7 +29,7 @@
   
       <div v-if="showResult" class="mt-4 text-center font-bold">
         <span v-if="isCorrect" class="text-green-600">Correct!</span>
-        <span v-else class="text-red-600">Incorrect! La bonne réponse était: {{ currentQuestion.correctAnswer }}</span>
+        <span v-else class="text-red-600">Wrong! The riht answer was: {{ currentQuestion.correctAnswer }}</span>
       </div>
     </div>
   
