@@ -19,8 +19,8 @@ volumes:
   ollama-data-dev:
   mercure-data-dev:
   mercure-config-dev:
-  mariadb-data-dev:
-  matomo-data-dev:
+  matomo-app-data-dev:
+  matomo-db-data-dev:
 
 services:
   reverse-proxy:
