@@ -4,12 +4,14 @@ import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import Button from '@/components/ui/atoms/Button.vue';
 import Input from '@/components/ui/atoms/Input.vue';
-import Select from '@/components/ui/atoms/Select.vue';
-import ActiveTimerInput from '@/components/ui/molecules/inputs/ActiveTimerinput.vue';
+import ActiveTimerInput from '../ui/molecules/inputs/ActiveTimerInput.vue';
 import { useAuthStore } from '@/store/auth';
 import { useRoomStore } from '@/store/room';
 import { useToast } from 'vue-toastification';
 import { useMatomo } from '@/composables/useMatomo';
+import Checkbox from '../ui/atoms/Checkbox.vue';
+import Error from '../ui/atoms/Error.vue';
+import { badWords } from '@/utils/profanity';
 
 
 const router = useRouter()
@@ -18,15 +20,29 @@ const roomStore = useRoomStore()
 const toast = useToast()
 const { trackEvent } = useMatomo()
 
-const prompt = ref('')
+const formError = ref<string | null>(null);
+const isPublic = ref(false)
+const prompt = ref(router.currentRoute.value.query.prompt as string || '')
 const count = ref(10)
 const isLoading = ref(false)
 const minutes = ref(0)
 const seconds = ref(30)
-const invite = ref('')
+//const invite = ref('')
 const timePerQuestion = computed(() => minutes.value * 60 + seconds.value)
 
 const createQuiz = async () => {
+
+  if (!prompt.value.trim()) {
+    formError.value = 'Please enter a prompt for the quiz.';
+    return;
+  }
+
+  const containsBadWord = badWords.some(word => prompt.value.toLowerCase().includes(word));
+  if (containsBadWord) {
+    formError.value = 'Please refrain from using inappropriate language.';
+    return;
+  }
+
   if (!authStore.user) {
     console.error('User must be authenticated to create a quiz/room');
     router.push('/login');
@@ -46,9 +62,8 @@ const createQuiz = async () => {
   
 
   try {
-
     const roomResponse = await api.post('/room/create', {
-      isPublic: true
+      isPublic: isPublic.value,
     })
 
     const room = roomResponse?.data
@@ -82,14 +97,14 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     console.log("Checking if quiz already exists...")
     const initialResponse = await api.get(`/quizzes?title=${encodeURIComponent(cleanPrompt)}`)
     const quizzesArray = initialResponse?.data?.['member']
-    const existingQuizzes = quizzesArray.filter(q =>
+    const existingQuizzes = quizzesArray.filter((q: any) =>
       typeof q.title === 'string' &&
       q.title.trim().toLowerCase() === cleanPrompt &&
       q.ready == true
     )
 
     if (existingQuizzes.length > 0) {
-      const lastQuiz = existingQuizzes.reduce((max, q) => q.id > max.id ? q : max, existingQuizzes[0])
+      const lastQuiz = existingQuizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, existingQuizzes[0])
       console.log("Existing ready quiz found:", lastQuiz)
       trackEvent('Quiz', 'Generation Skipped', 'Already Exists', 1);
       return
@@ -106,14 +121,14 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     const waitForQuiz = async (): Promise<void> => {
       const response = await api.get(`/quizzes?title=${encodeURIComponent(cleanPrompt)}`)
       const quizzesArray = response?.data?.['member']
-      const quizzes = quizzesArray.filter(q =>
+      const quizzes = quizzesArray.filter((q: any) =>
         typeof q.title === 'string' &&
         q.title.trim().toLowerCase() === cleanPrompt &&
         q.ready == true
       )
 
       if (quizzes.length > 0) {
-        const lastQuiz = quizzes.reduce((max, q) => q.id > max.id ? q : max, quizzes[0])
+        const lastQuiz = quizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, quizzes[0])
         console.log("Quiz ready and found:", lastQuiz)
         trackEvent('Quiz', 'Generation Complete', cleanPrompt, countValue);
         return
@@ -134,8 +149,8 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
 </script>
 
 <template>
-  <div class="mx-auto p-6 bg-white w-100">
-    <h2 class="text-xl font-bold mb-4">Créer un Quiz</h2>
+  <div class="mx-auto p-6 w-100">
+    <h2 class="text-xl font-bold mb-4">Quiz creation</h2>
 
     <form @submit.prevent="createQuiz">
       <div class="mb-4">
@@ -161,6 +176,14 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
         />
       </div>
 
+      <Checkbox 
+        id="room-is-public"
+        v-model="isPublic"
+        label="Make this room public"
+        class="mb-4"
+        checkbox-left
+      />
+
       <!-- Timer placé visuellement dans le form, mais structurellement en dehors -->
       <!-- On le place juste après le champ "count", mais toujours avant le bouton -->
     </form>
@@ -173,8 +196,11 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     <!-- Bouton toujours dans le form -->
     <form @submit.prevent="createQuiz" class="mt-0">
       <Button type="submit" theme="primary" class="primary" rounded="sm" :disabled="isLoading">
-        {{ isLoading ? 'Création...' : 'Créer le Quiz' }}
+        {{ isLoading ? 'Creation in progress...' : 'Create Quiz' }}
       </Button>
     </form>
+    <Error v-if="formError">
+      <p>{{ formError }}</p>
+    </Error>
   </div>
 </template>

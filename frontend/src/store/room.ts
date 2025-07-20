@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import type { Room, CreateRoomDto } from '@/types';
 import { useToast } from "vue-toastification";
 import { 
@@ -142,9 +142,10 @@ export const useRoomStore = defineStore("room", () => {
     }
   };
 
-  const listPublicRooms = async () => {
+  const listPublicRooms = async (page?: number, itemsPerPage?: number) => {
     try {
-      const response = await listPublicRoomsService();
+      isLoading.value = true;
+      const response = await listPublicRoomsService({ page, itemsPerPage });
       if (response.code === 'SUCCESS' && response.rooms) {
         publicRooms.value = response.rooms;
         return response.rooms;
@@ -152,8 +153,12 @@ export const useRoomStore = defineStore("room", () => {
     } catch (error: any) {
       toast.error('Error loading public rooms');
       throw error;
+    } finally {
+      isLoading.value = false;
     }
   };
+
+  const userInRoom = computed(() => currentRoom.value !== null);
 
   return {
     currentRoom,
@@ -167,5 +172,6 @@ export const useRoomStore = defineStore("room", () => {
     deleteRoom,
     kickUser,
     listPublicRooms,
+    userInRoom,
   };
 });

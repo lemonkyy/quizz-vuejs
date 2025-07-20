@@ -20,9 +20,9 @@ export default defineComponent({
 </script>
 
 <template>
-  <div :class="['Create', 'Question'].includes(route.name) ? 'flex flex-col min-h-screen' : 'flex flex-col min-h-screen bg-[#f8f6f2]'">
+  <div class="flex flex-col min-h-screen bg-website-background">
     <Header />
-    <main :class="['Create', 'Question'].includes(route.name) ? 'flex-grow w-full h-full pt-20' : 'flex-grow px-12 md:px-64 h-full pt-20'">
+    <main class="flex-grow px-12 md:px-64 h-full pt-20">
       <router-view />
     </main>
     <Footer />

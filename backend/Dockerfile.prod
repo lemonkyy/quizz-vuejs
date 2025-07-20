@@ -1,0 +1,63 @@
+FROM php:8.4-fpm-alpine AS base
+
+RUN apk update && apk add --no-cache \
+    git \
+    unzip \
+    libzip-dev \
+    icu-dev \
+    postgresql-dev \
+    postgresql \
+    libsodium-dev \
+ && docker-php-ext-configure intl \
+ && docker-php-ext-install \
+    zip \
+    intl \
+    pdo_pgsql \
+    sodium
+
+FROM base AS builder
+
+WORKDIR /app
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+COPY . .
+
+RUN composer install --no-dev --optimize-autoloader --no-scripts --no-interaction
+RUN composer dump-env prod
+
+FROM base AS production
+
+ARG DATABASE_URL
+ARG SENTRY_DSN
+ARG MERCURE_JWT_SECRET
+ARG MERCURE_URL
+ARG MERCURE_PUBLIC_URL
+ARG SPEC_SHAPER_ENCRYPT_KEY
+ENV DATABASE_URL=${DATABASE_URL}
+ENV SENTRY_DSN=${SENTRY_DSN}
+ENV MERCURE_JWT_SECRET=${MERCURE_JWT_SECRET}
+ENV MERCURE_URL=${MERCURE_URL}
+ENV MERCURE_PUBLIC_URL=${MERCURE_PUBLIC_URL}
+ENV SPEC_SHAPER_ENCRYPT_KEY=${SPEC_SHAPER_ENCRYPT_KEY}
+
+WORKDIR /app
+
+COPY --from=builder /app /app
+COPY ./build/php.ini /usr/local/etc/php/php.ini
+
+RUN mkdir -p /app/var /app/log \
+    && chown -R www-data:www-data /app/var /app/log /app
+
+USER www-data
+RUN php bin/console cache:clear --env=prod --no-warmup \
+ && php bin/console cache:warmup --env=prod
+
+USER root
+
+RUN sed -i 's|listen = 127.0.0.1:9000|listen = 0.0.0.0:9000|' /usr/local/etc/php-fpm.d/www.conf
+
+RUN chown -R www-data:www-data /app
+
+EXPOSE 9000
+CMD ["php-fpm"]

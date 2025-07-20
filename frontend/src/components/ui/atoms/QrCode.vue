@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { type PropType } from 'vue';
-import QrcodeVue from 'qrcode.vue';
 
-const props = defineProps({
+import QrcodeVue from 'qrcode.vue';
+import type { PropType } from 'vue';
+
+defineProps({
   value: { type: String, required: true },
   size: { type: Number, default: 200 },
   level: { type: String as PropType<'L' | 'M' | 'Q' | 'H'>, default: 'L' },

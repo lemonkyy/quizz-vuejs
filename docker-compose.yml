@@ -19,15 +19,15 @@ volumes:
   ollama-data-dev:
   mercure-data-dev:
   mercure-config-dev:
-  matomo-app-data-dev:
-  matomo-db-data-dev:
+  mariadb-data-dev:
+  matomo-data-dev:
 
 services:
   reverse-proxy:
     container_name: nginx_quiz
     build:
       context: ./nginx
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
     ports:
       - "8888:80"
     volumes:
@@ -83,6 +83,7 @@ services:
       MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_DEV}
       JWT_COOKIE_SECURE: FALSE
       SENTRY_DSN: ${SENTRY_DSN_DEV}
+      ENABLE_API_DOCS: true
     volumes:
       - ./backend:/app:delegated
       - uploads-data-dev:/app/public/uploads/images
@@ -113,7 +114,10 @@ services:
       VITE_MATOMO_HOST: ${VITE_MATOMO_HOST_DEV}
       VITE_MATOMO_SITE_ID: ${VITE_MATOMO_SITE_ID_DEV}
       VITE_SENTRY_DSN: ${SENTRY_DSN_DEV}
-      SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN}
+      SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN_DEV}
+      VITE_SENTRY_ORG: ${VITE_SENTRY_ORG_DEV}
+      VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS_DEV}
+      VITE_HMR_PORT: 8888
       WATCHPACK_POLLING: true
     networks:
       - reverse-proxy-bridge
@@ -148,7 +152,6 @@ services:
     networks:
       - ollama-backend-bridge
 
-  
   #mariadb database for matomo
   matomo-database:
     image: mariadb:11.8.2
@@ -171,7 +174,7 @@ services:
 
   #matomo - analytics
   matomo:
-    image: matomo:fpm-alpine
+    image: matomo:5.3.2-apache
     container_name: matomo_quiz
     restart: unless-stopped
     depends_on:

@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { computed, ref, type PropType } from 'vue';
-import AutoComplete from './AutoComplete.vue';
+import { computed, type PropType } from 'vue';
 
-const modelValue = defineModel({required: true, default: ''});
+const modelValue = defineModel<string | number>({
+  default: ''
+});
 
 type InputType = 'none' | 'text' | 'tel' | 'url' | 'email' | 'numeric' | 'decimal' | 'search' | undefined;
 type InputStyle = 'primary' | 'secondary';
@@ -21,7 +22,8 @@ const props = defineProps({
     className: { type: String, default: '' },
     maxlength: { type: Number, default: 255 },
     inputmode: { type: String as PropType<InputType>, default: undefined },
-    AutoComplete: { type: Boolean, default: false }
+    autocomplete: { type: String, default: undefined },
+    
 });
 
 const labelClasses = computed(() => {
@@ -90,12 +92,12 @@ const inputClasses = computed(() => {
         :placeholder="placeholder"
         :maxlength="maxlength"
         :inputmode="inputmode"
+        :autocomplete="autocomplete"
         v-model="modelValue"
         :class="[
           inputClasses,
           className,
         ]"
-        :autocomplete="props.AutoComplete ? id : 'off'"
       />
   </div>
 </template>

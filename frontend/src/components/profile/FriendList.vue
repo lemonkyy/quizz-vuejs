@@ -4,8 +4,11 @@ import FriendListItem from '@/components/profile/FriendListItem.vue';
 import { ref, onMounted, watch } from 'vue';
 import { useFriendStore } from '@/store/friendship';
 import { useIntersectionObserver } from '@/composables/useIntersectionObserver';
+import { sendInvitation } from '@/services/invitationService';
+import { useToast } from 'vue-toastification';
 
 const friendStore = useFriendStore();
+const toast = useToast();
 
 const props = defineProps({
   usernameFilter: { type: String, default: '' },
@@ -29,6 +32,20 @@ const fetchFriends = async (page: number = 1) => {
 
 const handleRemoveFriend = async (friendId: string) => {
   await friendStore.removeFriend(friendId);
+};
+
+const handleInviteFriend = async (friendId: string) => {
+  try {
+    await sendInvitation(friendId);
+    toast.success('Invitation sent!');
+  } catch (error: any) {
+    if (error.response && error.response.data.code === 'ERR_INVITATION_ALREADY_SENT') {
+      toast.error('Invitation already sent.');
+      return;
+    }
+    console.error('Error sending invitation:', error);
+    toast.error('Failed to send invitation.');
+  }
 };
 
 onMounted(() => {
@@ -58,6 +75,7 @@ watch(() => props.usernameFilter, () => {
       :key="friend.id"
       :friend="friend"
       @remove-friend="handleRemoveFriend"
+      @invite-friend="handleInviteFriend"
     />
     <div ref="friendsListRef" class="text-center py-4">
       <LoadingSpinner v-if="isLoading" color="text-text-secondary" />

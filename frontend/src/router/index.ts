@@ -2,12 +2,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import Home from '../pages/Home.vue';
 import Login from '../pages/Login.vue';
-import UIPreview from '../pages/UIPreview.vue';
 import Register from '@/pages/Register.vue';
 import Question from '../pages/Question.vue'
 import Create from '../pages/Create.vue'
 import Room from '../pages/Room.vue'
 import Results from '../pages/Results.vue'
+import PublicRooms from '../pages/PublicRooms.vue'
 
 
 const routes = [
@@ -18,6 +18,15 @@ const routes = [
     meta: {
       title: 'QuizUp - Home',
       description: 'Welcome to QuizUp! Challenge your friends and test your knowledge with fun quizzes.',
+    },
+  },
+  {
+    path: '/public-rooms',
+    name: 'PublicRooms',
+    component: PublicRooms,
+    meta: {
+      title: 'QuizUp - Public Rooms',
+      description: 'Discover and join public quiz rooms.',
     },
   },
   {
@@ -72,15 +81,6 @@ const routes = [
     meta: {
       title: 'QuizUp - Results',
       description: 'See the quiz results and how you performed!',
-    },
-  },
-  {
-    path: '/ui',
-    name: 'UIPreview',
-    component: UIPreview,
-    meta: {
-      title: 'QuizUp - UI Preview',
-      description: 'A preview of the UI components for QuizUp.',
     },
   },
 ];

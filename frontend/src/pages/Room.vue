@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import { onMounted, computed, ref, watch, onUnmounted } from 'vue';
+import { onMounted, ref, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoomStore } from '@/store/room';
-import { useAuthStore } from '@/store/auth';
+//import { useAuthStore } from '@/store/auth';
 import { useToast } from 'vue-toastification';
 import api from '@/api/axios';
 import { useMatomo } from '@/composables/useMatomo';
@@ -10,10 +10,12 @@ import Title from '../components/ui/atoms/Title.vue';
 import Button from '../components/ui/atoms/Button.vue';
 import CountdownTimer from '../components/ui/molecules/inputs/CountdownTimer.vue';
 import RoomProfilePictures from '../components/room/RoomProfilePictures.vue';
+import InviteFriendButton from '@/components/ui/molecules/buttons/InviteFriendButton.vue';
+import ProfileModal from '@/components/ui/molecules/modals/ProfileModal.vue';
 
 const router = useRouter();
 const roomStore = useRoomStore();
-const authStore = useAuthStore();
+//const authStore = useAuthStore();
 const toast = useToast();
 const { trackEvent } = useMatomo();
 
@@ -23,6 +25,14 @@ const isCheckingQuiz = ref(false);
 const quizTopic = ref(localStorage.getItem('currentQuizTopic') || 'Trivia Night');
 
 const timerDuration = ref(15);
+
+const showProfileModal = ref(false);
+const profileModalInitialView = ref<'menu' | 'friends'>('menu');
+
+const openProfileModal = (view: 'menu' | 'friends') => {
+  profileModalInitialView.value = view;
+  showProfileModal.value = true;
+};
 
 let refreshInterval: number | null = null;
 
@@ -171,7 +181,7 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f8f6f2] py-8 w-full">
+  <div class="bg-[#f8f6f2] py-8 w-full h-screen">
     <div class="w-full px-8">
       <div v-if="roomStore.currentRoom" class="space-y-8">
         
@@ -182,10 +192,13 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
         </div>
 
         <div class="space-y-4">
-          <Title :level="2" class="text-xl font-semibold text-[#2c2c2c]">
-            Participants ({{ roomStore.currentRoom?.roomPlayers?.length || 0 }})
-          </Title>
-          <RoomProfilePictures :players="roomStore.currentRoom?.roomPlayers || []" />
+          <div class="flex justify-between items-center flex-wrap">
+            <Title :level="2" class="text-xl font-semibold text-[#2c2c2c]">
+              Participants ({{ roomStore.currentRoom?.roomPlayers?.length || 0 }})
+            </Title>
+            <InviteFriendButton @click="openProfileModal('friends')" />
+          </div>
+          <RoomProfilePictures :players="(roomStore.currentRoom?.roomPlayers || []) as any[]" />
           
           <div class="mt-4 p-3 rounded-lg" :class="quizReady ? 'bg-green-100 border border-green-300' : 'bg-yellow-100 border border-yellow-300'">
             <div class="flex items-center gap-2">
@@ -222,7 +235,7 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
               rounded="sm" 
               @click="startQuiz"
             >
-              Lancer le Quiz
+              Start the Quiz
             </Button>
             <Button 
               type="button" 
@@ -230,7 +243,7 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
               @click="leaveRoom" 
               style="background-color:#F2F0E8;"
             >
-              Quitter la Room
+              Leave room
             </Button>
           </div>
         </div>
@@ -253,4 +266,5 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
       </div>
     </div>
   </div>
+  <ProfileModal v-model="showProfileModal" :initial-view="profileModalInitialView" />
 </template>

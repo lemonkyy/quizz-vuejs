@@ -3,6 +3,7 @@ import type { User, PublicUser } from '@/types';
 
 export async function login(params: {email: string, password: string}): Promise<{code: string, message?: string, tempToken?: string, error?: string}> {
   try {
+    console.log(import.meta.env.VITE_PUBLIC_API_URL + '/login');
     const response = await axios.post('/login', params);
     return response.data;
   } catch (error) {

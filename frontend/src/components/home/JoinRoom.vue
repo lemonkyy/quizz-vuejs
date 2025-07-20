@@ -55,7 +55,7 @@ const joinRoom = async () => {
         }
         
         const roomId = roomData[0];
-        const roomCode_returned = roomData[1];
+        //const roomCode_returned = roomData[1];
         
         if (!roomId) {
             toast.error('Room not found with this code');

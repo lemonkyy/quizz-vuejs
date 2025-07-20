@@ -5,10 +5,6 @@ WORKDIR /app
 ARG DATABASE_URL
 ENV DATABASE_URL=DATABASE_URL
 
-
-ARG JWT_PASSPHRASE
-ENV JWT_PASSPHRASE=${JWT_PASSPHRASE:-dev_passphrase}
-
 RUN apk update && apk add --no-cache \
     git \
     unzip \
@@ -35,9 +31,6 @@ COPY ./build/php.ini /usr/local/etc/php/php.ini
 COPY . .
 
 RUN composer install --optimize-autoloader --no-scripts
-
-#!à enlever en prod
-RUN php bin/console lexik:jwt:generate-keypair --overwrite
 
 RUN chown -R www-data:www-data /app
 

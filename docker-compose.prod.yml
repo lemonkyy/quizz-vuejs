@@ -1,33 +1,69 @@
 networks:
-  database-backend-bridge:
+  postgres-backend-bridge:
     driver: bridge
   backend-frontend-bridge:
     driver: bridge
   ollama-backend-bridge:
     driver: bridge
+  matomo-frontend-bridge:
+    driver: bridge
+  mariadb-matomo-bridge:
+    driver: bridge
+  reverse-proxy-bridge:
+    driver: bridge
+
+
 
 volumes:
   postgres-data-prod:
   uploads-data-prod:
-  ollama-data-prod:
-  matomo-data-prod:
   node-modules-prod:
+  ollama-data-prod:
   mercure-data-prod:
   mercure-config-prod:
+  frontend-build-prod:
+  mariadb-data-prod:
+  matomo-data:
 
 services:
-  #postgres database
-  database:
+  reverse-proxy:
+    container_name: nginx_quiz
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.prod
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /etc/letsencrypt/live/play-quizup.com:/etc/nginx/certs:ro
+      - /etc/letsencrypt/archive/play-quizup.com:/etc/nginx/archive:ro
+      - frontend-build-prod:/usr/share/nginx/html/frontend:ro
+    depends_on:
+      backend:
+        condition: service_started
+      frontend:
+        condition: service_completed_successfully
+      mercure:
+        condition: service_started
+      matomo:
+        condition: service_started
+    networks:
+      - reverse-proxy-bridge
+
+  #postgres database for symfony
+  backend-database:
     image: postgres:17.4-alpine
-    container_name: postgres_quiz
+    container_name: backend_database_quiz
+    restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER_PROD}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD_PROD}
       POSTGRES_DB: ${POSTGRES_DB_PROD}
+      PGDATA: /var/lib/postgresql/data/pgdata
     volumes:
-      - postgres-data-prod:/var/lib/postgresql/data:rw
+      - postgres-data-prod:/var/lib/postgresql/data/pgdata
     networks:
-      - database-backend-bridge
+      - postgres-backend-bridge
     healthcheck:
       test: ["CMD", "pg_isready", "-d", "${POSTGRES_DB:-database}", "-U", "${POSTGRES_USER:-user}"]
       timeout: 5s
@@ -40,108 +76,123 @@ services:
       context: ./backend
       dockerfile: Dockerfile.prod
       args:
-        DATABASE_URL: ${DATABASE_URL_PROD}
-    ports:
-      - "8000:443"
+        DATABASE_URL: ${SYMFONY_DATABASE_URL_PROD}
+        SENTRY_DSN: ${SENTRY_DSN_PROD}
+        MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_PROD}
+        MERCURE_URL: ${MERCURE_URL_PROD}
+        MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_PROD}
+        SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY_PROD}
     container_name: backend_quiz
     environment:
       APP_ENV: prod
-      APP_DEBUG: 1
-      SHELL_VERBOSITY: 3
+      APP_DEBUG: 0
       APP_SECRET: ${APP_SECRET_PROD}
-      CORS_ALLOW_ORIGIN: ${SYMFONY_CORS_ALLOW_ORIGIN}
-      DATABASE_URL: ${DATABASE_URL_PROD}
-      JWT_PASSPHRASE: ${SYMFONY_JWT_PASSPHRASE}
-      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY}
-      MERCURE_URL: ${MERCURE_URL}
-      MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY}
+      CORS_ALLOW_ORIGIN: ${SYMFONY_CORS_ALLOW_ORIGIN_PROD}
+      DATABASE_URL: ${SYMFONY_DATABASE_URL_PROD}
+      JWT_PASSPHRASE: ${SYMFONY_JWT_PASSPHRASE_PROD}
+      SPEC_SHAPER_ENCRYPT_KEY: ${SPEC_SHAPER_ENCRYPT_KEY_PROD}
+      MERCURE_URL: ${MERCURE_URL_PROD}
+      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_PROD}
+      MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_PROD}
       JWT_COOKIE_SECURE: TRUE
+      SENTRY_DSN: ${SENTRY_DSN_PROD}
+      ENABLE_API_DOCS: false
     volumes:
-      - ./backend:/app:delegated
       - uploads-data-prod:/app/public/uploads/images
     depends_on:
-      - database
+      - backend-database
     networks:
-      - database-backend-bridge
-      - backend-frontend-bridge
+      - postgres-backend-bridge
       - ollama-backend-bridge
+      - reverse-proxy-bridge
 
   #frontend - vuejs
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile.prod
-    ports:
-      - "443:443"
+      args:
+        VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_PROD}
+        VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_PROD}
+        VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_PROD}
+        VITE_MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL_PROD}
+        VITE_MATOMO_HOST: ${VITE_MATOMO_HOST_PROD}
+        VITE_MATOMO_SITE_ID: ${VITE_MATOMO_SITE_ID_PROD}
+        VITE_SENTRY_DSN: ${SENTRY_DSN_PROD}
+        SENTRY_AUTH_TOKEN: ${SENTRY_AUTH_TOKEN_PROD}
+        VITE_SENTRY_ORG: ${VITE_SENTRY_ORG_PROD}
+        VITE_ALLOWED_HOSTS: ${VITE_ALLOWED_HOSTS_PROD}
+    container_name: frontend_builder_quiz
+    command: sh -c 'cp -r /app/dist/. /app/dist_volume'
     volumes:
-      - ./frontend:/app:delegated
-      - node-modules-prod:/app/node_modules
-    container_name: frontend_quiz
-    depends_on:
-      - backend
-    environment:
-      NODE_ENV: prodelopment
-      VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL}
-      VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL}
-      VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL}
-      MERCURE_PUBLIC_URL: ${MERCURE_PUBLIC_URL}
-      PATH: /app/node_modules/.bin:$PATH
-
-      WATCHPACK_POLLING: true
+      - frontend-build-prod:/app/dist_volume
     networks:
-      - backend-frontend-bridge
+      - reverse-proxy-bridge
+
+  #mercure for frontend live updating
+  mercure:
+    image: dunglas/mercure:v0.13.0
+    container_name: mercure_quiz
+    restart: unless-stopped
+    environment:
+      SERVER_NAME: ':80'
+      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_KEY_PROD}
+      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_KEY_PROD}
+      MERCURE_EXTRA_DIRECTIVES: | 
+        cors_origins ${MERCURE_CORS_ALLOW_ORIGIN_PROD}
+        anonymous
+    volumes:
+      - mercure-data-prod:/data
+      - mercure-config-prod:/config
+    networks: 
+      - reverse-proxy-bridge
 
   #ollama - ai
   ollama:
-    image: ollama/ollama:latest
+    image: ollama/ollama:0.9.7-rc1
     container_name: ollama_quiz
     restart: unless-stopped
-    ports:
-      - "11434:11434"
     volumes:
       - ollama-data-prod:/root/.ollama
     networks:
       - ollama-backend-bridge
 
-  #matomo - analytics
-  matomo:
-    image: matomo:latest
-    container_name: matomo_quiz
+  
+  #mariadb database for matomo
+  matomo-database:
+    image: mariadb:11.8.2
+    container_name: matomo_database_quiz
     restart: unless-stopped
-    depends_on:
-      - database
     environment:
-      MATOMO_DATABASE_HOST: database
-      MATOMO_DATABASE_ADAPTER: postgres
-      MATOMO_DATABASE_TABLES_PREFIX: matomo_
-      MATOMO_DATABASE_USERNAME: ${POSTGRES_USER_PROD}
-      MATOMO_DATABASE_PASSWORD: ${POSTGRES_PASSWORD_PROD}
-      MATOMO_DATABASE_DBNAME: matomo
-    ports:
-      - "8081:443"
+      MYSQL_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD_PROD}
+      MYSQL_DATABASE: ${MARIADB_PROD}
+      MYSQL_USER: ${MARIADB_USER_PROD}
+      MYSQL_PASSWORD: ${MARIADB_PASSWORD_PROD}
     volumes:
-      - matomo-data-prod:/var/www/html
+      - mariadb-data-prod:/var/lib/mysql
     networks:
-      - backend-frontend-bridge
-      - database-backend-bridge
-
-  mercure:
-    image: dunglas/mercure
-    container_name: mercure_quiz
-    restart: unless-stopped
-    environment:
-      SERVER_NAME: ':80'
-      MERCURE_PUBLISHER_JWT_KEY: ${MERCURE_JWT_KEY}
-      MERCURE_SUBSCRIBER_JWT_KEY: ${MERCURE_JWT_KEY}
-      MERCURE_EXTRA_DIRECTIVES: |
-        cors_origins ${MERCURE_CORS_ALLOW_ORIGIN}
+      - mariadb-matomo-bridge
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost/healthz"]
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MARIADB_ROOT_PASSWORD_PROD}"]
       timeout: 5s
       retries: 5
       start_period: 60s
+
+  #matomo - analytics
+  matomo:
+    image: matomo:5.3.2-apache
+    container_name: matomo_quiz
+    restart: unless-stopped
+    depends_on:
+      - matomo-database
+    environment:
+      MATOMO_DATABASE_HOST: matomo-database
+      MATOMO_DATABASE_TABLES_PREFIX: matomo_
+      MATOMO_DATABASE_USERNAME: ${MARIADB_USER_PROD}
+      MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_PROD}
+      MATOMO_DATABASE_DBNAME: ${MARIADB_PROD}
     volumes:
-      - mercure-data-prod:/data
-      - mercure-config-prod:/config
-    networks: 
-      - backend-frontend-bridge
+      - matomo-data:/var/www/html
+    networks:
+      - mariadb-matomo-bridge
+      - reverse-proxy-bridge

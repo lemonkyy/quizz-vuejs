@@ -82,12 +82,12 @@ export async function kickUser(userId: string): Promise<{code: string}> {
   }
 }
 
-export async function listPublicRooms(): Promise<{code: string, rooms?: Room[]}> {
+export async function listPublicRooms(params?: { page?: number, itemsPerPage?: number }): Promise<{code: string, rooms?: Room[]}> {
   try {
-    const response = await axios.get('/room/public');
+    const response = await axios.get('/room/public', { params });
     return {
       code: 'SUCCESS',
-      rooms: response.data
+      rooms: response.data.member
     };
   } catch (error) {
     throw error;
