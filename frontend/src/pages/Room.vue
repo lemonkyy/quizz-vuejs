@@ -9,6 +9,8 @@ import Title from '../components/ui/atoms/Title.vue';
 import Button from '../components/ui/atoms/Button.vue';
 import CountdownTimer from '../components/ui/molecules/inputs/CountdownTimer.vue';
 import RoomProfilePictures from '../components/room/RoomProfilePictures.vue';
+import InviteFriendButton from '@/components/ui/molecules/buttons/InviteFriendButton.vue';
+import ProfileModal from '@/components/ui/molecules/modals/ProfileModal.vue';
 
 const router = useRouter();
 const roomStore = useRoomStore();
@@ -21,6 +23,14 @@ const isCheckingQuiz = ref(false);
 const quizTopic = ref(localStorage.getItem('currentQuizTopic') || 'Trivia Night');
 
 const timerDuration = ref(15);
+
+const showProfileModal = ref(false);
+const profileModalInitialView = ref<'menu' | 'friends'>('menu');
+
+const openProfileModal = (view: 'menu' | 'friends') => {
+  profileModalInitialView.value = view;
+  showProfileModal.value = true;
+};
 
 let refreshInterval: number | null = null;
 
@@ -174,9 +184,12 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
         </div>
 
         <div class="space-y-4">
-          <Title :level="2" class="text-xl font-semibold text-[#2c2c2c]">
-            Participants ({{ roomStore.currentRoom?.roomPlayers?.length || 0 }})
-          </Title>
+          <div class="flex justify-between items-center">
+            <Title :level="2" class="text-xl font-semibold text-[#2c2c2c]">
+              Participants ({{ roomStore.currentRoom?.roomPlayers?.length || 0 }})
+            </Title>
+            <InviteFriendButton @click="openProfileModal('friends')" />
+          </div>
           <RoomProfilePictures :players="(roomStore.currentRoom?.roomPlayers || []) as any[]" />
           
           <div class="mt-4 p-3 rounded-lg" :class="quizReady ? 'bg-green-100 border border-green-300' : 'bg-yellow-100 border border-yellow-300'">
@@ -245,4 +258,5 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
       </div>
     </div>
   </div>
+  <ProfileModal v-model="showProfileModal" :initial-view="profileModalInitialView" />
 </template>
