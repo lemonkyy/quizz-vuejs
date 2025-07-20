@@ -6,15 +6,15 @@ use ApiPlatform\Metadata\ApiResource;
 use App\Repository\QuizzesRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Uid\UuidV7;
 
 #[ORM\Entity(repositoryClass: QuizzesRepository::class)]
 #[ApiResource]
 class Quizzes
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?UuidV7 $id = null;
 
     #[ORM\Column(length: 100, nullable:true)]
     private ?string $title = null;
@@ -34,7 +34,12 @@ class Quizzes
     #[ORM\Column(nullable: true)]
     private ?int $count = null;
 
-    public function getId(): ?int
+    public function __construct()
+    {
+        $this->id = UuidV7::v7();
+    }
+
+    public function getId(): ?UuidV7
     {
         return $this->id;
     }

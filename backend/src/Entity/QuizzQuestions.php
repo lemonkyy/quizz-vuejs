@@ -5,15 +5,15 @@ namespace App\Entity;
 use ApiPlatform\Metadata\ApiResource;
 use App\Repository\QuizzQuestionsRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\UuidV7;
 
 #[ORM\Entity(repositoryClass: QuizzQuestionsRepository::class)]
 #[ApiResource]
 class QuizzQuestions
 {
     #[ORM\Id]
-    #[ORM\GeneratedValue]
-    #[ORM\Column]
-    private ?int $id = null;
+    #[ORM\Column(type: 'uuid', unique: true)]
+    private ?UuidV7 $id = null;
 
     #[ORM\ManyToOne(targetEntity: Quizzes::class)]
     #[ORM\JoinColumn(nullable: false)]
@@ -28,7 +28,12 @@ class QuizzQuestions
     #[ORM\Column(type: "json", nullable: true)]
     private ?array $options = null;
 
-    public function getId(): ?int { return $this->id; }
+    public function __construct()
+    {
+        $this->id = UuidV7::v7();
+    }
+
+    public function getId(): ?UuidV7 { return $this->id; }
 
     public function getQuizz(): ?Quizzes { return $this->quizz; }
 

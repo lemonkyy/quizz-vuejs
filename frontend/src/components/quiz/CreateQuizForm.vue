@@ -8,14 +8,17 @@ import ActiveTimerInput from '../ui/molecules/inputs/ActiveTimerInput.vue';
 import { useAuthStore } from '@/store/auth';
 import { useRoomStore } from '@/store/room';
 import { useToast } from 'vue-toastification';
+import { useMatomo } from '@/composables/useMatomo';
 import Checkbox from '../ui/atoms/Checkbox.vue';
 import Error from '../ui/atoms/Error.vue';
 import { badWords } from '@/utils/profanity';
+
 
 const router = useRouter()
 const authStore = useAuthStore()
 const roomStore = useRoomStore()
 const toast = useToast()
+const { trackEvent } = useMatomo()
 
 const formError = ref<string | null>(null);
 const isPublic = ref(false)
@@ -72,12 +75,18 @@ const createQuiz = async () => {
 
     toast.success(`Room créée avec le code: ${room.code}`);
 
+    // Track successful room creation
+    trackEvent('Room', 'Create Success', cleanPrompt, count.value);
+    trackEvent('Quiz', 'Generation Started', cleanPrompt, count.value);
+
     router.push('/room');
 
     createQuizInBackground(cleanPrompt, count.value, timePerQuestion.value);
 
   } catch (error) {
     console.error("Erreur lors de la création de la room:", error)
+    trackEvent('Room', 'Create Failed', cleanPrompt, 0);
+    toast.error('Erreur lors de la création de la room');
   } finally {
     isLoading.value = false
   }
@@ -97,6 +106,7 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     if (existingQuizzes.length > 0) {
       const lastQuiz = existingQuizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, existingQuizzes[0])
       console.log("Existing ready quiz found:", lastQuiz)
+      trackEvent('Quiz', 'Generation Skipped', 'Already Exists', 1);
       return
     }
 
@@ -120,6 +130,7 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
       if (quizzes.length > 0) {
         const lastQuiz = quizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, quizzes[0])
         console.log("Quiz ready and found:", lastQuiz)
+        trackEvent('Quiz', 'Generation Complete', cleanPrompt, countValue);
         return
       } else {
         console.log("Quiz en cours de génération...")
@@ -132,6 +143,7 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
 
   } catch (error) {
     console.error("Erreur lors de la création ou vérification du quizz:", error)
+    trackEvent('Quiz', 'Generation Failed', cleanPrompt, 0);
   }
 }
 </script>

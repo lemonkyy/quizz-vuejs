@@ -6,6 +6,7 @@ use App\Entity\QuizzQuestions;
 use App\Repository\QuizzesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Uid\UuidV7;
 
 
 class ParseQuizService
@@ -16,7 +17,7 @@ class ParseQuizService
         private LoggerInterface $logger,
     ) {}
 
-    public function parseAndPersistQuestions(int $quizId, ?int $expectedCount = null): void
+    public function parseAndPersistQuestions(UuidV7 $quizId, ?int $expectedCount = null): void
     {
         $quiz = $this->quizzesRepository->find($quizId);
 
