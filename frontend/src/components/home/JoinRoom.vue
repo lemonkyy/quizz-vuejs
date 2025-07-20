@@ -76,8 +76,14 @@ const joinRoom = async () => {
             toast.error('Room not found with this code');
             trackEvent('Room', 'Join Failed', 'Room Not Found', 0);
         } else if (error.response?.status === 400) {
-            toast.error('Cannot join this room');
-            trackEvent('Room', 'Join Failed', 'Cannot Join', 0);
+            const errorData = error.response?.data;
+            if (errorData?.code === 'ERR_ROOM_FULL') {
+                toast.error('Room is full (max 4 players)');
+                trackEvent('Room', 'Join Failed', 'Room Full', 0);
+            } else {
+                toast.error('Cannot join this room');
+                trackEvent('Room', 'Join Failed', 'Cannot Join', 0);
+            }
         } else {
             toast.error('Error joining room');
             trackEvent('Room', 'Join Failed', 'Unknown Error', 0);
