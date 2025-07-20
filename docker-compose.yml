@@ -32,6 +32,8 @@ services:
       - "8888:80"
     volumes:
       - ./backend:/app/backend:ro
+      - ./backend/public:/var/www/html/backend_public:ro
+      - matomo-data-dev:/var/www/html/matomo_public:ro
     depends_on:
       - backend
       - frontend
@@ -173,7 +175,7 @@ services:
 
   #matomo - analytics
   matomo:
-    image: matomo:5.3.2-apache
+    image: matomo:latest
     container_name: matomo_quiz
     restart: unless-stopped
     depends_on:
@@ -184,6 +186,8 @@ services:
       MATOMO_DATABASE_USERNAME: ${MARIADB_USER_DEV}
       MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_DEV}
       MATOMO_DATABASE_DBNAME: ${MARIADB_DEV}
+      MATOMO_ENABLE_PROXY_HEADERS: 1
+      MATOMO_FORCE_SSL: 0
     volumes:
       - matomo-data-dev:/var/www/html
     networks:

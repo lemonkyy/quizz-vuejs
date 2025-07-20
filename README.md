@@ -26,15 +26,22 @@
     ```
     Ceci démarrera les services backend (API Symfony) et frontend (Vue.js), ainsi que d'autres dépendances de développement.
 
-5.  **Générer les clés SSL JWT (Backend pour le développement) :**
+5.  **Créer la base de données (Backend) :**
+    Après avoir démarré les services, exécutez la commande suivante pour appliquer les migrations et créer la base de données :
+    ```sh
+    docker compose exec backend php bin/console doctrine:migration:migrate
+    ```
+    Cette commande exécutera les migrations Doctrine et créera la structure de la base de données nécessaire au fonctionnement de l'application.
+
+6.  **Générer les clés SSL JWT (Backend pour le développement) :**
     Pour que l'authentification JWT fonctionne en développement, mettez à jour la variable `SYMFONY_JWT_PASSPHRASE_DEV` avec un mot de passe de votre choix puis exécutez la commande suivante depuis la racine de votre projet :
     ```bash
     docker compose exec backend php bin/console lexik:jwt:generate-keypair --overwrite
     ```
     Cette commande générera les fichiers `private.pem` et `public.pem` dans `backend/config/jwt/`.
 
-6.  *(Optionnel)* **Charger les fixtures de test :**
-    Si vous souhaitez peupler la base de données avec des utilisateurs de test, exécutez :
+7.  **Charger les fixtures de test :**
+    Exécutez :
     ```bash
     docker compose exec backend php bin/console doctrine:fixtures:load --no-interaction
     ```
@@ -44,7 +51,7 @@
 
 -   **Frontend :** `http://localhost:8888`
 -   **Documentation API (Swagger/OpenAPI) :** `http://localhost:8888/api/docs`
--   **Matomo :** `http://localhost:8888/matomo`
+-   **Matomo :** `http://localhost:8888/matomo` (il est possible d'être redirigé la première fois, réaccédez au lien dans ce cas)
 
 ## Actions possibles sur l'application
 
@@ -115,7 +122,14 @@ Pour déployer et exécuter l'application dans un environnement de production à
     ```
     Cette commande générera les fichiers `private.pem` et `public.pem` dans `backend/config/jwt/`. Assurez-vous que ces fichiers sont correctement sécurisés et non exposés.
 
-3.  **Construire et démarrer les services de production :**
+3.  **Créer la base de données (Backend) :**
+    Après avoir démarré les services, exécutez la commande suivante pour appliquer les migrations et créer la base de données :
+    ```sh
+    docker compose exec backend php bin/console doctrine:migration:migrate
+    ```
+    Cette commande exécutera les migrations Doctrine et créera la structure de la base de données nécessaire au fonctionnement de l'application.
+
+4.  **Construire et démarrer les services de production :**
     ```bash
     docker compose -f docker-compose.prod.yml up --build -d
     ```
