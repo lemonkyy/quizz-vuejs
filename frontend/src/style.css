@@ -13,6 +13,7 @@
     --color-grey-4: #11182c;
     --color-grey-5: #E5E8EB;
     --color-grey-6: #fafafa;
+    --color-grey-7: #f8f6f2;
 
     --color-yellow-1: #e7d4a0;
     --color-yellow-2: #F2C247;
@@ -24,7 +25,7 @@
     --color-brown-1: #9C854A;
     --color-brown-2: #827A66;
 
-    --website-background: var(--color-light-yellow-4);
+    --color-website-background: var(--color-white);
 
     --color-primary: var(--color-yellow-2);
     --color-primary-focus: var(--color-yellow-3);

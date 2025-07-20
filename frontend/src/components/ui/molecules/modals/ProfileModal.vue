@@ -10,13 +10,21 @@ import { useAuthStore } from '@/store/auth';
 
 const auth = useAuthStore();
 
+const props = defineProps({
+  initialView: { type: String, default: 'menu' },
+});
+
 const modelValue = defineModel({required: true, default: false});
 defineEmits(['update:modelValue', 'valid']);
 
 const currentView = ref('menu');
 
-watch(modelValue, () => {
-  currentView.value = 'menu';
+watch(modelValue, (isOpen) => {
+  if (isOpen) {
+    currentView.value = props.initialView;
+  } else {
+    currentView.value = 'menu';
+  }
 });
 
 function showAddFriend() {

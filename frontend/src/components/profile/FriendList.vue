@@ -38,7 +38,11 @@ const handleInviteFriend = async (friendId: string) => {
   try {
     await sendInvitation(friendId);
     toast.success('Invitation sent!');
-  } catch (error) {
+  } catch (error: any) {
+    if (error.response && error.response.data.code === 'ERR_INVITATION_ALREADY_SENT') {
+      toast.error('Invitation already sent.');
+      return;
+    }
     console.error('Error sending invitation:', error);
     toast.error('Failed to send invitation.');
   }

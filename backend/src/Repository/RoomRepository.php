@@ -2,6 +2,7 @@
 
 namespace App\Repository;
 
+use Doctrine\ORM\Tools\Pagination\Paginator;
 use App\Entity\Room;
 use App\Entity\User;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -39,18 +40,22 @@ class RoomRepository extends ServiceEntityRepository
     /**
      * @return Room[]
      */
-    public function findPublicWithAvailableSlots(): array
+    public function findPublicWithAvailableSlots(?int $page = 1, ?int $limit = 25): Paginator
     {
         $maxUsers = $this->maxRoomUsers;
         
-        return $this->createQueryBuilder('r')
+        $qb =  $this->createQueryBuilder('r')
             ->leftJoin('r.roomPlayers', 'rp')
-            ->where('rp.isPublic = true')
-            ->groupBy('rp.id')
+            ->where('r.isPublic = true')
+            ->groupBy('r.id')
             ->having('COUNT(rp) < :max')
+            ->andHaving('COUNT(rp) > 0')
             ->setParameter('max', $maxUsers)
-            ->getQuery()
-            ->getResult();
+            ->orderBy('r.createdAt', 'ASC')
+            ->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        return new Paginator($qb->getQuery());
     }
 
     /**

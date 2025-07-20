@@ -2,6 +2,8 @@
 
 namespace App\Api\Provider\Room;
 
+use ApiPlatform\Doctrine\Orm\Paginator;
+use ApiPlatform\State\Pagination\Pagination;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\Repository\RoomRepository;
@@ -12,7 +14,7 @@ class ListPublicProvider implements ProviderInterface
 {
     private int $maxRoomUsers;
 
-    public function __construct(ParameterBagInterface $params, private RoomRepository $roomRepository)
+    public function __construct(ParameterBagInterface $params, private RoomRepository $roomRepository, private Pagination $pagination)
     {
         $this->maxRoomUsers = $params->get('app.max_room_users');
     }
@@ -22,8 +24,9 @@ class ListPublicProvider implements ProviderInterface
         return $resourceClass === Room::class && $operationName === 'api_room_list_public';
     }
 
-    public function provide(Operation $operation, array $uriVariables = [], array $context = []): array
+    public function provide(Operation $operation, array $uriVariables = [], array $context = []): Paginator
     {
-        return $this->roomRepository->findPublicWithAvailableSlots($this->maxRoomUsers);
+        [$page, , $limit] = $this->pagination->getPagination($operation, $context);
+        return new Paginator($this->roomRepository->findPublicWithAvailableSlots($page, $limit));
     }
 }
