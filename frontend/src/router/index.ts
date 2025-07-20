@@ -7,6 +7,7 @@ import Question from '../pages/Question.vue'
 import Create from '../pages/Create.vue'
 import Room from '../pages/Room.vue'
 import Results from '../pages/Results.vue'
+import PublicRooms from '../pages/PublicRooms.vue'
 
 
 const routes = [
@@ -17,6 +18,15 @@ const routes = [
     meta: {
       title: 'QuizUp - Home',
       description: 'Welcome to QuizUp! Challenge your friends and test your knowledge with fun quizzes.',
+    },
+  },
+  {
+    path: '/public-rooms',
+    name: 'PublicRooms',
+    component: PublicRooms,
+    meta: {
+      title: 'QuizUp - Public Rooms',
+      description: 'Discover and join public quiz rooms.',
     },
   },
   {

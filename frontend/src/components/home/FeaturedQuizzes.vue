@@ -5,18 +5,18 @@ import QuizCard from './QuizCard.vue';
 const quizzes = [
     {
         image: '/example_quiz1.png',
-        title: 'General Knowledge #1',
-        linkTo: '/quiz/1'
+        title: 'Harry Potter Trivia',
+        linkTo: { name: 'Create', query: { prompt: 'Harry Potter Trivia' } }
     },
     {
         image: '/example_quiz2.png',
         title: 'History of France',
-        linkTo: '/quiz/2'
+        linkTo: { name: 'Create', query: { prompt: 'History of France' } }
     },
     {
         image: '/example_quiz3.png',
         title: 'Science & Nature',
-        linkTo: '/quiz/3'
+        linkTo: { name: 'Create', query: { prompt: 'Science & Nature' } }
     }
 ]
 </script>

@@ -104,7 +104,7 @@ const handleRegister = async () => {
 <template>
     <div>
         <Title :level="1" center> Create your account </Title>
-        <form @submit.prevent="handleRegister" class="flex flex-col gap-7 mt-5 w-full sm:w-xl">
+        <form @submit.prevent="handleRegister" class="flex flex-col gap-7 mt-5 w-full sm:w-xl justify-center items-center">
           <Input id="email-register" theme="secondary" v-model="email" type="text" placeholder="Email" className="mx-4" without-border autocomplete="email"/>
           <Input id="username-register" theme="secondary" v-model="username" type="text" placeholder="Username" className="mx-4" without-border autocomplete="username"/>
           <Input id="password-register" theme="secondary" v-model="password" type="password" placeholder="Password" className="mx-4" without-border autocomplete="new-password"/>

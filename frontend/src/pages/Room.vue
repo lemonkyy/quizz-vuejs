@@ -173,7 +173,7 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-[#f8f6f2] py-8 w-full">
+  <div class="bg-[#f8f6f2] py-8 w-full h-screen">
     <div class="w-full px-8">
       <div v-if="roomStore.currentRoom" class="space-y-8">
         
@@ -184,7 +184,7 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
         </div>
 
         <div class="space-y-4">
-          <div class="flex justify-between items-center">
+          <div class="flex justify-between items-center flex-wrap">
             <Title :level="2" class="text-xl font-semibold text-[#2c2c2c]">
               Participants ({{ roomStore.currentRoom?.roomPlayers?.length || 0 }})
             </Title>
@@ -227,7 +227,7 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
               rounded="sm" 
               @click="startQuiz"
             >
-              Lancer le Quiz
+              Start the Quiz
             </Button>
             <Button 
               type="button" 
@@ -235,7 +235,7 @@ watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
               @click="leaveRoom" 
               style="background-color:#F2F0E8;"
             >
-              Quitter la Room
+              Leave room
             </Button>
           </div>
         </div>
