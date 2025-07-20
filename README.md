@@ -63,7 +63,7 @@
     *   À partir de la homepage, en précisant le code d'un groupe.
     *   À partir du menu, en appuyant sur "join" puis en rejoignant un groupe public.
     *   À partir d'une invitation.
-
+*   **Jouer à un quiz:** Attendre la création du quiz (peut être lente en fonction de l'ordinateur).
 
 ## Exécution de l'application en production
 
