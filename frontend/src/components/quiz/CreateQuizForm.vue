@@ -8,6 +8,7 @@ import ActiveTimerInput from '../ui/molecules/inputs/ActiveTimerInput.vue';
 import { useAuthStore } from '@/store/auth';
 import { useRoomStore } from '@/store/room';
 import { useToast } from 'vue-toastification';
+import Checkbox from '../ui/atoms/Checkbox.vue';
 
 
 const router = useRouter()
@@ -15,6 +16,7 @@ const authStore = useAuthStore()
 const roomStore = useRoomStore()
 const toast = useToast()
 
+const isPublic = ref(false)
 const prompt = ref('')
 const count = ref(10)
 const isLoading = ref(false)
@@ -45,7 +47,7 @@ const createQuiz = async () => {
   try {
 
     const roomResponse = await api.post('/room/create', {
-      isPublic: true
+      isPublic: isPublic.value,
     })
 
     const room = roomResponse?.data
@@ -148,6 +150,14 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
           min="1"
         />
       </div>
+
+      <Checkbox 
+        id="room-is-public"
+        v-model="isPublic"
+        label="Make this room public"
+        class="mb-4"
+        checkbox-left
+      />
 
       <!-- Timer placé visuellement dans le form, mais structurellement en dehors -->
       <!-- On le place juste après le champ "count", mais toujours avant le bouton -->

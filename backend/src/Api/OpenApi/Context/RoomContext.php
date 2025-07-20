@@ -43,6 +43,14 @@ class RoomContext
         return [
             'summary' => 'List public joinable rooms',
             'description' => 'Lists all public rooms that have available slots.',
+            'parameters' => [
+                [
+                    'in' => 'query',
+                    'name' => 'itemsPerPage',
+                    'schema' => ['type' => 'integer', 'default' => 10],
+                    'description' => 'The number of items to retrieve per page.'
+                ]
+            ],
             'responses' => [
                 '200' => [
                     'description' => 'List of public rooms',

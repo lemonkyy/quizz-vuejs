@@ -6,6 +6,8 @@ import { listNotifications as listNotificationsService, countNotifications as co
 import { acceptFriendRequest as acceptFriendRequestService, refuseFriendRequest as refuseFriendRequestService } from '@/services/friendService';
 import { acceptInvitation as acceptInvitationService, denyInvitation as denyInvitationService } from '@/services/invitationService';
 import { useAuthStore } from './auth';
+import { useRoomStore } from './room';
+import router from '@/router';
 
 export const useNotificationStore = defineStore("notification", () => {
   //notificationCount split from notifications for pagination
@@ -19,6 +21,7 @@ export const useNotificationStore = defineStore("notification", () => {
   const hasMoreNotifications = ref(true);
 
   const auth = useAuthStore();
+  const roomStore = useRoomStore();
 
   const listNotifications = async (page: number = 1, limit: number = itemsPerPage.value) => {
     if (!auth.user) {
@@ -92,16 +95,21 @@ export const useNotificationStore = defineStore("notification", () => {
   const acceptInvitation = async (id: string) => {
     try {
       const response = await acceptInvitationService(id);
-      if (response.code === 'SUCCESS') {
+      if (response.code === 'SUCCESS' && response.roomId) {
         notificationCount.value--;
-        toast.success('Room joined.');
+        await roomStore.joinRoom(response.roomId);
+        router.push({ path: `/room/` });
       }
     } catch (error: any) {
       if (error.response && error.response.data && error.response.data.code === 'ERR_INVITATION_EXPIRED') {
         toast.error('The invitation expired.');
-      } else {
-        toast.error('Error accepting invitation.');
-      }
+        notificationCount.value--;
+      } else if (error.response && error.response.data && error.response.data.code === 'ERR_ROOM_DELETED') {
+        toast.error('The room you tried to join has been deleted.');
+        await denyInvitation(id);
+        notificationCount.value--;
+      } 
+      // No generic error toast here, as roomStore.joinRoom handles its own errors
       throw error;
     }
   };
@@ -119,7 +127,6 @@ export const useNotificationStore = defineStore("notification", () => {
   };
 
   onMounted(() => {
-    // Only load notifications if user is authenticated
     if (auth.user) {
       countNotifications();
       setupMercureListener();

@@ -12,12 +12,13 @@ export async function sendInvitation(id: string): Promise<{code: string}> {
   }
 }
 
-export async function acceptInvitation(id: string): Promise<{code: string}> {
+export async function acceptInvitation(id: string): Promise<{code: string, roomId: string}> {
   try {
-    await axios.post(`/invitation/${id}/accept`);
-
+    const response = await axios.post(`/invitation/${id}/accept`);
     return {
-      code: 'SUCCESS'
+      code: 'SUCCESS',
+      roomId: response.data.room.id
+      
     };
   } catch (error) {
     throw error;
