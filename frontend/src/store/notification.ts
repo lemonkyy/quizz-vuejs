@@ -95,9 +95,9 @@ export const useNotificationStore = defineStore("notification", () => {
   const acceptInvitation = async (id: string) => {
     try {
       const response = await acceptInvitationService(id);
-      if (response.code === 'SUCCESS' && response.roomId) {
+      if (response.code === 'SUCCESS' && response.room) {
         notificationCount.value--;
-        await roomStore.joinRoom(response.roomId);
+        roomStore.currentRoom = response.room;
         router.push({ path: `/room/` });
       }
     } catch (error: any) {

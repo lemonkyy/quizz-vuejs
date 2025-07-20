@@ -27,7 +27,12 @@ const closeMenu = () => {
 </script>
 
 <template>
-    <MenuToggleButton :is-open="isMenuOpen" @toggle="toggleMenu" />
+    <!-- mobile menu -->
+    <ul class="md:hidden flex flex-row flex-nowrap gap-3 items-center ">
+      <li v-if="auth.user"><NotificationContainer /></li>
+      <li><MenuToggleButton :is-open="isMenuOpen" @toggle="toggleMenu" /></li>
+    </ul>
+    <!-- normal menu -->
     <ul class="hidden md:flex flex-row justify-around items-center gap-12">
         <ul class="flex flex-row justify-around items-center gap-12" v-if="!userInGame">
             <MenuItem links-to="/">Home</MenuItem>

@@ -1,4 +1,5 @@
 import axios from '@/api/axios';
+import type { Room } from '@/types';
 
 export async function sendInvitation(id: string): Promise<{code: string}> {
   try {
@@ -12,12 +13,12 @@ export async function sendInvitation(id: string): Promise<{code: string}> {
   }
 }
 
-export async function acceptInvitation(id: string): Promise<{code: string, roomId: string}> {
+export async function acceptInvitation(id: string): Promise<{code: string, room?: Room}> {
   try {
     const response = await axios.post(`/invitation/${id}/accept`);
     return {
       code: 'SUCCESS',
-      roomId: response.data.room.id
+      room: response.data
       
     };
   } catch (error) {

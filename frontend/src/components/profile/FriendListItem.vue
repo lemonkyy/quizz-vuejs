@@ -51,7 +51,7 @@ const handleInviteFriend = () => {
         theme="monochrome"
         rounded="md"
       >
-        {{ removeConfirmed ? 'Are you sure?' : 'Remove' }}
+        {{ removeConfirmed ? 'Are you sure?' : 'Unfriend' }}
       </Button>
     </div>
   </div>

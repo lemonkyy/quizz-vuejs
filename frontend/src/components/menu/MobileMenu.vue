@@ -34,7 +34,7 @@ const closeMenu = () => {
         <div class="absolute top-4 right-4">
             <CrossButton @click="closeMenu" />
         </div>
-        <ul class="flex flex-col items-center justify-center h-full gap-12">
+        <ul class="flex flex-col items-center justify-center h-full gap-12 z-50">
             <template v-if="!userInGame">
                 <MenuItem links-to="/" class="text-3xl" @click="closeMenu">Home</MenuItem>
                 <MenuItem links-to="/create" v-if="auth.user" class="text-3xl" @click="closeMenu">Create</MenuItem>
@@ -43,8 +43,7 @@ const closeMenu = () => {
                 <MenuItem links-to="/login" v-if="!auth.user" class="text-3xl" @click="closeMenu">Login</MenuItem>
             </template>
             <li v-else> <HelpButton class="text-3xl" /> </li>
-            <li v-if="auth.user" class="flex flex-row items-center gap-6">
-                <NotificationContainer />
+            <li v-if="auth.user">
                 <UserIcon class="cursor-pointer" v-on:click="() => {showProfileModal = !showProfileModal}" :src="auth.userProfilePictureUrl" />
             </li>
         </ul>
