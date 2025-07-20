@@ -1,25 +1,51 @@
 # Configuration du Projet et Variables d'Environnement
 
+
 ## Comment démarrer l'application
 
 1.  **Prérequis :**
     -   Docker et Docker Compose doivent être installés.
 
-2.  **Générer les clés SSL JWT (Backend pour le développement) :**
-    Pour que l'authentification JWT fonctionne en développement, vous devez générer des clés SSL pour le backend. Exécutez la commande suivante depuis le racine de votre projet :
-    ```bash
-    docker compose exec backend php bin/console lexik:jwt:generate-keypair --overwrite
-    ```
-    Cette commande générera les fichiers `private.pem` et `public.pem` dans `backend/config/jwt/`.
 
-3.  **Mettre à jour la phrase secrète JWT (Développement) :**
-    Après avoir généré les clés, mettez à jour la variable `SYMFONY_JWT_PASSPHRASE_DEV` dans votre fichier `.env` avec la phrase secrète que vous avez utilisée lors de la génération des clés.
+2.  **Créer un fichier `.env` (Développement) :**
+    À la racine du projet, créez un fichier nommé `.env` et copiez-y les variables d'environnement de .env.example. Adaptez les valeurs si besoin.
+
+3.  **Installer les dépendances :**
+    - Dans le dossier `backend`, exécutez :
+      ```sh
+      composer install
+      ```
+    - Dans le dossier `frontend`, exécutez :
+      ```sh
+      npm install
+      ```
 
 4.  **Démarrer l'application en mode développement :**
     ```sh
     docker compose up -d --build
     ```
     Ceci démarrera les services backend (API Symfony) et frontend (Vue.js), ainsi que d'autres dépendances de développement.
+
+
+5.  **Générer les clés SSL JWT (Backend pour le développement) :**
+    Pour que l'authentification JWT fonctionne en développement, mettez à jour la variable `SYMFONY_JWT_PASSPHRASE_DEV` avec un mot de passe de votre choix puis exécutez la commande suivante depuis le racine de votre projet :
+    ```bash
+    docker compose exec backend php bin/console lexik:jwt:generate-keypair --overwrite
+    ```
+    Cette commande générera les fichiers `private.pem` et `public.pem` dans `backend/config/jwt/`.
+
+6.  *(Optionnel)* **Charger les fixtures de test :**
+    Si vous souhaitez peupler la base de données avec des données de test, exécutez :
+    ```bash
+    docker compose exec backend php bin/console doctrine:fixtures:load --no-interaction
+    ```
+    Attention : cela effacera les données existantes dans la base de données.
+
+## Points d'accès (Développement)
+
+-   **Frontend :** `http://localhost:8888`
+-   **Documentation API (Swagger/OpenAPI) :** `http://localhost:8888/api/docs`
+-   **Matomo :** `http://localhost:8888/matomo`
 
 ## Variables d'environnement de développement
 
@@ -65,12 +91,6 @@ SENTRY_AUTH_TOKEN="YOUR_FRONTEND_SENTRY_AUTH_TOKEN"
 ```
 *Remplacez `YOUR_FRONTEND_SENTRY_DSN` et `YOUR_FRONTEND_SENTRY_AUTH_TOKEN` par votre DSN Sentry et votre jeton d'authentification réels pour le frontend.*
 
-## Points d'accès (Développement)
-
--   **Frontend :** `http://localhost:8888`
--   **Documentation API (Swagger/OpenAPI) :** `http://localhost:8888/api/docs`
--   **Matomo :** `http://localhost:8888/matomo`
-
 ## Exécution de l'application en production
 
 Pour déployer et exécuter l'application dans un environnement de production à l'aide de Docker Compose :
@@ -114,12 +134,20 @@ MERCURE_PUBLIC_URL_PROD="https://your-mercure-domain.com/.well-known/mercure" # 
     ```
     **Important :** Ne jamais commettre votre fichier `.env.prod` dans le contrôle de version.
 
+
 2.  **Générer les clés SSL JWT (Backend) :**
     Pour que l'authentification JWT fonctionne en production, vous devez générer des clés SSL pour le backend. Exécutez la commande suivante depuis la racine de votre projet :
     ```bash
     docker compose exec backend php bin/console lexik:jwt:generate-keypair --overwrite
     ```
     Cette commande générera les fichiers `private.pem` et `public.pem` dans `backend/config/jwt/`. Assurez-vous que ces fichiers sont correctement sécurisés et non exposés.
+
+3.  *(Optionnel)* **Charger les fixtures de test :**
+    Si vous souhaitez peupler la base de données de production avec des  utilisateurs de test, exécutez :
+    ```bash
+    docker compose exec backend php bin/console doctrine:fixtures:load --no-interaction
+    ```
+    Attention : cela effacera les données existantes dans la base de données.
     
 4.  **Construire et démarrer les services de production :**
     ```bash
