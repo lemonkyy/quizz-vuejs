@@ -15,14 +15,15 @@ class RoomCrudController extends AbstractCrudController
         return Room::class;
     }
 
-    /*
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id'),
-            TextField::new('title'),
-            TextEditorField::new('description'),
+            IdField::new('id')->hideOnForm(),
+            TextField::new('owner')->setLabel('Owner'),
+            TextField::new('createdAt')->setLabel('Created At')->hideOnForm(),
+            TextField::new('isPublic')->setLabel('Is Public'),
+            TextField::new('deletedAt')->setLabel('Deleted At')->hideOnForm(),
+            TextField::new('code')->setLabel('Room Code'),
         ];
     }
-    */
 }

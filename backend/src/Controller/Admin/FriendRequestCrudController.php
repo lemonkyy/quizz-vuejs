@@ -15,14 +15,17 @@ class FriendRequestCrudController extends AbstractCrudController
         return FriendRequest::class;
     }
 
-    /*
     public function configureFields(string $pageName): iterable
     {
         return [
-            IdField::new('id'),
-            TextField::new('title'),
-            TextEditorField::new('description'),
+            IdField::new('id')->hideOnForm(),
+            TextField::new('sender')->setLabel('Sender'),
+            TextField::new('receiver')->setLabel('Receiver'),
+            TextField::new('sentAt')->setLabel('Sent At'),
+            TextField::new('acceptedAt')->setLabel('Accepted At')->hideOnForm(),
+            TextField::new('revokedAt')->setLabel('Revoked At')->hideOnForm(),
+            TextField::new('deniedAt')->setLabel('Denied At')->hideOnForm(),
         ];
     }
-    */
 }
+
