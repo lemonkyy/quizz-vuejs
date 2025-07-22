@@ -23,6 +23,12 @@ class UserFixtures extends AbstractFixtures implements DependentFixtureInterface
     public function getData(): iterable
     {   
         yield [
+            'email' => 'admin@example.com',
+            'username' => 'admin',
+            'password' => 'admin',
+            'roles' => ['ROLE_ADMIN'],
+        ];
+        yield [
             'email' => 'user1@example.com',
             'username' => 'user1',
             'password' => 'user1',
