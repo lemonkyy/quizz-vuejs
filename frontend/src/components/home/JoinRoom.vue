@@ -64,7 +64,6 @@ const joinRoom = async () => {
         
         await roomStore.joinRoom(roomId);
         
-        // Track successful room join
         trackEvent('Room', 'Join Success', roomCode, 1);
         
         router.push('/room');

@@ -138,7 +138,6 @@ const copyRoomCode = async () => {
   }
 };
 
-
 onMounted(async () => {
 
   await roomStore.getCurrentRoom();

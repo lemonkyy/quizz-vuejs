@@ -41,6 +41,13 @@ class UserFixtures extends AbstractFixtures implements DependentFixtureInterface
             'password' => 'user2',
             'roles' => ['ROLE_USER'],
         ];
+
+        yield [
+            'email' => 'user3@example.com',
+            'username' => 'user3',
+            'password' => 'user3',
+            'roles' => ['ROLE_USER'],
+        ];
         
         $faker = Factory::create();
         for ($i = 0; $i < 25; $i++) {
@@ -51,7 +58,6 @@ class UserFixtures extends AbstractFixtures implements DependentFixtureInterface
                 'roles' => ['ROLE_USER'],
             ];
         }
-
     }
 
     protected function postInstantiate(object $entity, array $data): void

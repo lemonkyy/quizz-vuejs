@@ -96,7 +96,7 @@ services:
       MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_PROD}
       JWT_COOKIE_SECURE: TRUE
       SENTRY_DSN: ${SENTRY_DSN_PROD}
-      ENABLE_API_DOCS: false
+      ENABLE_API_DOCS: FALSE
     volumes:
       - uploads-data-prod:/app/public/uploads/images
     depends_on:

@@ -77,7 +77,8 @@ class ParseQuizService
                 $question->setQuizz($quiz);
                 $question->setQuestionText($questionText);
                 $question->setCorrectAnswer($correctAnswer ?? "TODO");
-                $question->setOptions($q['options']);
+                //$question->setOptions($q['options']);
+                $question->setOptions($options);
 
                 $this->entityManager->persist($question);
                 $this->logger->info("Added question: " . $questionText . " => Answer: " . ($correctAnswer ?? "TODO"));
