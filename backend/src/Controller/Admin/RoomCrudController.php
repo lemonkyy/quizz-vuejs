@@ -5,7 +5,9 @@ namespace App\Controller\Admin;
 use App\Entity\Room;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 
 class RoomCrudController extends AbstractCrudController
@@ -19,10 +21,10 @@ class RoomCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id')->hideOnForm(),
-            TextField::new('owner')->setLabel('Owner'),
-            TextField::new('createdAt')->setLabel('Created At')->hideOnForm(),
-            TextField::new('isPublic')->setLabel('Is Public'),
-            TextField::new('deletedAt')->setLabel('Deleted At')->hideOnForm(),
+            AssociationField::new('owner')->setLabel('Owner'),
+            DateTimeField::new('createdAt')->setLabel('Created At')->hideOnForm(),
+            BooleanField::new('isPublic')->setLabel('Is Public'),
+            DateTimeField::new('deletedAt')->setLabel('Deleted At')->hideOnForm(),
             TextField::new('code')->setLabel('Room Code'),
         ];
     }

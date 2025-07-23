@@ -5,8 +5,8 @@ namespace App\Controller\Admin;
 use App\Entity\Invitation;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\AssociationField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
 
 class InvitationCrudController extends AbstractCrudController
 {
@@ -19,13 +19,13 @@ class InvitationCrudController extends AbstractCrudController
     {
         return [
             IdField::new('id')->hideOnForm(),
-            TextField::new('room')->setLabel('Room'),
-            TextField::new('sender')->setLabel('Sender'),
-            TextField::new('receiver')->setLabel('Receiver'),
-            TextField::new('sentAt')->setLabel('Sent At'),
-            TextField::new('acceptedAt')->setLabel('Accepted At')->hideOnForm(),
-            TextField::new('revokedAt')->setLabel('Revoked At')->hideOnForm(),
-            TextField::new('deniedAt')->setLabel('Denied At')->hideOnForm(),
+            AssociationField::new('room')->setLabel('Room'),
+            AssociationField::new('sender')->setLabel('Sender'),
+            AssociationField::new('receiver')->setLabel('Receiver'),
+            DateTimeField::new('sentAt')->setLabel('Sent At'),
+            DateTimeField::new('acceptedAt')->setLabel('Accepted At')->hideOnForm(),
+            DateTimeField::new('revokedAt')->setLabel('Revoked At')->hideOnForm(),
+            DateTimeField::new('deniedAt')->setLabel('Denied At')->hideOnForm(),
         ];
     }
 }

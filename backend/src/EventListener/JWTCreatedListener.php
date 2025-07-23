@@ -25,6 +25,7 @@ class JWTCreatedListener
         $payload['hasTotp'] = $user->getTotpSecret() ? true : false;
         $payload['profilePictureFileName'] = $user->getprofilePicture()->getFileName();
         $payload['profilePictureId'] = $user->getProfilePicture()->getId();
+        $payload['roles'] = $user->getRoles();
 
         // if ($request) {
         //     $payload['ip'] = $request->getClientIp();
