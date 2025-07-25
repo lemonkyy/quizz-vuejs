@@ -18,6 +18,11 @@ export const useAuthStore = defineStore("auth",  () => {
   const userProfilePictureUrl = computed(() => {
     return user.value?.profilePicture ? import.meta.env.VITE_PUBLIC_PFP_URL + '/' + user.value.profilePicture.fileName : "";
   });
+
+  const isAdmin = computed(() => {
+    return user.value?.roles.includes('ROLE_ADMIN') ?? false;
+  });
+
   const toast = useToast();
 
   //get the cookie containing user info
@@ -155,7 +160,8 @@ export const useAuthStore = defineStore("auth",  () => {
     updateUser,
     logout,
     generateTotpSecret,
-    clearTotpSecret
+    clearTotpSecret,
+    isAdmin
   }
 
 })

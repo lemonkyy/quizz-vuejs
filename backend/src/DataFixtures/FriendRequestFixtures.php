@@ -19,18 +19,6 @@ class FriendRequestFixtures extends AbstractFixtures implements DependentFixture
             'dataSender' => 'User_1',
             'dataReceiver' => 'User_2',
         ];
-
-        yield [
-            'dataSender' => 'User_3',
-            'dataReceiver' => 'User_1',
-            'acceptedAt' => new \DateTimeImmutable(),
-        ];
-
-        yield [
-            'dataSender' => 'User_4',
-            'dataReceiver' => 'User_5',
-            'deniedAt' => new \DateTimeImmutable(),
-        ];
     }
 
     protected function postInstantiate(object $entity, array $data): void

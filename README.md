@@ -36,7 +36,15 @@ docker compose exec backend php bin/console lexik:jwt:generate-keypair --overwri
 ```
 Cette commande générera les fichiers `private.pem` et `public.pem` dans `backend/config/jwt/`.
 
-7. **Charger les fixtures de test :**
+
+7. **Installer le modèle (Mistral) :**
+le container Ollama a besoin d'un modèle pour génerer les quiz. Cette application utilise Mistral:
+```bash
+docker exec ollama_quiz ollama pull mistral
+```
+L'installation du modèle peut prendre quelques temps.
+
+8. **Charger les fixtures de test :**
 Exécutez :
 ```bash
 docker compose exec backend php bin/console doctrine:fixtures:load --no-interaction

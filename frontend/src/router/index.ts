@@ -1,5 +1,6 @@
 
 import { createRouter, createWebHistory } from 'vue-router';
+import { useRoomStore } from '@/store/room';
 import Home from '../pages/Home.vue';
 import Login from '../pages/Login.vue';
 import Register from '@/pages/Register.vue';
@@ -83,6 +84,15 @@ const routes = [
       description: 'See the quiz results and how you performed!',
     },
   },
+  {
+    path: '/:catchAll(.*)',
+    name: 'NotFound',
+    component: () => import('../pages/NotFound.vue'),
+    meta: {
+      title: 'QuizUp - 404 Not Found',
+      description: 'The page you are looking for does not exist.',
+    },
+  },
 ];
 
 const router = createRouter({
@@ -105,6 +115,20 @@ router.afterEach((to) => {
   }
 
   metaDescription.setAttribute('content', (to.meta.description as string) || defaultDescription);
+});
+
+router.beforeEach(async (to, from, next) => {
+  const roomStore = useRoomStore();
+
+  if (roomStore.currentRoom === null) {
+    await roomStore.getCurrentRoom();
+  }
+
+  if (roomStore.userInRoom && to.path !== '/room') {
+    next('/room');
+  } else {
+    next();
+  }
 });
 
 export default router;
