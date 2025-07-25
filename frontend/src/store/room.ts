@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 import type { Room, CreateRoomDto } from '@/types';
 import { useToast } from "vue-toastification";
+import { useMatomo } from '@/composables/useMatomo';
 import { 
   createRoom as createRoomService,
   joinRoom as joinRoomService,
@@ -19,6 +20,7 @@ export const useRoomStore = defineStore("room", () => {
   const isLoading = ref(false);
 
   const toast = useToast();
+  const { trackEvent } = useMatomo();
 
   const createRoom = async (roomData: CreateRoomDto) => {
     try {
@@ -120,6 +122,7 @@ export const useRoomStore = defineStore("room", () => {
       if (response.code === 'SUCCESS') {
         currentRoom.value = null;
         toast.success('Room deleted successfully');
+        trackEvent('Room', 'Deleted', 'N/A', 1);
       }
     } catch (error: any) {
       toast.error('Error deleting room');

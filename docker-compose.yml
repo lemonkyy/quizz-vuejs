@@ -106,7 +106,7 @@ services:
     depends_on:
       - backend
     environment:
-      VITE_NODE_ENV: development
+      VITE_NODE_SENTRY_ENV: development
       VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_DEV}
       VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_DEV}
       VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_DEV}

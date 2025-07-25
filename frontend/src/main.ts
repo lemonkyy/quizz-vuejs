@@ -1,5 +1,6 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
+import { createSentryPiniaPlugin } from "@sentry/vue";
 import Toast, { POSITION } from "vue-toastification";
 import "vue-toastification/dist/index.css";
 import './style.css';
@@ -14,6 +15,8 @@ import * as Sentry from "@sentry/vue";
 const app = createApp(App);
 
 const pinia = createPinia();
+
+pinia.use(createSentryPiniaPlugin());
 
 const  toastOptions = {
   position: POSITION.BOTTOM_CENTER
@@ -31,7 +34,7 @@ if (matomoHost) {
     enableLinkTracking: true,
     trackInitialView: true,
     trackHeartbeat: true,
-    debug: import.meta.env.VITE_NODE_ENV,
+    debug: import.meta.env.VITE_NODE_SENTRY_ENV,
     enableHeartBeatTimer: true,
     heartBeatTimerInterval: 15,
     disableCookies: false,
@@ -51,7 +54,7 @@ Sentry.init({
   app,
   dsn: import.meta.env.VITE_SENTRY_DSN,
   sendDefaultPii: true,
-  environment: "development"
+  environment: import.meta.env.VITE_NODE_SENTRY_ENV
 });
 
 if (matomoHost && window._paq) {

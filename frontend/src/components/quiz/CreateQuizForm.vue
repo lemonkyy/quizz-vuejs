@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import Button from '@/components/ui/atoms/Button.vue';
@@ -25,10 +25,22 @@ const isPublic = ref(false)
 const prompt = ref(router.currentRoute.value.query.prompt as string || '')
 const count = ref(10)
 const isLoading = ref(false)
+const formStarted = ref(false);
+const formSubmitted = ref(false);
 const minutes = ref(0)
 const seconds = ref(30)
 //const invite = ref('')
 const timePerQuestion = computed(() => minutes.value * 60 + seconds.value)
+
+onMounted(() => {
+  formStarted.value = true;
+});
+
+onBeforeUnmount(() => {
+  if (formStarted.value && !formSubmitted.value) {
+    trackEvent('Quiz Creation', 'Abandoned', prompt.value || 'No Prompt', 1);
+  }
+});
 
 const createQuiz = async () => {
 
@@ -59,6 +71,7 @@ const createQuiz = async () => {
 
   const cleanPrompt = normalizePrompt(prompt.value)
   isLoading.value = true
+  formSubmitted.value = true;
   
 
   try {
@@ -78,6 +91,7 @@ const createQuiz = async () => {
     // Track successful room creation
     trackEvent('Room', 'Create Success', cleanPrompt, count.value);
     trackEvent('Quiz', 'Generation Started', cleanPrompt, count.value);
+    trackEvent('Quiz', 'Create', cleanPrompt, 1);
 
     router.push('/room');
 

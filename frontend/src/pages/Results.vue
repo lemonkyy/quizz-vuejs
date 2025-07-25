@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { useMatomo } from '@/composables/useMatomo';
+import { useAuthStore } from '@/store/auth';
 import { useRoomStore } from '@/store/room';
 //import { useToast } from 'vue-toastification';
 import Title from '../components/ui/atoms/Title.vue';
 import Button from '../components/ui/atoms/Button.vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const authStore = useAuthStore();
 const roomStore = useRoomStore();
-//const toast = useToast();
+
+const { trackEvent } = useMatomo();
 
 const quizTopic = ref(localStorage.getItem('currentQuizTopic') || 'Trivia Night');
 
@@ -30,6 +34,10 @@ const leaveRoom = async () => {
 };
 
 onMounted(async () => {
+  const currentUser = authStore.user;
+  const userResult = results.value.find(r => r.username === currentUser?.username);
+  const score = userResult ? userResult.score : 0;
+  trackEvent('Quiz', 'Complete', quizTopic.value, score);
   if (!roomStore.currentRoom) {
     await roomStore.getCurrentRoom();
   }
