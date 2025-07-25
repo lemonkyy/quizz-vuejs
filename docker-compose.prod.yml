@@ -38,6 +38,7 @@ services:
       - /etc/letsencrypt/live/play-quizup.com:/etc/nginx/certs:ro
       - /etc/letsencrypt/archive/play-quizup.com:/etc/nginx/archive:ro
       - frontend-build-prod:/usr/share/nginx/html/frontend:ro
+      - matomo-app-data-prod:/var/www/html:ro
     depends_on:
       backend:
         condition: service_started
