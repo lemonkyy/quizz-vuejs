@@ -73,7 +73,7 @@ const createQuiz = async () => {
 
     localStorage.setItem('currentQuizTopic', prompt.value);
 
-    toast.success(`Room créée avec le code: ${room.code}`);
+    toast.success(`Room created with code ${room.code}`);
 
     // Track successful room creation
     trackEvent('Room', 'Create Success', cleanPrompt, count.value);
@@ -113,7 +113,8 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     const payload = {
       prompt: cleanPrompt,
       count: countValue,
-      timePerQuestion: timePerQuestionValue
+      timePerQuestion: timePerQuestionValue,
+      userId: authStore.user?.id
     }
     console.log("Sending payload to create quiz:", payload)
     await api.post('/quizz', payload)

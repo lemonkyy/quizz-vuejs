@@ -31,7 +31,7 @@ if (matomoHost) {
     enableLinkTracking: true,
     trackInitialView: true,
     trackHeartbeat: true,
-    debug: import.meta.env.NODE_ENV === 'development',
+    debug: import.meta.env.VITE_NODE_ENV,
     enableHeartBeatTimer: true,
     heartBeatTimerInterval: 15,
     disableCookies: false,

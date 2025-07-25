@@ -96,7 +96,3 @@ class ParseQuizService
         $this->logger->info("Quiz ID $quizId marked as ready.");
     }
 }
-
-
-
-

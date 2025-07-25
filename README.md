@@ -142,6 +142,7 @@ Cette commande :
 - Construira les images Docker de production pour vos services (en utilisant `Dockerfile.prod` le cas échéant).
 - Démarrera les services en mode détaché.
 
+
 5. **Accéder à l'application :**
 L'application sera accessible sur le(s) domaine(s) que vous avez configuré(s).
 

@@ -69,7 +69,8 @@ const checkQuizReadiness = async () => {
   }
 };
 
-const launchQuizForAllPlayers = async (quizId: number) => {
+const launchQuizForAllPlayers = async (quizId: string) => {
+  console.log('Attempting to launch quiz with ID:', quizId);
   try {
     toast.success('Quiz is ready! Starting now...');
     
@@ -98,7 +99,7 @@ const startQuiz = async () => {
       q.title.trim().toLowerCase() === currentTopic.trim().toLowerCase() &&
       q.ready === true
     );
-    
+
     if (readyQuiz) {
       trackEvent('Quiz', 'Start', currentTopic, readyQuiz.id);
       await launchQuizForAllPlayers(readyQuiz.id);

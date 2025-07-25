@@ -31,8 +31,8 @@ services:
     ports:
       - "8888:80"
     volumes:
-      - matomo-app-data-dev:/var/www/html:ro
       - ./backend/public:/app/public:ro
+      - matomo-app-data-dev:/var/www/html:z,ro
     depends_on:
       - backend
       - frontend
@@ -106,7 +106,7 @@ services:
     depends_on:
       - backend
     environment:
-      NODE_ENV: development
+      VITE_NODE_ENV: development
       VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_DEV}
       VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_DEV}
       VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_DEV}
@@ -174,11 +174,9 @@ services:
 
   #matomo - analytics
   matomo:
-    build:
-      context: ./matomo
-      dockerfile: Dockerfile.dev
+    image: matomo:fpm-alpine
     container_name: matomo_quiz
-    restart: unless-stopped
+    restart: always
     depends_on:
       - matomo-database
     environment:
@@ -188,7 +186,8 @@ services:
       MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_DEV}
       MATOMO_DATABASE_DBNAME: ${MARIADB_DEV}
     volumes:
-      - matomo-app-data-dev:/var/www/html
+      - matomo-app-data-dev:/var/www/html:z
     networks:
       - mariadb-matomo-bridge
       - reverse-proxy-bridge
+  

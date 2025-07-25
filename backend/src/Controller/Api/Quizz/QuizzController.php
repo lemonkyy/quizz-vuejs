@@ -18,12 +18,17 @@ class QuizzController extends AbstractController
         $prompt = $content['prompt'] ?? '';
         $count = $content['count'] ?? 10;
         $timePerQuestion = $content['timePerQuestion'] ?? 30;
+        $userId = $content['userId'] ?? null;
 
         if (empty($prompt)) {
             return $this->json(['error' => 'Prompt is required'], 400);
         }
 
-        $bus->dispatch(new GenerateQuizz($prompt, $count, $timePerQuestion));
+        if (empty($userId)) {
+            return $this->json(['error' => 'User ID is required'], 400);
+        }
+
+        $bus->dispatch(new GenerateQuizz($prompt, $count, $timePerQuestion, $userId));
 
         return $this->json(['status' => 'processing']);
     }
