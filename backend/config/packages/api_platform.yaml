@@ -12,7 +12,6 @@ api_platform:
       json: ["application/json"]
 
     enable_docs: '%env(bool:ENABLE_API_DOCS)%'
-    enable_entrypoint: '%env(bool:ENABLE_API_DOCS)%'
     enable_swagger: '%env(bool:ENABLE_API_DOCS)%'
     enable_swagger_ui: '%env(bool:ENABLE_API_DOCS)%'
     enable_re_doc: '%env(bool:ENABLE_API_DOCS)%'

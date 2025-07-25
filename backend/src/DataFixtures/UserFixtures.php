@@ -21,34 +21,36 @@ class UserFixtures extends AbstractFixtures implements DependentFixtureInterface
     }
 
     public function getData(): iterable
-    {
+    {   
         yield [
             'email' => 'admin@example.com',
             'username' => 'admin',
             'password' => 'admin',
             'roles' => ['ROLE_ADMIN'],
         ];
-
         yield [
             'email' => 'user1@example.com',
             'username' => 'user1',
             'password' => 'user1',
             'roles' => ['ROLE_USER'],
-            // gg-ignore
-            'totpSecret' => 'NOO4I7MLZ6UZMJLIWMM6TKRSYM',
         ];
 
-        for ($i = 2; $i < 25; $i++) {
-            yield [
-                'email' => 'user'.$i.'@example.com',
-                'username' => 'user'.$i,
-                'password' => 'user'.$i,
-                'roles' => ['ROLE_USER'],
-            ];
-        }
+        yield [
+            'email' => 'user2@example.com',
+            'username' => 'user2',
+            'password' => 'user2',
+            'roles' => ['ROLE_USER'],
+        ];
 
+        yield [
+            'email' => 'user3@example.com',
+            'username' => 'user3',
+            'password' => 'user3',
+            'roles' => ['ROLE_USER'],
+        ];
+        
         $faker = Factory::create();
-        for ($i = 0; $i < 50; $i++) {
+        for ($i = 0; $i < 25; $i++) {
             yield [
                 'email' => $faker->unique()->safeEmail(),
                 'username' => $faker->unique()->userName(),
@@ -56,7 +58,6 @@ class UserFixtures extends AbstractFixtures implements DependentFixtureInterface
                 'roles' => ['ROLE_USER'],
             ];
         }
-
     }
 
     protected function postInstantiate(object $entity, array $data): void

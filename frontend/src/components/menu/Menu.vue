@@ -39,6 +39,7 @@ const closeMenu = () => {
             <MenuItem links-to="/">Home</MenuItem>
             <MenuItem links-to="/create" v-if="auth.user">Create</MenuItem>
             <MenuItem links-to="/public-rooms" v-if="auth.user">Join</MenuItem>
+            <a href="/admin" target="_blank" rel="noopener noreferrer" class="hover:underline text-menu-text font-bold" v-if="auth.isAdmin">Admin</a>
             <MenuItem links-to="/register" v-if="!auth.user">Register</MenuItem>
             <MenuItem links-to="/login" v-if="!auth.user">Login</MenuItem>
         </ul>

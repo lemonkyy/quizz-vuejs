@@ -6,6 +6,7 @@ use App\Entity\QuizzQuestions;
 use App\Repository\QuizzesRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Uid\UuidV7;
 
 
 class ParseQuizService
@@ -16,7 +17,7 @@ class ParseQuizService
         private LoggerInterface $logger,
     ) {}
 
-    public function parseAndPersistQuestions(int $quizId, ?int $expectedCount = null): void
+    public function parseAndPersistQuestions(UuidV7 $quizId, ?int $expectedCount = null): void
     {
         $quiz = $this->quizzesRepository->find($quizId);
 
@@ -76,7 +77,8 @@ class ParseQuizService
                 $question->setQuizz($quiz);
                 $question->setQuestionText($questionText);
                 $question->setCorrectAnswer($correctAnswer ?? "TODO");
-                $question->setOptions($q['options']);
+                //$question->setOptions($q['options']);
+                $question->setOptions($options);
 
                 $this->entityManager->persist($question);
                 $this->logger->info("Added question: " . $questionText . " => Answer: " . ($correctAnswer ?? "TODO"));
@@ -94,7 +96,3 @@ class ParseQuizService
         $this->logger->info("Quiz ID $quizId marked as ready.");
     }
 }
-
-
-
-

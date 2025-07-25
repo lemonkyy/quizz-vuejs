@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/api/axios'
 import Button from '@/components/ui/atoms/Button.vue';
@@ -8,24 +8,39 @@ import ActiveTimerInput from '../ui/molecules/inputs/ActiveTimerInput.vue';
 import { useAuthStore } from '@/store/auth';
 import { useRoomStore } from '@/store/room';
 import { useToast } from 'vue-toastification';
+import { useMatomo } from '@/composables/useMatomo';
 import Checkbox from '../ui/atoms/Checkbox.vue';
 import Error from '../ui/atoms/Error.vue';
 import { badWords } from '@/utils/profanity';
+
 
 const router = useRouter()
 const authStore = useAuthStore()
 const roomStore = useRoomStore()
 const toast = useToast()
+const { trackEvent } = useMatomo()
 
 const formError = ref<string | null>(null);
 const isPublic = ref(false)
 const prompt = ref(router.currentRoute.value.query.prompt as string || '')
 const count = ref(10)
 const isLoading = ref(false)
+const formStarted = ref(false);
+const formSubmitted = ref(false);
 const minutes = ref(0)
 const seconds = ref(30)
 //const invite = ref('')
 const timePerQuestion = computed(() => minutes.value * 60 + seconds.value)
+
+onMounted(() => {
+  formStarted.value = true;
+});
+
+onBeforeUnmount(() => {
+  if (formStarted.value && !formSubmitted.value) {
+    trackEvent('Quiz Creation', 'Abandoned', prompt.value || 'No Prompt', 1);
+  }
+});
 
 const createQuiz = async () => {
 
@@ -56,6 +71,7 @@ const createQuiz = async () => {
 
   const cleanPrompt = normalizePrompt(prompt.value)
   isLoading.value = true
+  formSubmitted.value = true;
   
 
   try {
@@ -70,7 +86,12 @@ const createQuiz = async () => {
 
     localStorage.setItem('currentQuizTopic', prompt.value);
 
-    toast.success(`Room créée avec le code: ${room.code}`);
+    toast.success(`Room created with code ${room.code}`);
+
+    // Track successful room creation
+    trackEvent('Room', 'Create Success', cleanPrompt, count.value);
+    trackEvent('Quiz', 'Generation Started', cleanPrompt, count.value);
+    trackEvent('Quiz', 'Create', cleanPrompt, 1);
 
     router.push('/room');
 
@@ -78,6 +99,8 @@ const createQuiz = async () => {
 
   } catch (error) {
     console.error("Erreur lors de la création de la room:", error)
+    trackEvent('Room', 'Create Failed', cleanPrompt, 0);
+    toast.error('Erreur lors de la création de la room');
   } finally {
     isLoading.value = false
   }
@@ -97,13 +120,15 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
     if (existingQuizzes.length > 0) {
       const lastQuiz = existingQuizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, existingQuizzes[0])
       console.log("Existing ready quiz found:", lastQuiz)
+      trackEvent('Quiz', 'Generation Skipped', 'Already Exists', 1);
       return
     }
 
     const payload = {
       prompt: cleanPrompt,
       count: countValue,
-      timePerQuestion: timePerQuestionValue
+      timePerQuestion: timePerQuestionValue,
+      userId: authStore.user?.id
     }
     console.log("Sending payload to create quiz:", payload)
     await api.post('/quizz', payload)
@@ -120,6 +145,7 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
       if (quizzes.length > 0) {
         const lastQuiz = quizzes.reduce((max: any, q: any) => q.id > max.id ? q : max, quizzes[0])
         console.log("Quiz ready and found:", lastQuiz)
+        trackEvent('Quiz', 'Generation Complete', cleanPrompt, countValue);
         return
       } else {
         console.log("Quiz en cours de génération...")
@@ -132,6 +158,7 @@ const createQuizInBackground = async (cleanPrompt: string, countValue: number, t
 
   } catch (error) {
     console.error("Erreur lors de la création ou vérification du quizz:", error)
+    trackEvent('Quiz', 'Generation Failed', cleanPrompt, 0);
   }
 }
 </script>

@@ -1,5 +1,6 @@
 
 import { createRouter, createWebHistory } from 'vue-router';
+import { useRoomStore } from '@/store/room';
 import Home from '../pages/Home.vue';
 import Login from '../pages/Login.vue';
 import Register from '@/pages/Register.vue';
@@ -8,6 +9,7 @@ import Create from '../pages/Create.vue'
 import Room from '../pages/Room.vue'
 import Results from '../pages/Results.vue'
 import PublicRooms from '../pages/PublicRooms.vue'
+import { useAuthStore } from '@/store/auth';
 
 
 const routes = [
@@ -83,6 +85,15 @@ const routes = [
       description: 'See the quiz results and how you performed!',
     },
   },
+  {
+    path: '/:catchAll(.*)',
+    name: 'NotFound',
+    component: () => import('../pages/NotFound.vue'),
+    meta: {
+      title: 'QuizUp - 404 Not Found',
+      description: 'The page you are looking for does not exist.',
+    },
+  },
 ];
 
 const router = createRouter({
@@ -105,6 +116,20 @@ router.afterEach((to) => {
   }
 
   metaDescription.setAttribute('content', (to.meta.description as string) || defaultDescription);
+});
+
+router.beforeEach(async (to, _from, next) => {
+  const roomStore = useRoomStore();
+  const authStore = useAuthStore();
+
+  if (authStore.user && roomStore.currentRoom === null) {
+    await roomStore.getCurrentRoom();
+  }
+  if (roomStore.userInRoom && !(to.path.startsWith('/room') || to.path.startsWith('/results') || to.path.startsWith('/question'))) {
+    next('/room');
+  } else {
+    next();
+  }
 });
 
 export default router;

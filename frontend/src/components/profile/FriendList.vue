@@ -6,9 +6,11 @@ import { useFriendStore } from '@/store/friendship';
 import { useIntersectionObserver } from '@/composables/useIntersectionObserver';
 import { sendInvitation } from '@/services/invitationService';
 import { useToast } from 'vue-toastification';
+import { useMatomo } from '@/composables/useMatomo';
 
 const friendStore = useFriendStore();
 const toast = useToast();
+const { trackEvent } = useMatomo();
 
 const props = defineProps({
   usernameFilter: { type: String, default: '' },
@@ -38,6 +40,7 @@ const handleInviteFriend = async (friendId: string) => {
   try {
     await sendInvitation(friendId);
     toast.success('Invitation sent!');
+    trackEvent('Invitation', 'Sent', friendId, 1);
   } catch (error: any) {
     if (error.response && error.response.data.code === 'ERR_INVITATION_ALREADY_SENT') {
       toast.error('Invitation already sent.');

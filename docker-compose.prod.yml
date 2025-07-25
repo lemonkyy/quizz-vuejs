@@ -22,7 +22,8 @@ volumes:
   mercure-data-prod:
   mercure-config-prod:
   frontend-build-prod:
-  mariadb-data-prod:
+  matomo-app-data-prod:
+  matomo-db-data-prod:
 
 services:
   reverse-proxy:
@@ -37,6 +38,7 @@ services:
       - /etc/letsencrypt/live/play-quizup.com:/etc/nginx/certs:ro
       - /etc/letsencrypt/archive/play-quizup.com:/etc/nginx/archive:ro
       - frontend-build-prod:/usr/share/nginx/html/frontend:ro
+      - matomo-app-data-prod:/var/www/html:ro
     depends_on:
       backend:
         condition: service_started
@@ -84,7 +86,7 @@ services:
     container_name: backend_quiz
     environment:
       APP_ENV: prod
-      APP_DEBUG: 0
+      APP_DEBUG: 1
       APP_SECRET: ${APP_SECRET_PROD}
       CORS_ALLOW_ORIGIN: ${SYMFONY_CORS_ALLOW_ORIGIN_PROD}
       DATABASE_URL: ${SYMFONY_DATABASE_URL_PROD}
@@ -95,7 +97,7 @@ services:
       MERCURE_JWT_SECRET: ${MERCURE_JWT_KEY_PROD}
       JWT_COOKIE_SECURE: TRUE
       SENTRY_DSN: ${SENTRY_DSN_PROD}
-      ENABLE_API_DOCS: false
+      ENABLE_API_DOCS: FALSE
     volumes:
       - uploads-data-prod:/app/public/uploads/images
     depends_on:
@@ -111,6 +113,7 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.prod
       args:
+        VITE_NODE_SENTRY_ENV: production
         VITE_PUBLIC_API_URL: ${VITE_PUBLIC_API_URL_PROD}
         VITE_PUBLIC_IMAGES_URL: ${VITE_PUBLIC_IMAGES_URL_PROD}
         VITE_PUBLIC_PFP_URL: ${VITE_PUBLIC_PFP_URL_PROD}
@@ -168,7 +171,7 @@ services:
       MYSQL_USER: ${MARIADB_USER_PROD}
       MYSQL_PASSWORD: ${MARIADB_PASSWORD_PROD}
     volumes:
-      - mariadb-data-prod:/var/lib/mysql
+      - matomo-db-data-prod:/var/lib/mysql
     networks:
       - mariadb-matomo-bridge
     healthcheck:
@@ -179,9 +182,9 @@ services:
 
   #matomo - analytics
   matomo:
-    image: matomo:latest
+    image: matomo:5.3.2-fpm-alpine
     container_name: matomo_quiz
-    restart: unless-stopped
+    restart: always
     depends_on:
       - matomo-database
     environment:
@@ -190,6 +193,9 @@ services:
       MATOMO_DATABASE_USERNAME: ${MARIADB_USER_PROD}
       MATOMO_DATABASE_PASSWORD: ${MARIADB_PASSWORD_PROD}
       MATOMO_DATABASE_DBNAME: ${MARIADB_PROD}
+    volumes:
+      - matomo-app-data-prod:/var/www/html:z
     networks:
       - mariadb-matomo-bridge
       - reverse-proxy-bridge
+  

@@ -10,14 +10,21 @@ import {login as loginService,
 import { jwtDecode } from 'jwt-decode';
 import router from '@/router';
 import { useToast } from "vue-toastification";
+import { useMatomo } from '@/composables/useMatomo';
 
 export const useAuthStore = defineStore("auth",  () => {
 
   const user = ref<User |null>(null);
+  const { trackEvent } = useMatomo();
 
   const userProfilePictureUrl = computed(() => {
     return user.value?.profilePicture ? import.meta.env.VITE_PUBLIC_PFP_URL + '/' + user.value.profilePicture.fileName : "";
   });
+
+  const isAdmin = computed(() => {
+    return user.value?.roles.includes('ROLE_ADMIN') ?? false;
+  });
+
   const toast = useToast();
 
   //get the cookie containing user info
@@ -57,6 +64,9 @@ export const useAuthStore = defineStore("auth",  () => {
         await registerService({ email, password, tosAgreedTo, username });
         toast.success('Account registered!');
         router.push('/');
+        if (user.value) {
+          trackEvent('User', 'Registered', user.value.id, 1);
+        }
         return { code: 'SUCCESS' };
       } catch (error) {
         throw error;
@@ -155,7 +165,8 @@ export const useAuthStore = defineStore("auth",  () => {
     updateUser,
     logout,
     generateTotpSecret,
-    clearTotpSecret
+    clearTotpSecret,
+    isAdmin
   }
 
 })
