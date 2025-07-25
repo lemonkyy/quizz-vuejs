@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20250719143046 extends AbstractMigration
+final class Version20250723233549 extends AbstractMigration
 {
     public function getDescription(): string
     {
@@ -45,9 +45,12 @@ final class Version20250719143046 extends AbstractMigration
         $this->addSql('CREATE TABLE profile_picture (id UUID NOT NULL, file_name VARCHAR(255) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_C5659115D7DF1668 ON profile_picture (file_name)');
         $this->addSql('COMMENT ON COLUMN profile_picture.id IS \'(DC2Type:uuid)\'');
-        $this->addSql('CREATE TABLE quizz_questions (id SERIAL NOT NULL, quizz_id INT NOT NULL, question_text TEXT NOT NULL, correct_answer TEXT NOT NULL, options JSON DEFAULT NULL, PRIMARY KEY(id))');
+        $this->addSql('CREATE TABLE quizz_questions (id UUID NOT NULL, quizz_id UUID NOT NULL, question_text TEXT NOT NULL, correct_answer TEXT NOT NULL, options JSON DEFAULT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE INDEX IDX_79E4F161BA934BCD ON quizz_questions (quizz_id)');
-        $this->addSql('CREATE TABLE quizzes (id SERIAL NOT NULL, title VARCHAR(100) DEFAULT NULL, content_json TEXT NOT NULL, created_by INT DEFAULT NULL, ready BOOLEAN DEFAULT false NOT NULL, PRIMARY KEY(id))');
+        $this->addSql('COMMENT ON COLUMN quizz_questions.id IS \'(DC2Type:uuid)\'');
+        $this->addSql('COMMENT ON COLUMN quizz_questions.quizz_id IS \'(DC2Type:uuid)\'');
+        $this->addSql('CREATE TABLE quizzes (id UUID NOT NULL, title VARCHAR(100) DEFAULT NULL, content_json TEXT NOT NULL, created_by VARCHAR(255) DEFAULT NULL, ready BOOLEAN DEFAULT false NOT NULL, time_per_question INT DEFAULT NULL, count INT DEFAULT NULL, PRIMARY KEY(id))');
+        $this->addSql('COMMENT ON COLUMN quizzes.id IS \'(DC2Type:uuid)\'');
         $this->addSql('CREATE TABLE room (id UUID NOT NULL, owner_id UUID NOT NULL, created_at TIMESTAMP(0) WITHOUT TIME ZONE NOT NULL, is_public BOOLEAN NOT NULL, deleted_at TIMESTAMP(0) WITHOUT TIME ZONE DEFAULT NULL, code VARCHAR(20) NOT NULL, PRIMARY KEY(id))');
         $this->addSql('CREATE UNIQUE INDEX UNIQ_729F519B77153098 ON room (code)');
         $this->addSql('CREATE INDEX IDX_729F519B7E3C61F9 ON room (owner_id)');

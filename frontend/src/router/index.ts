@@ -9,6 +9,7 @@ import Create from '../pages/Create.vue'
 import Room from '../pages/Room.vue'
 import Results from '../pages/Results.vue'
 import PublicRooms from '../pages/PublicRooms.vue'
+import { useAuthStore } from '@/store/auth';
 
 
 const routes = [
@@ -117,14 +118,14 @@ router.afterEach((to) => {
   metaDescription.setAttribute('content', (to.meta.description as string) || defaultDescription);
 });
 
-router.beforeEach(async (to, from, next) => {
+router.beforeEach(async (to, _from, next) => {
   const roomStore = useRoomStore();
+  const authStore = useAuthStore();
 
-  if (roomStore.currentRoom === null) {
+  if (authStore.user && roomStore.currentRoom === null) {
     await roomStore.getCurrentRoom();
   }
-
-  if (roomStore.userInRoom && to.path !== '/room') {
+  if (roomStore.userInRoom && !(to.path.startsWith('/room') || to.path.startsWith('/results') || to.path.startsWith('/question'))) {
     next('/room');
   } else {
     next();

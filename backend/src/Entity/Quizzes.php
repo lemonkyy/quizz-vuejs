@@ -23,7 +23,7 @@ class Quizzes
     private ?string $contentJson = null;
 
     #[ORM\Column(nullable: true)]
-    private ?int $createdBy = null;
+    private ?string $createdBy = null;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private bool $ready = false;
@@ -68,12 +68,12 @@ class Quizzes
         return $this;
     }
 
-    public function getCreatedBy(): ?int
+    public function getCreatedBy(): ?string
     {
         return $this->createdBy;
     }
 
-    public function setCreatedBy(int $createdBy): self
+    public function setCreatedBy(?string $createdBy): self
     {
         $this->createdBy = $createdBy;
 

@@ -6,6 +6,14 @@
 2. **Créer un fichier `.env` (Développement) :**
 À la racine du projet, créez un fichier nommé `.env` et copiez-y les variables d'environnement de .env.example. Adaptez les valeurs si besoin.
 
+**Configuration Sentry (Optionnel) :**
+Si vous utilisez Sentry pour le suivi des erreurs, ajoutez les variables suivantes à votre fichier `.env` :
+```
+VITE_SENTRY_DSN="YOUR_DEVELOPMENT_FRONTEND_SENTRY_DSN"
+SENTRY_AUTH_TOKEN="YOUR_DEVELOPMENT_FRONTEND_SENTRY_AUTH_TOKEN"
+```
+Remplacez les valeurs par votre DSN de projet Sentry et votre jeton d'authentification.
+
 3. **Installer les dépendances :**
 - Dans le dossier `backend`, exécutez :
 ```sh
@@ -76,6 +84,33 @@ Attention : cela effacera les données existantes dans la base de données.
 * À partir d'une invitation.
 * **Jouer à un quiz:** Attendre la création du quiz (peut être lente en fonction de l'ordinateur).
 
+## KPIs Suivis (Frontend)
+
+Les événements Matomo suivants sont suivis sur le frontend, permettant le calcul de divers indicateurs clés de performance (KPIs) :
+
+*   **Invitations envoyées (`Invitation`, `Sent`) :** Déclenché chaque fois qu'un utilisateur envoie une invitation à un ami.
+*   **Suppression de Room (`Room`, `Deleted`) :** Déclenché chaque fois qu'une room est supprimée.
+*   **Enregistrement de compte (`User`, `Registered`) :** Déclenché chaque fois qu'un nouvel utilisateur s'enregistre.
+*   **Abandon de création de quiz (`Quiz Creation`, `Abandoned`) :** Déclenché lorsqu'un utilisateur commence à créer un quiz mais quitte le formulaire avant de le soumettre.
+*   **Copie du code de la room (`Room`, `Code Copied`) :** Déclenché lorsqu'un utilisateur copie le code d'une room dans le presse-papiers.
+*   **Début de quiz (`Quiz`, `Start`) :** Déclenché lorsqu'un quiz est lancé dans une room.
+*   **Achèvement de quiz (`Quiz`, `Complete`) :** Déclenché à la fin d'un quiz, incluant le score de l'utilisateur.
+*   **Génération de quiz - Démarrée (`Quiz`, `Generation Started`) :** Déclenché au début du processus de génération d'un quiz par l'IA.
+*   **Génération de quiz - Complète (`Quiz`, `Generation Complete`) :** Déclenché lorsque la génération d'un quiz par l'IA est terminée.
+*   **Génération de quiz - Échouée (`Quiz`, `Generation Failed`) :** Déclenché si le processus de génération d'un quiz par l'IA échoue.
+*   **Génération de quiz - Ignorée (`Quiz`, `Generation Skipped`) :** Déclenché si un quiz avec le même sujet existe déjà et que la génération est ignorée.
+
+Ces événements permettent de calculer des métriques agrégées telles que :
+*   Nombre moyen d’invitations envoyées par créateur de room.
+*   Durée de vie moyenne d'une room.
+*   Délai moyen entre la création d'un compte et le premier quiz.
+*   Taux d'abandon du processus de création de quiz.
+*   Taux d'achèvement des quizz.
+*   Taux d'abandon pendant la génération IA.
+*   Score moyen obtenu par les joueurs.
+*   Nombre moyen de questions par room créée.
+*   Et bien d'autres, en combinant et analysant ces données dans Matomo.
+
 ## Exécution de l'application en production
 
 Pour déployer et exécuter l'application dans un environnement de production à l'aide de Docker Compose :
@@ -133,7 +168,15 @@ docker compose exec backend php bin/console doctrine:migration:migrate
 ```
 Cette commande exécutera les migrations Doctrine et créera la structure de la base de données nécessaire au fonctionnement de l'application.
 
-4. **Construire et démarrer les services de production :**
+4. **Installer le modèle (Mistral) :**
+le container Ollama a besoin d'un modèle pour génerer les quiz. Cette application utilise Mistral:
+```bash
+docker exec ollama_quiz ollama pull mistral
+```
+L'installation du modèle peut prendre quelques temps.
+ 
+
+5. **Construire et démarrer les services de production :**
 ```bash
 docker compose -f docker-compose.prod.yml up --build -d
 ```
@@ -142,7 +185,8 @@ Cette commande :
 - Construira les images Docker de production pour vos services (en utilisant `Dockerfile.prod` le cas échéant).
 - Démarrera les services en mode détaché.
 
-5. **Accéder à l'application :**
-L'application sera accessible sur le(s) domaine(s) que vous avez configuré(s).
+
+6. **Accéder à l'application :**
+L'application sera accessible sur le domaine que vous avez configuré(s).
 
 **Conseil pour le déploiement :** Pour une gestion plus robuste des environnements de production, il est recommandé d'utiliser [Docker Contexts](https://docs.docker.com/engine/context/working-with-contexts/) pour déployer vos applications sur des hôtes distants.

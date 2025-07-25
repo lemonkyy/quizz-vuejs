@@ -2,7 +2,6 @@
 import { onMounted, ref, watch, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useRoomStore } from '@/store/room';
-//import { useAuthStore } from '@/store/auth';
 import { useToast } from 'vue-toastification';
 import api from '@/api/axios';
 import { useMatomo } from '@/composables/useMatomo';
@@ -15,7 +14,6 @@ import ProfileModal from '@/components/ui/molecules/modals/ProfileModal.vue';
 
 const router = useRouter();
 const roomStore = useRoomStore();
-//const authStore = useAuthStore();
 const toast = useToast();
 const { trackEvent } = useMatomo();
 
@@ -69,7 +67,8 @@ const checkQuizReadiness = async () => {
   }
 };
 
-const launchQuizForAllPlayers = async (quizId: number) => {
+const launchQuizForAllPlayers = async (quizId: string) => {
+  console.log('Attempting to launch quiz with ID:', quizId);
   try {
     toast.success('Quiz is ready! Starting now...');
     
@@ -98,7 +97,7 @@ const startQuiz = async () => {
       q.title.trim().toLowerCase() === currentTopic.trim().toLowerCase() &&
       q.ready === true
     );
-    
+
     if (readyQuiz) {
       trackEvent('Quiz', 'Start', currentTopic, readyQuiz.id);
       await launchQuizForAllPlayers(readyQuiz.id);
@@ -161,7 +160,6 @@ onUnmounted(() => {
     clearInterval(refreshInterval);
   }
 });
-
 
 watch(() => roomStore.currentRoom?.roomPlayers, (newPlayers, oldPlayers) => {
   
